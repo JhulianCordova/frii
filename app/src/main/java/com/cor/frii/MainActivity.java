@@ -40,7 +40,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         GasFragment.OnFragmentInteractionListener,
         SettingFragment.OnFragmentInteractionListener {
 
-    //Probando commit
+    //Probando commit elvis
 
     DrawerLayout drawerLayout;
     ActionBarDrawerToggle actionBarDrawerToggle;
