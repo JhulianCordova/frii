@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">frii</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="title_activity_maps">Map</string>
+    <string name="open">open</string>
+    <string name="close">close</string>
+
+    <!-- navigation  name-->
+    <string name="app_name_title">FRII</string>
+
+</resources>

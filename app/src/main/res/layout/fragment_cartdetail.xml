@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".CartdetailFragment"
+    android:layout_marginTop="?attr/actionBarSize">
+
+    <!-- TODO: Update blank fragment layout -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="20dp"
+            android:textStyle="bold"
+            android:textColor="@color/marcasTitle"
+            android:gravity="center"
+            android:layout_marginStart="4dp"
+            android:layout_marginEnd="4dp"
+            android:paddingRight="3dp"
+            android:paddingLeft="3dp"
+            android:padding="3dp"
+            android:text="Productos Seleccionados" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/CartDetailContainer"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/ButtonCartProcesarPedido"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Procesar Pedido"
+            android:layout_marginStart="4dp"
+            android:layout_marginEnd="4dp"
+            android:textStyle="bold"
+            android:onClick="procesarpedido"
+            android:textColor="@color/textTitleButton"
+            android:background="@drawable/custom_button"
+            android:layout_marginBottom="8dp"
+            />
+    </LinearLayout>
+
+</FrameLayout>
