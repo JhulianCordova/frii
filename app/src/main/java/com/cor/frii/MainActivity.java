@@ -38,8 +38,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         BrandsFragment.OnFragmentInteractionListener,
         ProductsFragment.OnFragmentInteractionListener,
         GasFragment.OnFragmentInteractionListener,
-        SettingFragment.OnFragmentInteractionListener{
+        SettingFragment.OnFragmentInteractionListener {
 
+    //Probando commit
 
     DrawerLayout drawerLayout;
     ActionBarDrawerToggle actionBarDrawerToggle;
@@ -47,24 +48,23 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     NavigationView navigationView;
 
 
-
     FloatingActionButton flo_cart;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
 
-
-        toolbar=findViewById(R.id.navigationToolbar);
+        toolbar = findViewById(R.id.navigationToolbar);
         setSupportActionBar(toolbar);
-        drawerLayout=findViewById(R.id.navigationDrawer);
-        navigationView=findViewById(R.id.navigationView);
+        drawerLayout = findViewById(R.id.navigationDrawer);
+        navigationView = findViewById(R.id.navigationView);
 
         // estaclecer el evento onclick de navigation
         navigationView.setNavigationItemSelectedListener(this);
 
-        actionBarDrawerToggle=new ActionBarDrawerToggle(this,drawerLayout,toolbar,R.string.open,R.string.close);
+        actionBarDrawerToggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.open, R.string.close);
         drawerLayout.addDrawerListener(actionBarDrawerToggle);
         actionBarDrawerToggle.setDrawerIndicatorEnabled(true);
         actionBarDrawerToggle.syncState();
@@ -72,11 +72,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         cargarFragments();
 
         //carito de comprar
-        flo_cart=findViewById(R.id.fad_cart_order);
-        flo_cart.setOnClickListener(new View.OnClickListener(){
+        flo_cart = findViewById(R.id.fad_cart_order);
+        flo_cart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent=new Intent(v.getContext(),Cart.class);
+                Intent intent = new Intent(v.getContext(), Cart.class);
                 startActivity(intent);
                 //finish();
             }
@@ -88,21 +88,21 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
         drawerLayout.closeDrawer(GravityCompat.START);
-        FragmentManager manager=getSupportFragmentManager();
-        FragmentTransaction transaction=manager.beginTransaction();
-        if (menuItem.getItemId()==R.id.home){
-            transaction.replace(R.id.navigationContainer,new MainFragment());
+        FragmentManager manager = getSupportFragmentManager();
+        FragmentTransaction transaction = manager.beginTransaction();
+        if (menuItem.getItemId() == R.id.home) {
+            transaction.replace(R.id.navigationContainer, new MainFragment());
             transaction.commit();
-            Toast.makeText(this,"ingreso a home",Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "ingreso a home", Toast.LENGTH_SHORT).show();
         }
-        if (menuItem.getItemId()==R.id.account){
-            Toast.makeText(this,"en implementacion",Toast.LENGTH_SHORT).show();
+        if (menuItem.getItemId() == R.id.account) {
+            Toast.makeText(this, "en implementacion", Toast.LENGTH_SHORT).show();
         }
-        if(menuItem.getItemId()==R.id.setting){
-            transaction.replace(R.id.navigationContainer,new SettingFragment());
+        if (menuItem.getItemId() == R.id.setting) {
+            transaction.replace(R.id.navigationContainer, new SettingFragment());
             transaction.addToBackStack(null);
             transaction.commit();
-            Toast.makeText(this,"en implementacion",Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "en implementacion", Toast.LENGTH_SHORT).show();
         }
 
 
@@ -110,20 +110,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
 
-
-
     @Override
     public void onFragmentInteraction(Uri uri) {
 
     }
 
-    public  void cargarFragments(){
+    public void cargarFragments() {
         FragmentManager fragmentManager;
         FragmentTransaction fragmentTransaction;
         //inicializando al fragment que contendra alos fragments categories y brands
-        fragmentManager=getSupportFragmentManager();
-        fragmentTransaction=fragmentManager.beginTransaction();
-        fragmentTransaction.add(R.id.navigationContainer,new MainFragment());
+        fragmentManager = getSupportFragmentManager();
+        fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.add(R.id.navigationContainer, new MainFragment());
         fragmentTransaction.commit();
 
 
