@@ -10,6 +10,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.cor.frii.pojo.Brands;
+import com.cor.frii.utils.LoadImage;
 
 import java.util.List;
 
@@ -25,7 +26,7 @@ public class BrandsAdapter extends RecyclerView.Adapter<BrandsAdapter.viewHolder
 
     @Override
     public void onClick(View v) {
-        if (listener!=null){
+        if (listener != null) {
             listener.onClick(v);
         }
     }
@@ -34,14 +35,14 @@ public class BrandsAdapter extends RecyclerView.Adapter<BrandsAdapter.viewHolder
     @Override
     public viewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
 
-        View view= LayoutInflater.from(parent.getContext()).inflate(R.layout.custom_brands,parent,false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.custom_brands, parent, false);
         view.setOnClickListener(this);
         return new viewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull viewHolder holder, int position) {
-        holder.BrandsTitle.setText(brands.get(position).getName());
+        holder.bind(brands.get(position));
 
     }
 
@@ -52,17 +53,23 @@ public class BrandsAdapter extends RecyclerView.Adapter<BrandsAdapter.viewHolder
 
     public void setOnClickListener(View.OnClickListener onClickListener) {
 
-        this.listener=onClickListener;
+        this.listener = onClickListener;
 
     }
 
-    public class viewHolder extends RecyclerView.ViewHolder{
-        TextView BrandsTitle;
-        ImageView BrandsImage;
+    public class viewHolder extends RecyclerView.ViewHolder {
+        TextView brandsTitle;
+        ImageView brandsImage;
 
         public viewHolder(@NonNull View itemView) {
             super(itemView);
-            BrandsTitle=itemView.findViewById(R.id.BrandsTitle);
+            brandsTitle = itemView.findViewById(R.id.BrandsTitle);
+            brandsImage = itemView.findViewById(R.id.BrandsImage);
+        }
+
+        void bind(final Brands brands) {
+            brandsTitle.setText(brands.getName());
+            new LoadImage(brandsImage).execute(brands.getUrl());
         }
     }
 }
