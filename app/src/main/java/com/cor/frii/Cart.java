@@ -83,7 +83,7 @@ public class Cart extends AppCompatActivity implements NavigationView.OnNavigati
         if (menuItem.getItemId()==R.id.account){
             Toast.makeText(this,"ingreso a account",Toast.LENGTH_SHORT).show();
         }
-        if(menuItem.getItemId()==R.id.setting){
+        if(menuItem.getItemId()==R.id.Perfil){
             transaction.replace(R.id.navigationContainer,new SettingFragment());
             transaction.addToBackStack(null);
             transaction.commit();

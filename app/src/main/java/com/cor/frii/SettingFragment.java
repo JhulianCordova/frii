@@ -7,6 +7,9 @@ import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+
+import com.google.android.material.textfield.TextInputLayout;
 
 
 /**
@@ -26,6 +29,14 @@ public class SettingFragment extends Fragment {
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
+
+    TextInputLayout Dni;
+    TextInputLayout Nombre;
+    TextInputLayout Email;
+    TextInputLayout Direccion;
+    TextInputLayout Telefono1;
+    TextInputLayout Telefono2;
+    Button Editar,Guardar;
 
     private OnFragmentInteractionListener mListener;
 
@@ -64,7 +75,35 @@ public class SettingFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_setting, container, false);
+        View view=inflater.inflate(R.layout.fragment_setting, container, false);
+
+
+        Dni=view.findViewById(R.id.DNIPerfil);
+        Nombre=view.findViewById(R.id.NombrePerfil);
+        Email=view.findViewById(R.id.EmailPerfil);
+        Direccion=view.findViewById(R.id.DireccionPerfil);
+        Telefono1=view.findViewById(R.id.TelefonoPerfil);
+        Telefono2=view.findViewById(R.id.TelefonoPerfil1);
+        Editar=view.findViewById(R.id.ButtonEditarPerfil);
+        Guardar=view.findViewById(R.id.ButtonGuardarPerfil);
+
+        Editar.setOnClickListener(new View.OnClickListener(){
+
+            @Override
+            public void onClick(View v) {
+                Nombre.setEnabled(true);
+                Email.setEnabled(true);
+                Direccion.setEnabled(true);
+                Telefono1.setEnabled(true);
+                Telefono2.setEnabled(true);
+                Guardar.setEnabled(true);
+                Guardar.setBackgroundResource(R.drawable.custom_button);
+            }
+        });
+
+
+
+        return view;
     }
 
     // TODO: Rename method, update argument and hook method into UI event

@@ -15,9 +15,9 @@
                 >
             </item>
             <item
-                android:id="@+id/setting"
+                android:id="@+id/Perfil"
                 android:icon="@drawable/ic_settings"
-                android:title="configuración"
+                android:title="Perfil"
                 >
             </item>
             <item

@@ -9,18 +9,21 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+
+       >
 
         <LinearLayout
             android:id="@+id/linearLayout4"
             android:layout_width="match_parent"
             android:layout_height="120dp"
-            android:orientation="vertical"
+            android:background="@color/setting_background"
             android:gravity="center"
+            android:orientation="vertical"
+            app:layout_constraintBottom_toTopOf="@+id/scrollView2"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            android:background="@color/setting_background">
+            app:layout_constraintTop_toTopOf="parent">
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
@@ -63,116 +66,162 @@
             </androidx.constraintlayout.widget.ConstraintLayout>
 
 
-
         </LinearLayout>
 
-        <LinearLayout
-            android:id="@+id/linearLayout3"
+        <ScrollView
+            android:id="@+id/scrollView2"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_marginStart="10dp"
-            android:layout_marginEnd="10dp"
+            android:layout_height="0dp"
+            android:layout_marginStart="3dp"
+            android:layout_marginEnd="3dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="1.0"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/linearLayout4">
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="DNI"/>
-            <TextView
-                android:id="@+id/textView17"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="98765432"
-                android:padding="4dp"
-                android:textColor="@color/marcasTitle"
-                android:textSize="17dp"
-                android:textStyle="bold"
-                />
 
-            <TextView
-                android:id="@+id/textView18"
-                android:layout_width="match_parent"
-                android:gravity="right"
-                android:paddingBottom="3dp"
-                android:textColor="@color/Blue"
-                android:layout_height="wrap_content"
-                android:text="cambiar..."
-                android:textSize="15dp"/>
             <LinearLayout
+                android:id="@+id/linearLayout3"
                 android:layout_width="match_parent"
-                android:layout_height="1dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="10dp"
                 android:orientation="vertical"
-                android:background="@color/black"/>
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="1.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/linearLayout4">
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/DNIPerfil"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:counterEnabled="true"
+                    app:counterMaxLength="11"
+                    app:errorEnabled="true">
+
+                    <com.google.android.material.textfield.TextInputEditText
+
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:enabled="false"
+                        android:hint="DNI o RUC"
+                        android:inputType="number"
+                        android:maxLength="11" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/NombrePerfil"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <com.google.android.material.textfield.TextInputEditText
+
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:enabled="false"
+                        android:hint="Nombre o Razon Social" />
+                </com.google.android.material.textfield.TextInputLayout>
 
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Nombre"
-                android:paddingTop="5dp"/>
-            <TextView
-                android:id="@+id/textView1711"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="name name Nme"
-                android:padding="4dp"
-                android:textColor="@color/marcasTitle"
-                android:textSize="17dp"
-                android:textStyle="bold"
-                />
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/EmailPerfil"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:errorEnabled="true"
 
-            <TextView
-                android:id="@+id/textView181"
-                android:layout_width="match_parent"
-                android:gravity="right"
-                android:paddingBottom="3dp"
-                android:textColor="@color/Blue"
-                android:layout_height="wrap_content"
-                android:text="cambiar..."
-                android:textSize="15dp"/>
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:orientation="vertical"
-                android:background="@color/black"/>
+                    >
+
+                    <com.google.android.material.textfield.TextInputEditText
+
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Email"
+                        android:enabled="false"
+                        android:inputType="textEmailAddress" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/DireccionPerfil"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <com.google.android.material.textfield.TextInputEditText
+
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Dirección"
+                        android:enabled="false"
+                        android:inputType="text" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/TelefonoPerfil"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <com.google.android.material.textfield.TextInputEditText
+
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Número de telefono"
+                        android:enabled="false"
+                        android:inputType="phone" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/TelefonoPerfil1"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <com.google.android.material.textfield.TextInputEditText
+
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Número de telefono"
+                        android:enabled="false"
+                        android:inputType="phone" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="5dp">
+
+                    <Button
+                        android:id="@+id/ButtonEditarPerfil"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:padding="3dp"
+                        android:layout_marginEnd="3dp"
+                        android:layout_marginStart="4dp"
+                        android:background="@drawable/custom_button"
+                        android:textColor="@color/textTitleButton"
+                        android:textStyle="bold"
+                        android:layout_weight="1"
+                        android:text="Editar" />
+
+                    <Button
+                        android:id="@+id/ButtonGuardarPerfil"
+                        android:background="@drawable/custom_guardar_setting"
+                        android:textColor="@color/textTitleButton"
+                        android:textStyle="bold"
+                        android:layout_marginStart="3dp"
+                        android:layout_marginEnd="4dp"
+                        android:enabled="false"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Guardar" />
+                </LinearLayout>
 
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Dirección"
-                android:paddingTop="5dp"/>
-            <TextView
-                android:id="@+id/textView17111"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Av. ajajsssss"
-                android:padding="4dp"
-                android:textColor="@color/marcasTitle"
-                android:textSize="17dp"
-                android:textStyle="bold"
-                />
+            </LinearLayout>
+        </ScrollView>
 
-            <TextView
-                android:id="@+id/textView1811"
-                android:layout_width="match_parent"
-                android:gravity="right"
-                android:paddingBottom="3dp"
-                android:textColor="@color/Blue"
-                android:layout_height="wrap_content"
-                android:text="cambiar..."
-                android:textSize="15dp"/>
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:orientation="vertical"
-                android:background="@color/black"/>
-
-        </LinearLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </FrameLayout>
