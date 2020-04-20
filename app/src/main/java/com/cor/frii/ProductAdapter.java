@@ -10,6 +10,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.cor.frii.pojo.Product;
+import com.cor.frii.utils.LoadImage;
 
 import java.util.List;
 
@@ -31,14 +32,14 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.viewHold
     @Override
     public viewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
 
-        View view= LayoutInflater.from(parent.getContext()).inflate(R.layout.custom_products,parent,false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.custom_products, parent, false);
         view.setOnClickListener(this);
         return new viewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull viewHolder holder, int position) {
-        holder.productTilte.setText(products.get(position).getName());
+        holder.bind(products.get(position));
     }
 
     @Override
@@ -46,13 +47,19 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.viewHold
         return products.size();
     }
 
-    public class viewHolder extends RecyclerView.ViewHolder{
-        TextView productTilte,productDescription;
+    public class viewHolder extends RecyclerView.ViewHolder {
+        TextView productTilte, productDescription;
         ImageView productImage;
 
         public viewHolder(@NonNull View itemView) {
             super(itemView);
-            productTilte=itemView.findViewById(R.id.ProductTitle);
+            productTilte = itemView.findViewById(R.id.ProductTitle);
+            productImage = itemView.findViewById(R.id.ProductImage);
+        }
+
+        void bind(final Product product) {
+            productTilte.setText(product.getName());
+            new LoadImage(productImage).execute(product.getUrl());
         }
     }
 }

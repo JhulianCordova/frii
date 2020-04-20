@@ -188,7 +188,10 @@ public class BrandsFragment extends Fragment {
                                         transaction.addToBackStack(null);
                                         transaction.commit();
                                     } else {
+                                        Bundle b = new Bundle();
+                                        b.putInt("IdMarke", brandsList.get(recyclerView.getChildAdapterPosition(v)).getId());
                                         ProductsFragment productsFragment = new ProductsFragment();
+                                        productsFragment.setArguments(b);
                                         transaction.replace(R.id.mainContainer, productsFragment);
                                         transaction.addToBackStack(null);
                                         transaction.commit();
