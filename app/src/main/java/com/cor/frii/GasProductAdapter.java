@@ -10,6 +10,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.cor.frii.pojo.Product;
+import com.cor.frii.utils.LoadImage;
 
 import java.util.List;
 
@@ -31,15 +32,14 @@ public class GasProductAdapter extends RecyclerView.Adapter<GasProductAdapter.vi
     @Override
     public viewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
 
-        View view= LayoutInflater.from(parent.getContext()).inflate(R.layout.custom_gas_product,parent,false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.custom_gas_product, parent, false);
         view.setOnClickListener(this);
         return new viewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull viewHolder holder, int position) {
-        holder.gasProductTitle.setText(products.get(position).getName());
-
+        holder.bind(products.get(position));
     }
 
     @Override
@@ -47,13 +47,19 @@ public class GasProductAdapter extends RecyclerView.Adapter<GasProductAdapter.vi
         return products.size();
     }
 
-    public class viewHolder extends RecyclerView.ViewHolder{
+    public class viewHolder extends RecyclerView.ViewHolder {
         TextView gasProductTitle;
         ImageView gasProductImage;
 
         public viewHolder(@NonNull View itemView) {
             super(itemView);
-            gasProductTitle=itemView.findViewById(R.id.ProductGasTitle);
+            gasProductTitle = itemView.findViewById(R.id.ProductGasTitle);
+            gasProductImage = itemView.findViewById(R.id.ProductGasImage);
+        }
+
+        void bind(final Product product) {
+            gasProductTitle.setText(product.getName());
+            new LoadImage(gasProductImage).execute(product.getUrl());
         }
     }
 }

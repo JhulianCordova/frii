@@ -214,8 +214,6 @@ public class BrandsFragment extends Fragment {
                 });
 
         VolleySingleton.getInstance(getContext()).addToRequestQueue(arrayRequest);
-
-
     }
 
 }
