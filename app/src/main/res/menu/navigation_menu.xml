@@ -22,7 +22,7 @@
             </item>
             <item
                 android:id="@+id/MisPedidos"
-                android:icon="@drawable/ic_settings"
+                android:icon="@drawable/ic_take_note"
                 android:title="Mis Pedidos"
                 >
             </item>

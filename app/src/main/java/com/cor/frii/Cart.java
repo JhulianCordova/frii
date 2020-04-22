@@ -71,9 +71,10 @@ public class Cart extends AppCompatActivity implements NavigationView.OnNavigati
         drawerLayout.closeDrawer(GravityCompat.START);
         FragmentManager manager=getSupportFragmentManager();
         FragmentTransaction transaction=manager.beginTransaction();
+        Intent intent;
         if (menuItem.getItemId()==R.id.home){
 
-            Intent intent=new Intent(this,MainActivity.class);
+             intent=new Intent(this,MainActivity.class);
             //transaction.replace(R.id.navigationContainer,new MainFragment());
             startActivity(intent);
             finish();
@@ -81,6 +82,9 @@ public class Cart extends AppCompatActivity implements NavigationView.OnNavigati
             Toast.makeText(this,"ingreso a home",Toast.LENGTH_SHORT).show();
         }
         if (menuItem.getItemId()==R.id.account){
+             intent=new Intent(getBaseContext(),PerfilActivity.class);
+            intent.putExtra("id",R.id.account);
+            startActivity(intent);
             Toast.makeText(this,"ingreso a account",Toast.LENGTH_SHORT).show();
         }
         if(menuItem.getItemId()==R.id.Perfil){
@@ -88,6 +92,10 @@ public class Cart extends AppCompatActivity implements NavigationView.OnNavigati
             transaction.addToBackStack(null);
             transaction.commit();
             Toast.makeText(this,"ingreso a configuracion",Toast.LENGTH_SHORT).show();
+        }
+        if (menuItem.getItemId()==R.id.MisPedidos){
+            intent=new Intent(this,PedidosActivity.class);
+            startActivity(intent);
         }
         return false;
     }
