@@ -3,24 +3,27 @@ package com.cor.frii;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
+
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 
-import com.google.android.material.textfield.TextInputLayout;
+import java.util.ArrayList;
 
 
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
- * {@link SettingFragment.OnFragmentInteractionListener} interface
+ * {@link MisPedidosFragment.OnFragmentInteractionListener} interface
  * to handle interaction events.
- * Use the {@link SettingFragment#newInstance} factory method to
+ * Use the {@link MisPedidosFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class SettingFragment extends Fragment {
+public class MisPedidosFragment extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -30,17 +33,13 @@ public class SettingFragment extends Fragment {
     private String mParam1;
     private String mParam2;
 
-    TextInputLayout Dni;
-    TextInputLayout Nombre;
-    TextInputLayout Email;
-    TextInputLayout Direccion;
-    TextInputLayout Telefono1;
-    TextInputLayout Telefono2;
-    Button Editar,Guardar;
-
     private OnFragmentInteractionListener mListener;
 
-    public SettingFragment() {
+    ArrayList<String> data;
+    RecyclerView recyclerView;
+    MisPedidosAdapter misPedidosAdapter;
+
+    public MisPedidosFragment() {
         // Required empty public constructor
     }
 
@@ -50,11 +49,11 @@ public class SettingFragment extends Fragment {
      *
      * @param param1 Parameter 1.
      * @param param2 Parameter 2.
-     * @return A new instance of fragment SettingFragment.
+     * @return A new instance of fragment MisPedidosFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static SettingFragment newInstance(String param1, String param2) {
-        SettingFragment fragment = new SettingFragment();
+    public static MisPedidosFragment newInstance(String param1, String param2) {
+        MisPedidosFragment fragment = new MisPedidosFragment();
         Bundle args = new Bundle();
         args.putString(ARG_PARAM1, param1);
         args.putString(ARG_PARAM2, param2);
@@ -75,32 +74,13 @@ public class SettingFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view=inflater.inflate(R.layout.fragment_setting, container, false);
-
-
-        Dni=view.findViewById(R.id.DNIPerfil);
-        Nombre=view.findViewById(R.id.NombrePerfil);
-        Email=view.findViewById(R.id.EmailPerfil);
-        Direccion=view.findViewById(R.id.DireccionPerfil);
-        Telefono1=view.findViewById(R.id.TelefonoPerfil);
-        Telefono2=view.findViewById(R.id.TelefonoPerfil1);
-        Editar=view.findViewById(R.id.ButtonEditarPerfil);
-        Guardar=view.findViewById(R.id.ButtonGuardarPerfil);
-
-        Editar.setOnClickListener(new View.OnClickListener(){
-
-            @Override
-            public void onClick(View v) {
-                Nombre.setEnabled(true);
-                Email.setEnabled(true);
-                Direccion.setEnabled(true);
-                Telefono1.setEnabled(true);
-                Telefono2.setEnabled(true);
-                Guardar.setEnabled(true);
-                Guardar.setBackgroundResource(R.drawable.custom_button);
-            }
-        });
-
+        View view=inflater.inflate(R.layout.fragment_mispedidos, container, false);
+        recyclerView=view.findViewById(R.id.MisPedidosContainer);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        data=new ArrayList<>();
+        data.add("av.sol 203 \n2012/12/23 12:45:00");
+        misPedidosAdapter=new MisPedidosAdapter(data);
+        recyclerView.setAdapter(misPedidosAdapter);
 
 
         return view;

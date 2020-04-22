@@ -19,4 +19,13 @@
         android:id="@+id/fad_cart_order"
         />
 
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_gravity="bottom|start"
+        android:src="@drawable/ic_take_note"
+        app:backgroundTint="@color/fondoitems"
+        android:id="@+id/fad_order_pedido"
+        />
+
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -38,9 +38,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         BrandsFragment.OnFragmentInteractionListener,
         ProductsFragment.OnFragmentInteractionListener,
         GasFragment.OnFragmentInteractionListener,
-        SettingFragment.OnFragmentInteractionListener {
+        SettingFragment.OnFragmentInteractionListener,
+        MisPedidosFragment.OnFragmentInteractionListener{
 
-    //Probando commit elvis
+
 
     DrawerLayout drawerLayout;
     ActionBarDrawerToggle actionBarDrawerToggle;
@@ -49,6 +50,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
 
     FloatingActionButton flo_cart;
+    FloatingActionButton flo_order_pedido;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,27 +84,66 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         });
 
+        flo_order_pedido=findViewById(R.id.fad_order_pedido);
+        flo_order_pedido.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent=new Intent(getBaseContext(),PedidosActivity.class);
+                startActivity(intent);
+            }
+        });
+
     }
 
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
+
         drawerLayout.closeDrawer(GravityCompat.START);
         FragmentManager manager = getSupportFragmentManager();
         FragmentTransaction transaction = manager.beginTransaction();
         if (menuItem.getItemId() == R.id.home) {
             transaction.replace(R.id.navigationContainer, new MainFragment());
             transaction.commit();
-            Toast.makeText(this, "ingreso a home", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "home", Toast.LENGTH_SHORT).show();
         }
         if (menuItem.getItemId() == R.id.account) {
-            Toast.makeText(this, "en implementacion", Toast.LENGTH_SHORT).show();
+            //transaction.replace(R.id.navigationContainer,new AccountFragment());
+
+            Intent intent=new Intent(getBaseContext(),PerfilActivity.class);
+            intent.putExtra("id",R.id.account);
+            startActivity(intent);
+
+            Toast.makeText(this, "Account", Toast.LENGTH_SHORT).show();
         }
-        if (menuItem.getItemId() == R.id.setting) {
+        if (menuItem.getItemId() == R.id.Perfil) {
+
+            Intent intent=new Intent(getBaseContext(),PerfilActivity.class);
+            String title=menuItem.getTitle().toString();
+            intent.putExtra("name",title);
+            intent.putExtra("id",R.id.Perfil);
+            startActivity(intent);
+
+            /*
             transaction.replace(R.id.navigationContainer, new SettingFragment());
             transaction.addToBackStack(null);
             transaction.commit();
-            Toast.makeText(this, "en implementacion", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Perfil", Toast.LENGTH_SHORT).show();
+
+             */
+        }
+        if (menuItem.getItemId()==R.id.MisPedidos){
+
+            Intent intent=new Intent(getBaseContext(),PedidosActivity.class);
+            startActivity(intent);
+            /*
+            transaction.replace(R.id.navigationContainer, new MisPedidosFragment());
+            transaction.addToBackStack(null);
+            transaction.commit();
+            Toast.makeText(this, "Mis Pedidos", Toast.LENGTH_SHORT).show();
+
+             */
+
         }
 
 

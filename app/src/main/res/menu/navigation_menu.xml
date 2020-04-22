@@ -15,14 +15,14 @@
                 >
             </item>
             <item
-                android:id="@+id/setting"
+                android:id="@+id/Perfil"
                 android:icon="@drawable/ic_settings"
-                android:title="configuración"
+                android:title="Perfil"
                 >
             </item>
             <item
                 android:id="@+id/MisPedidos"
-                android:icon="@drawable/ic_settings"
+                android:icon="@drawable/ic_take_note"
                 android:title="Mis Pedidos"
                 >
             </item>

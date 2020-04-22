@@ -24,4 +24,5 @@
     <color name="LightBlue">#51d1f6</color>
     <color name="Gray">#9b9b9b</color>
     <color name="black">#000</color>
+    <color name="white">#fff</color>
 </resources>
