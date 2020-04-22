@@ -141,7 +141,7 @@ public class ProductsFragment extends Fragment {
         if (b != null) {
             url = urlBase + "/api/product/markes/" + b.getInt("IdMarke");
         } else {
-            Toast.makeText(getContext(), "Ne pudo cargar la Información", Toast.LENGTH_LONG).show();
+            Toast.makeText(getContext(), "No se pudo cargar la Información", Toast.LENGTH_LONG).show();
         }
 
         products = new ArrayList<>();
@@ -162,7 +162,7 @@ public class ProductsFragment extends Fragment {
                                         "",
                                         Float.parseFloat(object.getString("unit_price")),
                                         object.getString("measurement"),
-                                        3,
+                                        1,
                                         imagen_url
                                 );
 

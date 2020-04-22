@@ -1,23 +1,29 @@
 package com.cor.frii;
 
+import android.content.Context;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.cor.frii.pojo.CartDetail;
+import com.cor.frii.persistence.CartLab;
+import com.cor.frii.persistence.ECart;
 
 import java.util.List;
 
-public class CartDetailAdapter extends RecyclerView.Adapter<CartDetailAdapter.viewHolder> implements View.OnClickListener{
+public class CartDetailAdapter extends RecyclerView.Adapter<CartDetailAdapter.viewHolder> implements View.OnClickListener {
 
-    List<CartDetail> cartDetails;
+    private List<ECart> cartDetails;
+    private Context context;
 
-    public CartDetailAdapter(List<CartDetail> cartDetails) {
+    public CartDetailAdapter(List<ECart> cartDetails) {
         this.cartDetails = cartDetails;
     }
 
@@ -30,14 +36,54 @@ public class CartDetailAdapter extends RecyclerView.Adapter<CartDetailAdapter.vi
     @Override
     public viewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
 
-        View view= LayoutInflater.from(parent.getContext()).inflate(R.layout.custom_cart_detail,parent,false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.custom_cart_detail, parent, false);
         view.setOnClickListener(this);
-        return  new viewHolder(view);
+        context = parent.getContext();
+        return new viewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull viewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull final viewHolder holder, final int position) {
         holder.cartTitle.setText(cartDetails.get(position).getName());
+        holder.cartCantidad.setText(String.valueOf(cartDetails.get(position).getCantidad()));
+        holder.cartPrecioU.setText(String.valueOf(cartDetails.get(position).getPrice()));
+        holder.cartSubtotal.setText(String.valueOf(cartDetails.get(position).getTotal()));
+
+        final ECart eCart = cartDetails.get(position);
+        calcularTotal(holder.cartCantidad, holder.cartPrecioU, holder.cartSubtotal, position);
+
+        holder.cartDeleteButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                CartLab.getInstance(context)
+                        .getAppDatabase()
+                        .getCartDao()
+                        .deleteCart(eCart);
+
+                notifyItemRemoved(position);
+                cartDetails.remove(position);
+                notifyDataSetChanged();
+            }
+        });
+
+        holder.cartCantidad.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (holder.cartCantidad.getText().length() > 0) {
+                    calcularTotal(holder.cartCantidad, holder.cartPrecioU, holder.cartSubtotal, position);
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
 
     }
 
@@ -46,14 +92,32 @@ public class CartDetailAdapter extends RecyclerView.Adapter<CartDetailAdapter.vi
         return cartDetails.size();
     }
 
-    public class viewHolder extends RecyclerView.ViewHolder{
+    static class viewHolder extends RecyclerView.ViewHolder {
 
-        TextView cartTitle,cartPrecioU,cartSubtotal;
+        TextView cartTitle, cartPrecioU, cartSubtotal;
         EditText cartCantidad;
-        public viewHolder(@NonNull View itemView) {
-            super(itemView);
-            cartTitle=itemView.findViewById(R.id.cartProductTitle);
+        ImageButton cartDeleteButton;
 
+        viewHolder(@NonNull View itemView) {
+            super(itemView);
+            cartTitle = itemView.findViewById(R.id.cartProductTitle);
+            cartCantidad = itemView.findViewById(R.id.cartEditcantidad);
+            cartPrecioU = itemView.findViewById(R.id.cartPrecioU);
+            cartSubtotal = itemView.findViewById(R.id.cartSubTotal);
+            cartDeleteButton = itemView.findViewById(R.id.cartDeleteButton);
+        }
+    }
+
+    private void calcularTotal(EditText cantidad, TextView precio, TextView total, int posicion) {
+        if (cantidad.length() > 0 && precio.length() > 0) {
+            int c = Integer.parseInt(cantidad.getText().toString());
+            float p = Float.parseFloat(precio.getText().toString());
+
+            total.setText(String.valueOf(c * p));
+
+            cartDetails.get(posicion).setCantidad(c);
+            cartDetails.get(posicion).setPrice(p);
+            cartDetails.get(posicion).setTotal(c * p);
         }
     }
 }
