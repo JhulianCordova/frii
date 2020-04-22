@@ -8,13 +8,28 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
+import com.android.volley.NetworkResponse;
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.ServerError;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.HttpHeaderParser;
+import com.android.volley.toolbox.JsonArrayRequest;
 import com.cor.frii.pojo.Categories;
 import com.cor.frii.pojo.Product;
+import com.cor.frii.utils.VolleySingleton;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 
 
@@ -39,10 +54,12 @@ public class ProductsFragment extends Fragment {
     private OnFragmentInteractionListener mListener;
 
 
-
     private ProductAdapter productAdapter;
     private RecyclerView recyclerView;
     ArrayList<Product> products;
+
+    //--
+    String urlBase = "http://34.71.251.155";
 
     public ProductsFragment() {
         // Required empty public constructor
@@ -79,17 +96,11 @@ public class ProductsFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view=inflater.inflate(R.layout.fragment_products, container, false);
-        recyclerView=view.findViewById(R.id.ProductsContainer);
+        View view = inflater.inflate(R.layout.fragment_products, container, false);
+        recyclerView = view.findViewById(R.id.ProductsContainer);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        products=new ArrayList<>();
-        products.add(new Product(1,"cerveza","",2,"",3,""));
-        products.add(new Product(2,"Agua","",2,"",3,""));
-        products.add(new Product(3,"Pollo","",2,"",3,""));
-
-        productAdapter=new ProductAdapter(products);
-        recyclerView.setAdapter(productAdapter);
+        llenarDatos();
 
         return view;
     }
@@ -119,18 +130,72 @@ public class ProductsFragment extends Fragment {
         mListener = null;
     }
 
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
+    }
+
+    private void llenarDatos() {
+        String url = "";
+        Bundle b = this.getArguments();
+        if (b != null) {
+            url = urlBase + "/api/product/markes/" + b.getInt("IdMarke");
+        } else {
+            Toast.makeText(getContext(), "No se pudo cargar la Información", Toast.LENGTH_LONG).show();
+        }
+
+        products = new ArrayList<>();
+
+        JSONArray jsonArray = new JSONArray();
+        JsonArrayRequest arrayRequest =
+                new JsonArrayRequest(Request.Method.GET, url, jsonArray, new Response.Listener<JSONArray>() {
+                    @Override
+                    public void onResponse(JSONArray response) {
+                        try {
+                            for (int i = 0; i < response.length(); i++) {
+                                JSONObject object = response.getJSONObject(i);
+                                String imagen_url = urlBase + object.getString("image");
+                                Product product = new Product(
+                                        object.getInt("id"),
+                                        object.getJSONObject("marke_id").getString("name") + " " +
+                                                object.getJSONObject("detail_measurement_id").getString("name"),
+                                        "",
+                                        Float.parseFloat(object.getString("unit_price")),
+                                        object.getString("measurement"),
+                                        1,
+                                        imagen_url
+                                );
+
+                                products.add(product);
+                            }
+
+                            productAdapter = new ProductAdapter(products);
+                            recyclerView.setAdapter(productAdapter);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.d("Volley get", "error voley" + error.toString());
+                        NetworkResponse response = error.networkResponse;
+                        if (error instanceof ServerError && response != null) {
+                            try {
+                                String res = new String(response.data, HttpHeaderParser.parseCharset(response.headers, "utf-8"));
+                                JSONObject obj = new JSONObject(res);
+                                Log.d("Voley post", obj.toString());
+                                String msj = obj.getString("message");
+                                Toast.makeText(getContext(), msj, Toast.LENGTH_SHORT).show();
+
+                            } catch (UnsupportedEncodingException | JSONException e1) {
+                                e1.printStackTrace();
+                            }
+                        }
+                    }
+                });
+
+        VolleySingleton.getInstance(getContext()).addToRequestQueue(arrayRequest);
+
     }
 }

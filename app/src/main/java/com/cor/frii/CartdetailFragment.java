@@ -15,9 +15,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
+import com.cor.frii.persistence.CartLab;
+import com.cor.frii.persistence.ECart;
 import com.cor.frii.pojo.CartDetail;
 
 import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -43,7 +46,7 @@ public class CartdetailFragment extends Fragment {
 
     private CartDetailAdapter cartDetailAdapter;
     private RecyclerView recyclerView;
-    ArrayList<CartDetail> cartDetails;
+    List<ECart> cartDetails;
     Button procesarPedido;
 
     public CartdetailFragment() {
@@ -81,31 +84,26 @@ public class CartdetailFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view=inflater.inflate(R.layout.fragment_cartdetail, container, false);
-        recyclerView=view.findViewById(R.id.CartDetailContainer);
+        View view = inflater.inflate(R.layout.fragment_cartdetail, container, false);
+        recyclerView = view.findViewById(R.id.CartDetailContainer);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        cartDetails=new ArrayList<>();
-        cartDetails.add(new CartDetail(1,"gas",3,2));
-        cartDetails.add(new CartDetail(1,"cerveza",3,2));
-        cartDetails.add(new CartDetail(1,"agua",3,2));
-        cartDetailAdapter=new CartDetailAdapter(cartDetails);
-        recyclerView.setAdapter(cartDetailAdapter);
+        llenarCarrito();
 
-        procesarPedido=view.findViewById(R.id.ButtonCartProcesarPedido);
-        procesarPedido.setOnClickListener(new View.OnClickListener(){
-            FragmentManager manager=getActivity().getSupportFragmentManager();
-            FragmentTransaction transaction=manager.beginTransaction();
+        procesarPedido = view.findViewById(R.id.ButtonCartProcesarPedido);
+        procesarPedido.setOnClickListener(new View.OnClickListener() {
+            FragmentManager manager = getActivity().getSupportFragmentManager();
+            FragmentTransaction transaction = manager.beginTransaction();
+
             @Override
             public void onClick(View v) {
 
-                ProcesarpedidoFragment procesarpedidoFragment=new ProcesarpedidoFragment();
-                transaction.replace(R.id.navigationContainer,procesarpedidoFragment);
+                ProcesarpedidoFragment procesarpedidoFragment = new ProcesarpedidoFragment();
+                transaction.replace(R.id.navigationContainer, procesarpedidoFragment);
                 transaction.addToBackStack(null);
                 transaction.commit();
             }
         });
-
 
 
         return view;
@@ -135,18 +133,18 @@ public class CartdetailFragment extends Fragment {
         mListener = null;
     }
 
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
+    }
+
+    private void llenarCarrito() {
+        cartDetails = CartLab.getInstance(getContext())
+                .getAppDatabase()
+                .getCartDao()
+                .getCart();
+
+        cartDetailAdapter = new CartDetailAdapter(cartDetails);
+        recyclerView.setAdapter(cartDetailAdapter);
     }
 }

@@ -14,7 +14,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
+
 import android.widget.Toast;
 
 import com.android.volley.NetworkResponse;
@@ -23,6 +23,7 @@ import com.android.volley.Response;
 import com.android.volley.ServerError;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.HttpHeaderParser;
+
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.cor.frii.pojo.Categories;
 import com.cor.frii.utils.VolleySingleton;
@@ -154,7 +155,6 @@ public class CategoriesFragment extends Fragment {
                                         imagen_url);
                                 categories.add(categoria);
                             }
-
                             // Adaptador => para la persistencia de datos
                             categoriesAdapter = new CategoriesAdapter(categories);
                             recyclerView.setAdapter(categoriesAdapter);
@@ -165,9 +165,13 @@ public class CategoriesFragment extends Fragment {
 
                                 @Override
                                 public void onClick(View v) {
+                                    Bundle bundle = new Bundle();
+                                    bundle.putInt("idCategory", categories.get(recyclerView.getChildAdapterPosition(v)).getId());
+
                                     FragmentManager manager = getActivity().getSupportFragmentManager();
                                     FragmentTransaction transaction = manager.beginTransaction();
                                     brandsFragment = new BrandsFragment();
+                                    brandsFragment.setArguments(bundle);
                                     String categoriesTitle = categories.get(recyclerView.getChildAdapterPosition(v)).getName();
                                     Toast.makeText(getContext(), categoriesTitle, Toast.LENGTH_SHORT).show();
                                     transaction.replace(R.id.mainContainer, brandsFragment);
@@ -198,7 +202,6 @@ public class CategoriesFragment extends Fragment {
                         }
                     }
                 });
-
         VolleySingleton.getInstance(getContext()).addToRequestQueue(arrayRequest);
     }
 
