@@ -15,11 +15,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
-import com.cor.frii.persistence.CartLab;
-import com.cor.frii.persistence.ECart;
-import com.cor.frii.pojo.CartDetail;
+import com.cor.frii.persistence.DatabaseClient;
+import com.cor.frii.persistence.entity.ECart;
 
-import java.util.ArrayList;
 import java.util.List;
 
 
@@ -139,7 +137,7 @@ public class CartdetailFragment extends Fragment {
     }
 
     private void llenarCarrito() {
-        cartDetails = CartLab.getInstance(getContext())
+        cartDetails = DatabaseClient.getInstance(getContext())
                 .getAppDatabase()
                 .getCartDao()
                 .getCart();

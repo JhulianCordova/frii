@@ -13,8 +13,8 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.cor.frii.persistence.CartLab;
-import com.cor.frii.persistence.ECart;
+import com.cor.frii.persistence.DatabaseClient;
+import com.cor.frii.persistence.entity.ECart;
 import com.cor.frii.pojo.Product;
 import com.cor.frii.utils.LoadImage;
 
@@ -94,7 +94,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.viewHold
 
                     if (productCantidad.getText().length() > 0) {
                         eCart.setCantidad(Integer.parseInt(productCantidad.getText().toString()));
-                        CartLab.getInstance(context)
+                        DatabaseClient.getInstance(context)
                                 .getAppDatabase()
                                 .getCartDao()
                                 .addCart(eCart);

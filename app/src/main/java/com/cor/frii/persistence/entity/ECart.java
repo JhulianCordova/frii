@@ -1,4 +1,4 @@
-package com.cor.frii.persistence;
+package com.cor.frii.persistence.entity;
 
 
 import androidx.annotation.NonNull;
