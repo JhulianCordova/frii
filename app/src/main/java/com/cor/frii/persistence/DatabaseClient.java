@@ -5,8 +5,6 @@ import android.content.Context;
 
 import androidx.room.Room;
 
-import com.cor.frii.persistence.dao.CartDao;
-
 public class DatabaseClient {
 
     @SuppressLint("StaticFieldLeak")
@@ -19,6 +17,7 @@ public class DatabaseClient {
         this.ctx = context.getApplicationContext();
         appDatabase = Room.databaseBuilder(this.ctx, AppDatabase.class, "freebusiness")
                 .allowMainThreadQueries()
+                .fallbackToDestructiveMigration()
                 .build();
 
     }

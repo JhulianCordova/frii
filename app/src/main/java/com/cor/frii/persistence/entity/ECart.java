@@ -72,4 +72,15 @@ public class ECart {
     public void setTotal(float total) {
         this.total = total;
     }
+
+    @Override
+    public String toString() {
+        return "ECart{" +
+                "uid='" + uid + '\'' +
+                ", name='" + name + '\'' +
+                ", price=" + price +
+                ", cantidad=" + cantidad +
+                ", total=" + total +
+                '}';
+    }
 }

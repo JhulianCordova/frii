@@ -14,6 +14,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.TextView;
 
 import com.cor.frii.persistence.DatabaseClient;
 import com.cor.frii.persistence.entity.ECart;
@@ -29,7 +30,7 @@ import java.util.List;
  * Use the {@link CartdetailFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class CartdetailFragment extends Fragment {
+public class CartdetailFragment extends Fragment implements CartDetailAdapter.EventListener {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -46,6 +47,7 @@ public class CartdetailFragment extends Fragment {
     private RecyclerView recyclerView;
     List<ECart> cartDetails;
     Button procesarPedido;
+    private TextView lblTotal;
 
     public CartdetailFragment() {
         // Required empty public constructor
@@ -85,6 +87,7 @@ public class CartdetailFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_cartdetail, container, false);
         recyclerView = view.findViewById(R.id.CartDetailContainer);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        lblTotal = view.findViewById(R.id.lblTotal);
 
         llenarCarrito();
 
@@ -131,6 +134,11 @@ public class CartdetailFragment extends Fragment {
         mListener = null;
     }
 
+    @Override
+    public void calcularTotal(float total) {
+        lblTotal.setText(String.valueOf(total));
+    }
+
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
@@ -140,9 +148,11 @@ public class CartdetailFragment extends Fragment {
         cartDetails = DatabaseClient.getInstance(getContext())
                 .getAppDatabase()
                 .getCartDao()
-                .getCart();
+                .getCarts();
 
-        cartDetailAdapter = new CartDetailAdapter(cartDetails);
+        cartDetailAdapter = new CartDetailAdapter(cartDetails, this);
         recyclerView.setAdapter(cartDetailAdapter);
+
+
     }
 }

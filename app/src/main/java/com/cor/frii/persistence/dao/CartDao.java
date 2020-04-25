@@ -14,7 +14,7 @@ import java.util.List;
 public interface CartDao {
 
     @Query("SELECT * FROM cart")
-    List<ECart> getCart();
+    List<ECart> getCarts();
 
     @Query("SELECT * FROM cart WHERE uid LIKE :uid")
     ECart getCart(String uid);

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -16,16 +17,16 @@
             android:id="@+id/textView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="20dp"
-            android:textStyle="bold"
-            android:textColor="@color/marcasTitle"
-            android:gravity="center"
             android:layout_marginStart="4dp"
             android:layout_marginEnd="4dp"
-            android:paddingRight="3dp"
-            android:paddingLeft="3dp"
+            android:gravity="center"
             android:padding="3dp"
-            android:text="Productos Seleccionados" />
+            android:paddingLeft="3dp"
+            android:paddingRight="3dp"
+            android:text="Productos Seleccionados"
+            android:textColor="@color/marcasTitle"
+            android:textSize="20dp"
+            android:textStyle="bold" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -38,19 +39,56 @@
                 android:layout_height="match_parent" />
         </LinearLayout>
 
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/textView13"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="230dp"
+
+                android:text="Total:"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/lblTotal"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.0" />
+
+            <TextView
+                android:id="@+id/lblTotal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="32dp"
+                android:layout_marginEnd="55dp"
+
+                android:text="0.0"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/textView13"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.0" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
         <Button
             android:id="@+id/ButtonCartProcesarPedido"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Procesar Pedido"
             android:layout_marginStart="4dp"
             android:layout_marginEnd="4dp"
-            android:textStyle="bold"
-            android:onClick="procesarpedido"
-            android:textColor="@color/textTitleButton"
-            android:background="@drawable/custom_button"
             android:layout_marginBottom="8dp"
-            />
+            android:background="@drawable/custom_button"
+            android:onClick="procesarpedido"
+            android:text="Procesar Pedido"
+            android:textColor="@color/textTitleButton"
+            android:textStyle="bold" />
+
     </LinearLayout>
 
 </FrameLayout>
