@@ -16,7 +16,7 @@ public interface CartDao {
     @Query("SELECT * FROM cart")
     List<ECart> getCarts();
 
-    @Query("SELECT * FROM cart WHERE uid LIKE :uid")
+    @Query("SELECT * FROM cart WHERE uid = :uid  ")
     ECart getCart(String uid);
 
     @Insert

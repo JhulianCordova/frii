@@ -1,5 +1,6 @@
 package com.cor.frii.persistence.entity;
 
+
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
@@ -24,6 +25,15 @@ public class Acount {
 
     @ColumnInfo(name = "direccion")
     private String direccion;
+
+    @ColumnInfo(name = "email")
+    private String email;
+
+    @ColumnInfo(name = "password")
+    private String password;
+
+    @ColumnInfo(name = "token")
+    private String token;
 
 
     public int getId() {
@@ -72,5 +82,44 @@ public class Acount {
 
     public void setDireccion(String direccion) {
         this.direccion = direccion;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
+    }
+
+    @Override
+    public String toString() {
+        return "Acount{" +
+                "id=" + id +
+                ", numDocumento='" + numDocumento + '\'' +
+                ", nombre='" + nombre + '\'' +
+                ", phoneOne='" + phoneOne + '\'' +
+                ", phoneTwo='" + phoneTwo + '\'' +
+                ", direccion='" + direccion + '\'' +
+                ", email='" + email + '\'' +
+                ", password='" + password + '\'' +
+                ", token='" + token + '\'' +
+                '}';
     }
 }

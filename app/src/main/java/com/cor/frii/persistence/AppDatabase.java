@@ -11,7 +11,7 @@ import com.cor.frii.persistence.dao.AcountDao;
 @Database(entities = {
         Acount.class,
         ECart.class
-}, version = 3)
+}, version = 1)
 public abstract class AppDatabase extends RoomDatabase {
     public abstract CartDao getCartDao();
 

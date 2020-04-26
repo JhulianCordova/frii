@@ -15,9 +15,15 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
+
+import android.widget.TextView;
 import android.widget.Toast;
 
 
+import com.cor.frii.persistence.DatabaseClient;
+import com.cor.frii.persistence.DatabaseHelper;
+import com.cor.frii.persistence.Session;
+import com.cor.frii.persistence.entity.Acount;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 
@@ -39,8 +45,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         ProductsFragment.OnFragmentInteractionListener,
         GasFragment.OnFragmentInteractionListener,
         SettingFragment.OnFragmentInteractionListener,
-        MisPedidosFragment.OnFragmentInteractionListener{
-
+        MisPedidosFragment.OnFragmentInteractionListener {
 
 
     DrawerLayout drawerLayout;
@@ -48,7 +53,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     Toolbar toolbar;
     NavigationView navigationView;
 
+    //--
+    TextView lblUsername, lblEmail;
 
+    //e
+    String tokenTemp = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoyLCJ1c2VybmFtZSI6ImFsZGFlbHZpc0Bob3RtYWlsLmNvbSIsImV4cCI6MTU5MDQyODEwNiwiZW1haWwiOiIiLCJvcmlnX2lhdCI6MTU4NzgzNjEwNn0.pPDXXuhyer6GaxozPFqcaPsSkl0ANnuXROiIuxQViQw";
     FloatingActionButton flo_cart;
     FloatingActionButton flo_order_pedido;
 
@@ -63,6 +72,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         drawerLayout = findViewById(R.id.navigationDrawer);
         navigationView = findViewById(R.id.navigationView);
 
+
         // estaclecer el evento onclick de navigation
         navigationView.setNavigationItemSelectedListener(this);
 
@@ -72,6 +82,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         actionBarDrawerToggle.syncState();
 
         cargarFragments();
+        llenarInfoUsuario();
 
         //carito de comprar
         flo_cart = findViewById(R.id.fad_cart_order);
@@ -84,14 +95,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         });
 
-        flo_order_pedido=findViewById(R.id.fad_order_pedido);
+        flo_order_pedido = findViewById(R.id.fad_order_pedido);
         flo_order_pedido.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent=new Intent(getBaseContext(),PedidosActivity.class);
+                Intent intent = new Intent(getBaseContext(), PedidosActivity.class);
                 startActivity(intent);
             }
         });
+
 
     }
 
@@ -100,6 +112,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
 
         drawerLayout.closeDrawer(GravityCompat.START);
+
+
         FragmentManager manager = getSupportFragmentManager();
         FragmentTransaction transaction = manager.beginTransaction();
         if (menuItem.getItemId() == R.id.home) {
@@ -110,18 +124,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (menuItem.getItemId() == R.id.account) {
             //transaction.replace(R.id.navigationContainer,new AccountFragment());
 
-            Intent intent=new Intent(getBaseContext(),PerfilActivity.class);
-            intent.putExtra("id",R.id.account);
+            Intent intent = new Intent(getBaseContext(), PerfilActivity.class);
+            intent.putExtra("id", R.id.account);
             startActivity(intent);
 
             Toast.makeText(this, "Account", Toast.LENGTH_SHORT).show();
         }
         if (menuItem.getItemId() == R.id.Perfil) {
 
-            Intent intent=new Intent(getBaseContext(),PerfilActivity.class);
-            String title=menuItem.getTitle().toString();
-            intent.putExtra("name",title);
-            intent.putExtra("id",R.id.Perfil);
+            Intent intent = new Intent(getBaseContext(), PerfilActivity.class);
+            String title = menuItem.getTitle().toString();
+            intent.putExtra("name", title);
+            intent.putExtra("id", R.id.Perfil);
             startActivity(intent);
 
             /*
@@ -132,9 +146,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
              */
         }
-        if (menuItem.getItemId()==R.id.MisPedidos){
+        if (menuItem.getItemId() == R.id.MisPedidos) {
 
-            Intent intent=new Intent(getBaseContext(),PedidosActivity.class);
+            Intent intent = new Intent(getBaseContext(), PedidosActivity.class);
             startActivity(intent);
             /*
             transaction.replace(R.id.navigationContainer, new MisPedidosFragment());
@@ -175,6 +189,21 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         tras.add(R.id.mainContainer,new BrandsFragment()).commit();
 
          */
+    }
+
+    private void llenarInfoUsuario() {
+        Session session = new Session(getApplicationContext());
+        session.setToken(tokenTemp);
+        DatabaseHelper helper = new DatabaseHelper(getApplicationContext());
+        Acount acount = helper.login(tokenTemp);
+        if (acount != null) {
+            Toast.makeText(getApplicationContext(), "Esta loggeado", Toast.LENGTH_LONG).show();
+
+
+        } else {
+            Toast.makeText(getApplicationContext(), "Error de  loggeado", Toast.LENGTH_LONG).show();
+        }
+
     }
 
 

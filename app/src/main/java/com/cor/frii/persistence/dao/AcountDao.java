@@ -16,8 +16,8 @@ public interface AcountDao {
     @Query("SELECT * FROM acount")
     List<Acount> getUsers();
 
-    @Query("SELECT * FROM acount WHERE id LIKE :id")
-    Acount getUser(String id);
+    @Query("SELECT * FROM acount WHERE token LIKE :token")
+    Acount getUser(String token);
 
     @Insert
     void addUser(Acount... user);
@@ -27,5 +27,8 @@ public interface AcountDao {
 
     @Update
     void updateUser(Acount... user);
+
+    @Query("SELECT * FROM acount WHERE token LIKE :token")
+    Acount login(String token);
 
 }
