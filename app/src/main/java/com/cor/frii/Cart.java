@@ -81,6 +81,9 @@ public class Cart extends AppCompatActivity implements NavigationView.OnNavigati
             Toast.makeText(this,"ingreso a home",Toast.LENGTH_SHORT).show();
         }
         if (menuItem.getItemId()==R.id.account){
+            Intent intent=new Intent(getBaseContext(),PerfilActivity.class);
+            intent.putExtra("id",R.id.account);
+            startActivity(intent);
             Toast.makeText(this,"ingreso a account",Toast.LENGTH_SHORT).show();
         }
         if(menuItem.getItemId()==R.id.Perfil){
@@ -88,6 +91,13 @@ public class Cart extends AppCompatActivity implements NavigationView.OnNavigati
             transaction.addToBackStack(null);
             transaction.commit();
             Toast.makeText(this,"ingreso a configuracion",Toast.LENGTH_SHORT).show();
+        }
+        if (menuItem.getItemId()==R.id.MisPedidos){
+
+            Intent intent=new Intent(getBaseContext(),PedidosActivity.class);
+            startActivity(intent);
+
+
         }
         return false;
     }

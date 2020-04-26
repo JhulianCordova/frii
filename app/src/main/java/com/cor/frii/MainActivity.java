@@ -18,6 +18,7 @@ import android.view.View;
 import android.widget.Toast;
 
 
+import com.cor.frii.Login.LoginFragment;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 
@@ -74,6 +75,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         cargarFragments();
 
         //carito de comprar
+
+
         flo_cart = findViewById(R.id.fad_cart_order);
         flo_cart.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -92,6 +95,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 startActivity(intent);
             }
         });
+
 
     }
 
@@ -124,25 +128,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             intent.putExtra("id",R.id.Perfil);
             startActivity(intent);
 
-            /*
-            transaction.replace(R.id.navigationContainer, new SettingFragment());
-            transaction.addToBackStack(null);
-            transaction.commit();
-            Toast.makeText(this, "Perfil", Toast.LENGTH_SHORT).show();
-
-             */
         }
         if (menuItem.getItemId()==R.id.MisPedidos){
 
             Intent intent=new Intent(getBaseContext(),PedidosActivity.class);
             startActivity(intent);
-            /*
-            transaction.replace(R.id.navigationContainer, new MisPedidosFragment());
-            transaction.addToBackStack(null);
-            transaction.commit();
-            Toast.makeText(this, "Mis Pedidos", Toast.LENGTH_SHORT).show();
-
-             */
 
         }
 
