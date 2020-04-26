@@ -18,7 +18,6 @@ import android.view.View;
 import android.widget.Toast;
 
 
-import com.cor.frii.Login.LoginFragment;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 
@@ -75,8 +74,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         cargarFragments();
 
         //carito de comprar
-
-
         flo_cart = findViewById(R.id.fad_cart_order);
         flo_cart.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -87,6 +84,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         });
 
+        //orden pedidos detalles/historial
         flo_order_pedido=findViewById(R.id.fad_order_pedido);
         flo_order_pedido.setOnClickListener(new View.OnClickListener() {
             @Override

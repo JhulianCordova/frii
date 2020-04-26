@@ -36,25 +36,7 @@ public class newAccountFragment extends Fragment implements View.OnClickListener
         crearCuenta=view.findViewById(R.id.CrearCuenta);
 
 
-        /*
-        ForgottenPassword.setOnClickListener(new View.OnClickListener(){
 
-            @Override
-            public void onClick(View v) {
-
-            }
-        });
-
-
-        NewAccount.setOnClickListener(new View.OnClickListener(){
-
-            @Override
-            public void onClick(View v) {
-
-            }
-        });
-
-         */
 
         // init views
 
