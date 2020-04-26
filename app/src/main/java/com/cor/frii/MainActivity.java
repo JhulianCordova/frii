@@ -70,6 +70,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         toolbar = findViewById(R.id.navigationToolbar);
         setSupportActionBar(toolbar);
         drawerLayout = findViewById(R.id.navigationDrawer);
+
         navigationView = findViewById(R.id.navigationView);
 
 
@@ -198,6 +199,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         Acount acount = helper.login(tokenTemp);
         if (acount != null) {
             Toast.makeText(getApplicationContext(), "Esta loggeado", Toast.LENGTH_LONG).show();
+            View view = navigationView.getHeaderView(0);
+            lblUsername = view.findViewById(R.id.lblNombreUsuario);
+            lblEmail = view.findViewById(R.id.lblEmailUsuario);
+
+            lblUsername.setText(acount.getNombre());
+            lblEmail.setText(acount.getEmail());
 
 
         } else {
