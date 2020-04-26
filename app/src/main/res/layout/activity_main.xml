@@ -12,6 +12,7 @@
     <include android:layout_width="match_parent"
         android:layout_height="wrap_content"
         layout="@layout/navigation_toolbar"/>
+
     <include
         android:layout_height="wrap_content"
         android:layout_width="match_parent"

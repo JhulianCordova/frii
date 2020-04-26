@@ -84,7 +84,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         });
 
-        //orden pedidos detalles/historial
         flo_order_pedido=findViewById(R.id.fad_order_pedido);
         flo_order_pedido.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -93,7 +92,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 startActivity(intent);
             }
         });
-
 
     }
 
@@ -126,11 +124,25 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             intent.putExtra("id",R.id.Perfil);
             startActivity(intent);
 
+            /*
+            transaction.replace(R.id.navigationContainer, new SettingFragment());
+            transaction.addToBackStack(null);
+            transaction.commit();
+            Toast.makeText(this, "Perfil", Toast.LENGTH_SHORT).show();
+
+             */
         }
         if (menuItem.getItemId()==R.id.MisPedidos){
 
             Intent intent=new Intent(getBaseContext(),PedidosActivity.class);
             startActivity(intent);
+            /*
+            transaction.replace(R.id.navigationContainer, new MisPedidosFragment());
+            transaction.addToBackStack(null);
+            transaction.commit();
+            Toast.makeText(this, "Mis Pedidos", Toast.LENGTH_SHORT).show();
+
+             */
 
         }
 

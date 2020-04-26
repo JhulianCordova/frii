@@ -3,12 +3,18 @@ package com.cor.frii;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
+
 import androidx.fragment.app.Fragment;
+
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
+import com.cor.frii.persistence.DatabaseClient;
+import com.cor.frii.persistence.Session;
+import com.cor.frii.persistence.entity.Acount;
+import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 
 
@@ -30,15 +36,19 @@ public class SettingFragment extends Fragment {
     private String mParam1;
     private String mParam2;
 
-    TextInputLayout Dni;
-    TextInputLayout Nombre;
-    TextInputLayout Email;
-    TextInputLayout Direccion;
-    TextInputLayout Telefono1;
-    TextInputLayout Telefono2;
-    Button Editar,Guardar;
+    TextInputEditText Dni;
+    TextInputEditText Nombre;
+    TextInputEditText Email;
+    TextInputEditText Direccion;
+    TextInputEditText Telefono1;
+    TextInputEditText Telefono2;
+    Button Editar, Guardar;
 
     private OnFragmentInteractionListener mListener;
+
+    //--Variables temporales
+    int idUsuarioTemp = 2;
+
 
     public SettingFragment() {
         // Required empty public constructor
@@ -75,19 +85,19 @@ public class SettingFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view=inflater.inflate(R.layout.fragment_setting, container, false);
+        View view = inflater.inflate(R.layout.fragment_setting, container, false);
 
 
-        Dni=view.findViewById(R.id.DNIPerfil);
-        Nombre=view.findViewById(R.id.NombrePerfil);
-        Email=view.findViewById(R.id.EmailPerfil);
-        Direccion=view.findViewById(R.id.DireccionPerfil);
-        Telefono1=view.findViewById(R.id.TelefonoPerfil);
-        Telefono2=view.findViewById(R.id.TelefonoPerfil1);
-        Editar=view.findViewById(R.id.ButtonEditarPerfil);
-        Guardar=view.findViewById(R.id.ButtonGuardarPerfil);
+        Dni = view.findViewById(R.id.DNIPerfil);
+        Nombre = view.findViewById(R.id.NombrePerfil);
+        Email = view.findViewById(R.id.EmailPerfil);
+        Direccion = view.findViewById(R.id.DireccionPerfil);
+        Telefono1 = view.findViewById(R.id.TelefonoPerfil);
+        Telefono2 = view.findViewById(R.id.TelefonoPerfil1);
+        Editar = view.findViewById(R.id.ButtonEditarPerfil);
+        Guardar = view.findViewById(R.id.ButtonGuardarPerfil);
 
-        Editar.setOnClickListener(new View.OnClickListener(){
+        Editar.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View v) {
@@ -100,8 +110,7 @@ public class SettingFragment extends Fragment {
                 Guardar.setBackgroundResource(R.drawable.custom_button);
             }
         });
-
-
+        llenarInformacionUsuario();
 
         return view;
     }
@@ -130,18 +139,55 @@ public class SettingFragment extends Fragment {
         mListener = null;
     }
 
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
+    }
+
+    public synchronized void llenarInformacionUsuario() {
+
+        Session session = new Session(getContext());
+        String token = session.getToken();
+
+        System.out.println(token);
+        if (token != null || !token.equals("")) {
+
+        }
+
+        Acount cuenta = DatabaseClient.getInstance(getContext())
+                .getAppDatabase()
+                .getAcountDao()
+                .getUser(token);
+        if (cuenta != null) {
+            //Llenar la informacion
+            Dni.setText(cuenta.getNumDocumento());
+            Nombre.setText(cuenta.getNombre());
+            Email.setText(cuenta.getEmail());
+            Direccion.setText(cuenta.getDireccion());
+            Telefono1.setText(cuenta.getPhoneOne());
+            Telefono2.setText(cuenta.getPhoneTwo());
+
+        }
+
+        // Verificar si existe el usuario si no insertar en la db
+
+        else {
+            // Verificar si el login con el token son correctos -> si pasa llenar en la db
+            Acount acount = new Acount();
+            acount.setId(idUsuarioTemp);
+            acount.setDireccion("JR LIBERTADORES 160");
+            acount.setEmail("aldaelvis@hotmail.com");
+            acount.setNumDocumento("71847204");
+            acount.setNombre("Elvis Aldair");
+            acount.setPassword("1234");
+            acount.setPhoneOne("958076028");
+            acount.setPhoneTwo(null);
+            acount.setToken(token);
+
+            DatabaseClient.getInstance(getContext())
+                    .getAppDatabase()
+                    .getAcountDao()
+                    .addUser(acount);
+        }
     }
 }

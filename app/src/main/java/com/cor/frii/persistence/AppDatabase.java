@@ -3,7 +3,17 @@ package com.cor.frii.persistence;
 import androidx.room.Database;
 import androidx.room.RoomDatabase;
 
-@Database(entities = {ECart.class}, version = 1)
+import com.cor.frii.persistence.dao.CartDao;
+import com.cor.frii.persistence.entity.Acount;
+import com.cor.frii.persistence.entity.ECart;
+import com.cor.frii.persistence.dao.AcountDao;
+
+@Database(entities = {
+        Acount.class,
+        ECart.class
+}, version = 1)
 public abstract class AppDatabase extends RoomDatabase {
     public abstract CartDao getCartDao();
+
+    public abstract AcountDao getAcountDao();
 }

@@ -13,8 +13,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.cor.frii.persistence.CartLab;
-import com.cor.frii.persistence.ECart;
+import com.cor.frii.persistence.DatabaseClient;
+import com.cor.frii.persistence.entity.ECart;
 
 import java.util.List;
 
@@ -22,8 +22,10 @@ public class CartDetailAdapter extends RecyclerView.Adapter<CartDetailAdapter.vi
 
     private List<ECart> cartDetails;
     private Context context;
+    private EventListener eventListener;
 
-    public CartDetailAdapter(List<ECart> cartDetails) {
+    public CartDetailAdapter(List<ECart> cartDetails, EventListener eventListener) {
+        this.eventListener = eventListener;
         this.cartDetails = cartDetails;
     }
 
@@ -50,12 +52,13 @@ public class CartDetailAdapter extends RecyclerView.Adapter<CartDetailAdapter.vi
         holder.cartSubtotal.setText(String.valueOf(cartDetails.get(position).getTotal()));
 
         final ECart eCart = cartDetails.get(position);
-        calcularTotal(holder.cartCantidad, holder.cartPrecioU, holder.cartSubtotal, position);
+        calcularSubTotal(holder.cartCantidad, holder.cartPrecioU, holder.cartSubtotal, position);
+        eventListener.calcularTotal(calcularTotal());
 
         holder.cartDeleteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                CartLab.getInstance(context)
+                DatabaseClient.getInstance(context)
                         .getAppDatabase()
                         .getCartDao()
                         .deleteCart(eCart);
@@ -75,7 +78,10 @@ public class CartDetailAdapter extends RecyclerView.Adapter<CartDetailAdapter.vi
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 if (holder.cartCantidad.getText().length() > 0) {
-                    calcularTotal(holder.cartCantidad, holder.cartPrecioU, holder.cartSubtotal, position);
+                    calcularSubTotal(holder.cartCantidad, holder.cartPrecioU, holder.cartSubtotal, position);
+                    actualizarCantidad(holder.cartCantidad, position);
+
+                    eventListener.calcularTotal(calcularTotal());
                 }
             }
 
@@ -105,10 +111,11 @@ public class CartDetailAdapter extends RecyclerView.Adapter<CartDetailAdapter.vi
             cartPrecioU = itemView.findViewById(R.id.cartPrecioU);
             cartSubtotal = itemView.findViewById(R.id.cartSubTotal);
             cartDeleteButton = itemView.findViewById(R.id.cartDeleteButton);
+
         }
     }
 
-    private void calcularTotal(EditText cantidad, TextView precio, TextView total, int posicion) {
+    private void calcularSubTotal(EditText cantidad, TextView precio, TextView total, int posicion) {
         if (cantidad.length() > 0 && precio.length() > 0) {
             int c = Integer.parseInt(cantidad.getText().toString());
             float p = Float.parseFloat(precio.getText().toString());
@@ -119,5 +126,34 @@ public class CartDetailAdapter extends RecyclerView.Adapter<CartDetailAdapter.vi
             cartDetails.get(posicion).setPrice(p);
             cartDetails.get(posicion).setTotal(c * p);
         }
+    }
+
+    private void actualizarCantidad(TextView cantidad, int position) {
+        ECart cart = DatabaseClient
+                .getInstance(context)
+                .getAppDatabase()
+                .getCartDao()
+                .getCart(cartDetails.get(position).getUid());
+
+        int cant = Integer.parseInt(cantidad.getText().toString());
+        cart.setCantidad(cant);
+        cart.setTotal(cant * cart.getTotal());
+
+        DatabaseClient.getInstance(context)
+                .getAppDatabase()
+                .getCartDao()
+                .updateCart(cart);
+    }
+
+    private float calcularTotal() {
+        float sum = 0;
+        for (ECart e : cartDetails) {
+            sum += e.getTotal();
+        }
+        return sum;
+    }
+
+    public interface EventListener {
+        void calcularTotal(float total);
     }
 }
