@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+
+    android:layout_gravity="center">
+
+
+    <ImageView
+        android:id="@+id/LoginImage"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        app:layout_constraintBottom_toTopOf="@+id/EmailLogin"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:srcCompat="@drawable/ic_launcher_background" />
+
+    <EditText
+        android:id="@+id/EmailLogin"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="8dp"
+        android:background="@android:color/transparent"
+        android:drawableLeft="@drawable/ic_email"
+        android:drawablePadding="5dp"
+        android:hint="@string/email"
+        android:inputType="textEmailAddress"
+        android:singleLine="true"
+        android:text=""
+        android:textSize="16dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/LoginImage" />
+
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/LoginPassword"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/EmailLogin">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:drawableLeft="@drawable/ic_lock"
+            android:drawablePadding="4dp"
+            android:hint="@string/password"
+            android:inputType="textPassword" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <TextView
+        android:id="@+id/ForgottenPasswordLogin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        android:padding="4dp"
+        android:text="Olvidaste tu contraseña?"
+        android:textSize="16dp"
+
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/LoginPassword" />
+
+    <Button
+        android:id="@+id/ButonEntrarLogin"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="24dp"
+        android:background="@drawable/custom_button"
+        android:padding="3dp"
+        android:text="Entrar"
+        android:textColor="@color/textTitleButton"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/ForgottenPasswordLogin" />
+
+
+    <TextView
+        android:id="@+id/NewAccountLogin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="24dp"
+        android:gravity="center"
+        android:text="Solicitar una cuenta"
+        android:textSize="20dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.584"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/progressBarLogin" />
+
+    <ProgressBar
+        android:id="@+id/progressBarLogin"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="24dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/ButonEntrarLogin" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
