@@ -10,7 +10,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.GridLayoutManager;
+
 
 import com.cor.frii.R;
 import com.google.android.material.textfield.TextInputLayout;
@@ -18,7 +18,7 @@ import com.google.android.material.textfield.TextInputLayout;
 public class LoginFragment extends Fragment implements View.OnClickListener {
 
     private static Button buttonEntrar;
-    private static TextView Email,ForgottenPassword,NewAccount;
+    private static TextView Email, ForgottenPassword, NewAccount;
     private static TextInputLayout password;
     private static ImageView loginImage;
     private static ProgressBar progressBarLogin;
@@ -28,43 +28,17 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_brands, container, false);
+        View view = inflater.inflate(R.layout.login_layout, container, false);
 
-        buttonEntrar=view.findViewById(R.id.ButonEntrarLogin);
-        Email=view.findViewById(R.id.EmailLogin);
-        ForgottenPassword=view.findViewById(R.id.ForgottenPasswordLogin);
-        NewAccount=view.findViewById(R.id.NewAccountLogin);
-        password=view.findViewById(R.id.LoginPassword);
-        progressBarLogin=view.findViewById(R.id.progressBarLogin);
-
-
-        /*
-        ForgottenPassword.setOnClickListener(new View.OnClickListener(){
-
-            @Override
-            public void onClick(View v) {
-
-            }
-        });
-
-
-        NewAccount.setOnClickListener(new View.OnClickListener(){
-
-            @Override
-            public void onClick(View v) {
-
-            }
-        });
-
-         */
-
-        // init views
+        buttonEntrar = view.findViewById(R.id.ButonEntrarLogin);
+        Email = view.findViewById(R.id.EmailLogin);
+        ForgottenPassword = view.findViewById(R.id.ForgottenPasswordLogin);
+        NewAccount = view.findViewById(R.id.NewAccountLogin);
+        password = view.findViewById(R.id.LoginPassword);
+        progressBarLogin = view.findViewById(R.id.progressBarLogin);
 
         return view;
     }
-
-
-
 
 
     @Override
