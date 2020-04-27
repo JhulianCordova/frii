@@ -28,6 +28,7 @@ import com.cor.frii.pojo.Brands;
 import com.cor.frii.pojo.Categories;
 import com.cor.frii.utils.VolleySingleton;
 
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -57,11 +58,11 @@ public class BrandsFragment extends Fragment {
     private OnFragmentInteractionListener mListener;
 
     //--
-    String urlBase = "http://34.71.251.155";
+    private String urlBase = "http://34.71.251.155";
 
     private BrandsAdapter brandsAdapter;
     private RecyclerView recyclerView;
-    ArrayList<Brands> brandsList;
+    private ArrayList<Brands> brandsList;
 
     public BrandsFragment() {
         // Required empty public constructor

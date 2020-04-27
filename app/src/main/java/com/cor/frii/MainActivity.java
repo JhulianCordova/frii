@@ -15,9 +15,13 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 
+import com.cor.frii.persistence.DatabaseHelper;
+import com.cor.frii.persistence.Session;
+import com.cor.frii.persistence.entity.Acount;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 
@@ -52,6 +56,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     FloatingActionButton flo_cart;
     FloatingActionButton flo_order_pedido;
 
+    //--
+    TextView lblUsername, lblEmail;
+
+    //e
+    String tokenTemp = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoyLCJ1c2VybmFtZSI6ImFsZGFlbHZpc0Bob3RtYWlsLmNvbSIsImV4cCI6MTU5MDQyODEwNiwiZW1haWwiOiIiLCJvcmlnX2lhdCI6MTU4NzgzNjEwNn0.pPDXXuhyer6GaxozPFqcaPsSkl0ANnuXROiIuxQViQw";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -72,6 +82,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         actionBarDrawerToggle.syncState();
 
         cargarFragments();
+        llenarInfoUsuario();
 
         //carito de comprar
         flo_cart = findViewById(R.id.fad_cart_order);
@@ -175,6 +186,27 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         tras.add(R.id.mainContainer,new BrandsFragment()).commit();
 
          */
+    }
+
+    private void llenarInfoUsuario() {
+        Session session = new Session(getApplicationContext());
+        session.setToken(tokenTemp);
+        DatabaseHelper helper = new DatabaseHelper(getApplicationContext());
+        Acount acount = helper.login(tokenTemp);
+        if (acount != null) {
+            Toast.makeText(getApplicationContext(), "Esta loggeado", Toast.LENGTH_LONG).show();
+            View view = navigationView.getHeaderView(0);
+            lblUsername = view.findViewById(R.id.lblNombreUsuario);
+            lblEmail = view.findViewById(R.id.lblEmailUsuario);
+
+            lblUsername.setText(acount.getNombre());
+            lblEmail.setText(acount.getEmail());
+
+
+        } else {
+            Toast.makeText(getApplicationContext(), "Error de  loggeado", Toast.LENGTH_LONG).show();
+        }
+
     }
 
 
