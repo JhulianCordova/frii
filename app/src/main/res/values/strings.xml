@@ -10,4 +10,10 @@
     <!-- navigation  name-->
     <string name="app_name_title">FRII</string>
 
+
+    <!-- login -->
+
+    <string name="email">Write your Email</string>
+    <string name="password">write your password</string>
+
 </resources>

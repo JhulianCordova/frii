@@ -14,10 +14,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.TextView;
 
-import com.cor.frii.pojo.CartDetail;
+import com.cor.frii.persistence.DatabaseClient;
+import com.cor.frii.persistence.entity.ECart;
 
-import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -28,7 +30,7 @@ import java.util.ArrayList;
  * Use the {@link CartdetailFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class CartdetailFragment extends Fragment {
+public class CartdetailFragment extends Fragment implements CartDetailAdapter.EventListener {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -43,8 +45,9 @@ public class CartdetailFragment extends Fragment {
 
     private CartDetailAdapter cartDetailAdapter;
     private RecyclerView recyclerView;
-    ArrayList<CartDetail> cartDetails;
+    List<ECart> cartDetails;
     Button procesarPedido;
+    private TextView lblTotal;
 
     public CartdetailFragment() {
         // Required empty public constructor
@@ -81,31 +84,27 @@ public class CartdetailFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view=inflater.inflate(R.layout.fragment_cartdetail, container, false);
-        recyclerView=view.findViewById(R.id.CartDetailContainer);
+        View view = inflater.inflate(R.layout.fragment_cartdetail, container, false);
+        recyclerView = view.findViewById(R.id.CartDetailContainer);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        lblTotal = view.findViewById(R.id.lblTotal);
 
-        cartDetails=new ArrayList<>();
-        cartDetails.add(new CartDetail(1,"gas",3,2));
-        cartDetails.add(new CartDetail(1,"cerveza",3,2));
-        cartDetails.add(new CartDetail(1,"agua",3,2));
-        cartDetailAdapter=new CartDetailAdapter(cartDetails);
-        recyclerView.setAdapter(cartDetailAdapter);
+        llenarCarrito();
 
-        procesarPedido=view.findViewById(R.id.ButtonCartProcesarPedido);
-        procesarPedido.setOnClickListener(new View.OnClickListener(){
-            FragmentManager manager=getActivity().getSupportFragmentManager();
-            FragmentTransaction transaction=manager.beginTransaction();
+        procesarPedido = view.findViewById(R.id.ButtonCartProcesarPedido);
+        procesarPedido.setOnClickListener(new View.OnClickListener() {
+            FragmentManager manager = getActivity().getSupportFragmentManager();
+            FragmentTransaction transaction = manager.beginTransaction();
+
             @Override
             public void onClick(View v) {
 
-                ProcesarpedidoFragment procesarpedidoFragment=new ProcesarpedidoFragment();
-                transaction.replace(R.id.navigationContainer,procesarpedidoFragment);
+                ProcesarpedidoFragment procesarpedidoFragment = new ProcesarpedidoFragment();
+                transaction.replace(R.id.navigationContainer, procesarpedidoFragment);
                 transaction.addToBackStack(null);
                 transaction.commit();
             }
         });
-
 
 
         return view;
@@ -135,18 +134,25 @@ public class CartdetailFragment extends Fragment {
         mListener = null;
     }
 
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
+    @Override
+    public void calcularTotal(float total) {
+        lblTotal.setText(String.valueOf(total));
+    }
+
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
+    }
+
+    private void llenarCarrito() {
+        cartDetails = DatabaseClient.getInstance(getContext())
+                .getAppDatabase()
+                .getCartDao()
+                .getCarts();
+
+        cartDetailAdapter = new CartDetailAdapter(cartDetails, this);
+        recyclerView.setAdapter(cartDetailAdapter);
+
+
     }
 }

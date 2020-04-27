@@ -138,11 +138,19 @@ public class BrandsFragment extends Fragment {
     // Llenar datos
     private void llenarDatos() {
         brandsList = new ArrayList<>();
-        brandsList.add(new Brands(1, "Gas Normal", "", urlBase + "/media/images/markes/LLAMAGAS_LOGO.png"));
-        brandsList.add(new Brands(2, "Gas Premium", "", urlBase + "/media/images/markes/LLAMAGAS_LOGO.png"));
-        brandsList.add(new Brands(3, "Camion", "", urlBase + "/media/images/markes/LLAMAGAS_LOGO.png"));
 
-        String url = this.urlBase + "/api/markes";
+
+        Bundle bundle = this.getArguments();
+        String url = "";
+        if (bundle != null) {
+            url = this.urlBase + "/api/markes/" + bundle.getInt("idCategory");
+        } else {
+            url = this.urlBase + "/api/markes";
+            brandsList.add(new Brands(1, "Gas Normal", "", urlBase + "/media/images/none-img.png"));
+            brandsList.add(new Brands(2, "Gas Premium", "", urlBase + "/media/images/none-img.png"));
+            brandsList.add(new Brands(3, "Camion", "", urlBase + "/media/images/none-img.png"));
+        }
+
         JSONArray jsonArray = new JSONArray();
         JsonArrayRequest arrayRequest =
                 new JsonArrayRequest(Request.Method.GET, url, jsonArray, new Response.Listener<JSONArray>() {
@@ -180,7 +188,10 @@ public class BrandsFragment extends Fragment {
                                         transaction.addToBackStack(null);
                                         transaction.commit();
                                     } else {
+                                        Bundle b = new Bundle();
+                                        b.putInt("IdMarke", brandsList.get(recyclerView.getChildAdapterPosition(v)).getId());
                                         ProductsFragment productsFragment = new ProductsFragment();
+                                        productsFragment.setArguments(b);
                                         transaction.replace(R.id.mainContainer, productsFragment);
                                         transaction.addToBackStack(null);
                                         transaction.commit();

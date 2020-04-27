@@ -54,7 +54,7 @@ public class PedidosActivity extends AppCompatActivity implements  NavigationVie
         FragmentManager manager=getSupportFragmentManager();
         FragmentTransaction transaction=manager.beginTransaction();
         transaction.add(R.id.navigationContainer, new MisPedidosFragment());
-        transaction.addToBackStack(null);
+        //transaction.addToBackStack(null);
         transaction.commit();
 
 
