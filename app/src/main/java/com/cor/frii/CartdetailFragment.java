@@ -87,7 +87,7 @@ public class CartdetailFragment extends Fragment implements CartDetailAdapter.Ev
         View view = inflater.inflate(R.layout.fragment_cartdetail, container, false);
         recyclerView = view.findViewById(R.id.CartDetailContainer);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        //lblTotal = view.findViewById(R.id.lblTotal);
+        lblTotal = view.findViewById(R.id.lblTotal);
 
         llenarCarrito();
 
