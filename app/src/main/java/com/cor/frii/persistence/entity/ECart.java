@@ -1,4 +1,4 @@
-package com.cor.frii.persistence;
+package com.cor.frii.persistence.entity;
 
 
 import androidx.annotation.NonNull;
@@ -71,5 +71,16 @@ public class ECart {
 
     public void setTotal(float total) {
         this.total = total;
+    }
+
+    @Override
+    public String toString() {
+        return "ECart{" +
+                "uid='" + uid + '\'' +
+                ", name='" + name + '\'' +
+                ", price=" + price +
+                ", cantidad=" + cantidad +
+                ", total=" + total +
+                '}';
     }
 }

@@ -5,28 +5,26 @@ import android.content.Context;
 
 import androidx.room.Room;
 
-import java.util.List;
-
-public class CartLab {
+public class DatabaseClient {
 
     @SuppressLint("StaticFieldLeak")
-    private static CartLab miInstance;
+    private static DatabaseClient miInstance;
 
-    private CartDao cartDao;
     private AppDatabase appDatabase;
     private Context ctx;
 
-    private CartLab(Context context) {
+    private DatabaseClient(Context context) {
         this.ctx = context.getApplicationContext();
         appDatabase = Room.databaseBuilder(this.ctx, AppDatabase.class, "freebusiness")
                 .allowMainThreadQueries()
+                .fallbackToDestructiveMigration()
                 .build();
 
     }
 
-    public static synchronized CartLab getInstance(Context context) {
+    public static synchronized DatabaseClient getInstance(Context context) {
         if (miInstance == null) {
-            miInstance = new CartLab(context);
+            miInstance = new DatabaseClient(context);
         }
 
         return miInstance;

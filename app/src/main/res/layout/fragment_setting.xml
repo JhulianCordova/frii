@@ -4,14 +4,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".SettingFragment"
-    android:layout_marginTop="?attr/actionBarSize">
+    android:layout_marginTop="?attr/actionBarSize"
+    tools:context=".SettingFragment">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
 
-       >
+        >
 
         <LinearLayout
             android:id="@+id/linearLayout4"
@@ -93,7 +93,7 @@
                 app:layout_constraintTop_toBottomOf="@+id/linearLayout4">
 
                 <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/DNIPerfil"
+
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     app:counterEnabled="true"
@@ -101,32 +101,34 @@
                     app:errorEnabled="true">
 
                     <com.google.android.material.textfield.TextInputEditText
-
+                        android:id="@+id/DNIPerfil"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:enabled="false"
                         android:hint="DNI o RUC"
                         android:inputType="number"
-                        android:maxLength="11" />
+                        android:maxLength="11"
+                        android:textColor="#555555" />
 
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/NombrePerfil"
+
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content">
 
                     <com.google.android.material.textfield.TextInputEditText
-
+                        android:id="@+id/NombrePerfil"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:enabled="false"
-                        android:hint="Nombre o Razon Social" />
+                        android:hint="Nombre o Razon Social"
+                        android:textColor="#555555" />
                 </com.google.android.material.textfield.TextInputLayout>
 
 
                 <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/EmailPerfil"
+
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     app:errorEnabled="true"
@@ -134,88 +136,92 @@
                     >
 
                     <com.google.android.material.textfield.TextInputEditText
-
+                        android:id="@+id/EmailPerfil"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:enabled="false"
                         android:hint="Email"
-                        android:enabled="false"
-                        android:inputType="textEmailAddress" />
+                        android:inputType="textEmailAddress"
+                        android:textColor="#555555" />
 
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/DireccionPerfil"
+
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content">
 
                     <com.google.android.material.textfield.TextInputEditText
-
+                        android:id="@+id/DireccionPerfil"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:enabled="false"
                         android:hint="Dirección"
-                        android:enabled="false"
-                        android:inputType="text" />
+                        android:inputType="text"
+                        android:textColor="#555555" />
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/TelefonoPerfil"
+
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content">
 
                     <com.google.android.material.textfield.TextInputEditText
-
+                        android:id="@+id/TelefonoPerfil"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="Número de telefono"
                         android:enabled="false"
-                        android:inputType="phone" />
+                        android:hint="Número de telefono"
+                        android:inputType="phone"
+                        android:textColor="#555555" />
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/TelefonoPerfil1"
+
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content">
 
                     <com.google.android.material.textfield.TextInputEditText
-
+                        android:id="@+id/TelefonoPerfil1"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="Número de telefono"
                         android:enabled="false"
-                        android:inputType="phone" />
+                        android:hint="Número de telefono"
+                        android:inputType="phone"
+                        android:textColor="#555555" />
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:orientation="horizontal"
-                    android:layout_marginTop="5dp">
+                    android:layout_marginTop="5dp"
+                    android:orientation="horizontal">
 
                     <Button
                         android:id="@+id/ButtonEditarPerfil"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:padding="3dp"
-                        android:layout_marginEnd="3dp"
                         android:layout_marginStart="4dp"
-                        android:background="@drawable/custom_button"
-                        android:textColor="@color/textTitleButton"
-                        android:textStyle="bold"
+                        android:layout_marginEnd="3dp"
                         android:layout_weight="1"
-                        android:text="Editar" />
+                        android:background="@drawable/custom_button"
+                        android:padding="3dp"
+                        android:text="Editar"
+                        android:textColor="@color/textTitleButton"
+                        android:textStyle="bold" />
 
                     <Button
                         android:id="@+id/ButtonGuardarPerfil"
-                        android:background="@drawable/custom_guardar_setting"
-                        android:textColor="@color/textTitleButton"
-                        android:textStyle="bold"
-                        android:layout_marginStart="3dp"
-                        android:layout_marginEnd="4dp"
-                        android:enabled="false"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_marginStart="3dp"
+                        android:layout_marginEnd="4dp"
                         android:layout_weight="1"
-                        android:text="Guardar" />
+                        android:background="@drawable/custom_guardar_setting"
+                        android:enabled="false"
+                        android:text="Guardar"
+                        android:textColor="@color/textTitleButton"
+                        android:textStyle="bold" />
                 </LinearLayout>
 
 
