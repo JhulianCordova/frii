@@ -26,6 +26,13 @@
                 android:title="Mis Pedidos"
                 >
             </item>
+
+            <item
+                android:id="@+id/CerrarSesion"
+                android:icon="@drawable/ic_close"
+                android:title="Cerrar Sesión"
+                >
+            </item>
         </menu>
     </item>
 

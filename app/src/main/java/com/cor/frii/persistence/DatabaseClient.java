@@ -16,6 +16,7 @@ public class DatabaseClient {
     private DatabaseClient(Context context) {
         this.ctx = context.getApplicationContext();
         appDatabase = Room.databaseBuilder(this.ctx, AppDatabase.class, "freebusiness")
+                .enableMultiInstanceInvalidation()
                 .allowMainThreadQueries()
                 .fallbackToDestructiveMigration()
                 .build();
