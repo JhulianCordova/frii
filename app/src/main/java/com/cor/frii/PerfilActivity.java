@@ -60,7 +60,7 @@ public class PerfilActivity extends AppCompatActivity  implements NavigationView
             FragmentManager manager=getSupportFragmentManager();
             FragmentTransaction transaction=manager.beginTransaction();
             transaction.add(R.id.navigationContainer,new SettingFragment());
-            transaction.addToBackStack(null);
+            //transaction.addToBackStack(null);
             transaction.commit();
 
         }
@@ -68,7 +68,7 @@ public class PerfilActivity extends AppCompatActivity  implements NavigationView
             FragmentManager manager=getSupportFragmentManager();
             FragmentTransaction transaction=manager.beginTransaction();
             transaction.replace(R.id.navigationContainer,new AccountFragment());
-            transaction.addToBackStack(null);
+            //transaction.addToBackStack(null);
             transaction.commit();
         }
 
