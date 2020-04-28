@@ -36,13 +36,13 @@ public class PedidosActivity extends AppCompatActivity implements  NavigationVie
 
         toolbar = findViewById(R.id.navigationToolbar);
         setSupportActionBar(toolbar);
+
         /*
         drawerLayout = findViewById(R.id.navigationDrawerPedidos);
         navigationView = findViewById(R.id.navigationView);
 
         // estaclecer el evento onclick de navigation
         navigationView.setNavigationItemSelectedListener(this);
-
 
         actionBarDrawerToggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.open, R.string.close);
         drawerLayout.addDrawerListener(actionBarDrawerToggle);
