@@ -34,8 +34,8 @@ public interface AcountDao {
     @Update
     void updateUser(Acount... user);
 
-    @Query("SELECT * FROM acount WHERE id=:id AND email=:username AND password=:password")
-    Acount login(int id, String username, String password);
+    @Query("SELECT * FROM acount WHERE email=:username AND password=:password")
+    Acount login(String username, String password);
 
     @Query("DELETE FROM acount WHERE id= :id")
     void deleteById(int id);

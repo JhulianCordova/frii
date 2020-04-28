@@ -215,38 +215,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         final int token = session.getToken();
 
 
+        // Todo - Implementar en tiempo real el registro si existe el token
         if (token != 0) {
 
 
-
-
-
-            new AsyncTask<Void, Void, Void>() {
-                @Override
-                protected Void doInBackground(Void... voids) {
-
-                    List<Acount> acounts = DatabaseClient.getInstance(getApplicationContext())
-                            .getAppDatabase()
-                            .getAcountDao()
-                            .getUsers();
-
-                    for (Acount a : acounts) {
-                        System.out.println(a.getNombre());
-                    }
-
-                    return null;
-                }
-            }.execute()
-           ;
-            /*Flowable<Acount> acount = DatabaseClient.getInstance(getApplicationContext())
+            Acount acount = DatabaseClient.getInstance(getApplicationContext())
                     .getAppDatabase()
                     .getAcountDao()
                     .getUser(token);
 
-            acount.*/
-
-
-            /*if (acount != null) {
+            if (acount != null) {
 
                 View view = navigationView.getHeaderView(0);
                 lblUsername = view.findViewById(R.id.lblNombreUsuario);
@@ -259,13 +237,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
             } else {
                 Toast.makeText(getApplicationContext(), "Error de  loggeado", Toast.LENGTH_LONG).show();
-            }*/
+            }
 
             System.out.println("VALOR DE TOKEN " + token);
 
 
         } else {
-            System.out.println("sdsdsdsdsdsd");
+
+            System.out.println("LAS CREDENCIALES SON INVALIDAS");
         }
 
 

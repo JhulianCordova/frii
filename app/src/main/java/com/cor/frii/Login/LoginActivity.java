@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.NetworkResponse;
@@ -28,7 +29,6 @@ import com.cor.frii.R;
 import com.cor.frii.persistence.DatabaseClient;
 import com.cor.frii.persistence.Session;
 import com.cor.frii.persistence.entity.Acount;
-import com.cor.frii.utils.VolleySingleton;
 import com.google.android.material.textfield.TextInputEditText;
 
 import org.json.JSONException;
@@ -41,6 +41,7 @@ import java.util.Map;
 public class LoginActivity extends AppCompatActivity {
 
     private EditText email;
+    private TextView NewAccount;
     private TextInputEditText password;
     //--
     public String baseUrl = "http://34.71.251.155";
@@ -53,12 +54,22 @@ public class LoginActivity extends AppCompatActivity {
 
         email = findViewById(R.id.EmailLogin);
         password = findViewById(R.id.txtPassword);
+        NewAccount = findViewById(R.id.NewAccountLogin);
         final Session s = new Session(getApplicationContext());
         if (s.getToken() > 0) {
             Intent intent = new Intent(getApplicationContext(), MainActivity.class);
             startActivity(intent);
             finish();
         }
+
+        NewAccount.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getApplicationContext(), NewAccountActivity.class);
+                startActivity(intent);
+                finish();
+            }
+        });
 
     }
 
@@ -98,7 +109,7 @@ public class LoginActivity extends AppCompatActivity {
                                 Acount cuenta = DatabaseClient.getInstance(getApplicationContext())
                                         .getAppDatabase()
                                         .getAcountDao()
-                                        .login(id_user, user, pass);
+                                        .login(user, pass);
 
                                 if (cuenta != null) {
                                     Toast.makeText(getApplicationContext(), "Credenciales validas OK", Toast.LENGTH_LONG).show();
@@ -112,7 +123,7 @@ public class LoginActivity extends AppCompatActivity {
                                     startActivity(intent);
                                     finish();
                                 }
-                                session.setToken(id_user);
+                                session.setToken(cuenta.getId());
                             }
                         } catch (JSONException e) {
                             e.printStackTrace();
