@@ -35,6 +35,7 @@ import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -140,11 +141,52 @@ public class BrandsFragment extends Fragment {
     private void llenarDatos() {
         brandsList = new ArrayList<>();
 
+        final List<Brands> gas_categories = new ArrayList<>();
+
 
         Bundle bundle = this.getArguments();
         String url = "";
         if (bundle != null) {
             url = this.urlBase + "/api/markes/" + bundle.getInt("idCategory");
+            if (bundle.getInt("idCategory") == 2) {
+                gas_categories.add(new Brands(1, "Gas Normal", "", urlBase + "/media/images/none-img.png"));
+                gas_categories.add(new Brands(2, "Gas Premium", "", urlBase + "/media/images/none-img.png"));
+                gas_categories.add(new Brands(3, "Camion", "", urlBase + "/media/images/none-img.png"));
+
+                brandsAdapter = new BrandsAdapter(gas_categories);
+                recyclerView.setAdapter(brandsAdapter);
+
+                brandsAdapter.setOnClickListener(new View.OnClickListener() {
+                    FragmentManager manager = getActivity().getSupportFragmentManager();
+                    FragmentTransaction transaction = manager.beginTransaction();
+
+                    @Override
+                    public void onClick(View v) {
+                        String brandsTitle = gas_categories.get(recyclerView.getChildAdapterPosition(v)).getName();
+                        brandsTitle = brandsTitle.toLowerCase();
+                        Toast.makeText(getContext(), brandsTitle, Toast.LENGTH_SHORT).show();
+                        if (brandsTitle.equals("gas normal") || brandsTitle.equals("gas premium")) {
+                            GasFragment gasFragment = new GasFragment();
+
+                            transaction.replace(R.id.mainContainer, gasFragment);
+                            transaction.addToBackStack(null);
+                            transaction.commit();
+                        } else {
+                            /*Bundle b = new Bundle();
+                            b.putInt("IdMarke", gas_categories.get(recyclerView.getChildAdapterPosition(v)).getId());
+                            ProductsFragment productsFragment = new ProductsFragment();
+                            productsFragment.setArguments(b);
+                            transaction.replace(R.id.mainContainer, productsFragment);
+                            transaction.addToBackStack(null);
+                            transaction.commit();*/
+
+                        }
+
+                    }
+                });
+
+                return;
+            }
         } else {
             url = this.urlBase + "/api/markes";
             brandsList.add(new Brands(1, "Gas Normal", "", urlBase + "/media/images/none-img.png"));

@@ -5,6 +5,7 @@ import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.LiveData;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -144,50 +145,29 @@ public class SettingFragment extends Fragment {
         void onFragmentInteraction(Uri uri);
     }
 
-    public synchronized void llenarInformacionUsuario() {
+    private synchronized void llenarInformacionUsuario() {
 
         Session session = new Session(getContext());
-        String token = session.getToken();
+        int token = session.getToken();
 
-        System.out.println(token);
-        if (token != null || !token.equals("")) {
-
+        if (token != 0) {
+            Acount cuenta = DatabaseClient.getInstance(getContext())
+                    .getAppDatabase()
+                    .getAcountDao()
+                    .getUser(token);
+            if (cuenta != null) {
+                //Llenar la informacion
+                Dni.setText(cuenta.getNumDocumento());
+                Nombre.setText(cuenta.getNombre());
+                Email.setText(cuenta.getEmail());
+                Direccion.setText(cuenta.getDireccion());
+                Telefono1.setText(cuenta.getPhoneOne());
+                Telefono2.setText(cuenta.getPhoneTwo());
+            }
         }
 
-        Acount cuenta = DatabaseClient.getInstance(getContext())
-                .getAppDatabase()
-                .getAcountDao()
-                .getUser(token);
-        if (cuenta != null) {
-            //Llenar la informacion
-            Dni.setText(cuenta.getNumDocumento());
-            Nombre.setText(cuenta.getNombre());
-            Email.setText(cuenta.getEmail());
-            Direccion.setText(cuenta.getDireccion());
-            Telefono1.setText(cuenta.getPhoneOne());
-            Telefono2.setText(cuenta.getPhoneTwo());
-
-        }
 
         // Verificar si existe el usuario si no insertar en la db
 
-        else {
-            // Verificar si el login con el token son correctos -> si pasa llenar en la db
-            Acount acount = new Acount();
-            acount.setId(idUsuarioTemp);
-            acount.setDireccion("JR LIBERTADORES 160");
-            acount.setEmail("aldaelvis@hotmail.com");
-            acount.setNumDocumento("71847204");
-            acount.setNombre("Elvis Aldair");
-            acount.setPassword("1234");
-            acount.setPhoneOne("958076028");
-            acount.setPhoneTwo(null);
-            acount.setToken(token);
-
-            DatabaseClient.getInstance(getContext())
-                    .getAppDatabase()
-                    .getAcountDao()
-                    .addUser(acount);
-        }
     }
 }
