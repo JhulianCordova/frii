@@ -60,7 +60,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     FloatingActionButton flo_order_pedido;
 
     //--
-    TextView lblUsername, lblEmail;
+    TextView lblUsername, lblEmail,CerrarSecion;
     int id = 3;
 
     //e
@@ -103,6 +103,21 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             public void onClick(View v) {
                 Intent intent = new Intent(getBaseContext(), PedidosActivity.class);
                 startActivity(intent);
+            }
+        });
+
+
+        CerrarSecion=findViewById(R.id.CerrarSesion);
+        CerrarSecion.setOnClickListener(new View.OnClickListener(){
+
+            @Override
+            public void onClick(View v) {
+                Session session = new Session(getApplicationContext());
+                session.destroySession();
+
+                Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
+                startActivity(intent);
+                finish();
             }
         });
 
@@ -166,7 +181,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
              */
 
         }
-
+        /*
         if (menuItem.getItemId() == R.id.CerrarSesion) {
 
             Session session = new Session(getApplicationContext());
@@ -177,6 +192,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             finish();
 
         }
+        
+         */
 
 
         return false;

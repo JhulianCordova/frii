@@ -25,7 +25,15 @@
         app:headerLayout="@layout/navigation_header"
         android:layout_gravity="start"
         android:fitsSystemWindows="true"
-        />
+        >
+
+        <include
+            android:layout_gravity="bottom"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            layout="@layout/custom_log_out"/>
+
+    </com.google.android.material.navigation.NavigationView>
 
 
 

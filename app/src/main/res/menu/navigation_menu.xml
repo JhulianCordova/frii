@@ -27,12 +27,15 @@
                 >
             </item>
 
+            <!--
             <item
                 android:id="@+id/CerrarSesion"
-                android:icon="@drawable/ic_close"
+                android:icon="@drawable/ic_turn_off"
                 android:title="Cerrar Sesión"
                 >
+
             </item>
+             -->
         </menu>
     </item>
 
