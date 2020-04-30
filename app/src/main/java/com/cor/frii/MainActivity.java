@@ -12,6 +12,7 @@ import androidx.fragment.app.FragmentTransaction;
 
 import android.content.Intent;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
@@ -19,11 +20,14 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
-import com.cor.frii.persistence.DatabaseHelper;
+import com.cor.frii.Login.LoginActivity;
+import com.cor.frii.persistence.DatabaseClient;
 import com.cor.frii.persistence.Session;
 import com.cor.frii.persistence.entity.Acount;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
+
+import java.util.List;
 
 
 //   AppCompatActivity
@@ -43,8 +47,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         ProductsFragment.OnFragmentInteractionListener,
         GasFragment.OnFragmentInteractionListener,
         SettingFragment.OnFragmentInteractionListener,
-        MisPedidosFragment.OnFragmentInteractionListener{
-
+        MisPedidosFragment.OnFragmentInteractionListener {
 
 
     DrawerLayout drawerLayout;
@@ -57,11 +60,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     FloatingActionButton flo_order_pedido;
 
     //--
-    TextView lblUsername, lblEmail;
+    TextView lblUsername, lblEmail,CerrarSecion;
+    int id = 3;
 
     //e
-    String tokenTemp = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoyLCJ1c2VybmFtZSI6ImFsZGFlbHZpc0Bob3RtYWlsLmNvbSIsImV4cCI6MTU5MDQyODEwNiwiZW1haWwiOiIiLCJvcmlnX2lhdCI6MTU4NzgzNjEwNn0.pPDXXuhyer6GaxozPFqcaPsSkl0ANnuXROiIuxQViQw";
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -95,17 +97,40 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         });
 
-        flo_order_pedido=findViewById(R.id.fad_order_pedido);
+        flo_order_pedido = findViewById(R.id.fad_order_pedido);
         flo_order_pedido.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent=new Intent(getBaseContext(),PedidosActivity.class);
+                Intent intent = new Intent(getBaseContext(), PedidosActivity.class);
                 startActivity(intent);
             }
         });
 
+
+        CerrarSecion=findViewById(R.id.CerrarSesion);
+        CerrarSecion.setOnClickListener(new View.OnClickListener(){
+
+            @Override
+            public void onClick(View v) {
+                Session session = new Session(getApplicationContext());
+                session.destroySession();
+
+                Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
+                startActivity(intent);
+                finish();
+            }
+        });
+
+
+        Session session = new Session(getApplicationContext());
+        System.out.println(session.getToken());
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        llenarInfoUsuario();
+    }
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
@@ -121,18 +146,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (menuItem.getItemId() == R.id.account) {
             //transaction.replace(R.id.navigationContainer,new AccountFragment());
 
-            Intent intent=new Intent(getBaseContext(),PerfilActivity.class);
-            intent.putExtra("id",R.id.account);
+            Intent intent = new Intent(getBaseContext(), PerfilActivity.class);
+            intent.putExtra("id", R.id.account);
             startActivity(intent);
 
             Toast.makeText(this, "Account", Toast.LENGTH_SHORT).show();
         }
         if (menuItem.getItemId() == R.id.Perfil) {
 
-            Intent intent=new Intent(getBaseContext(),PerfilActivity.class);
-            String title=menuItem.getTitle().toString();
-            intent.putExtra("name",title);
-            intent.putExtra("id",R.id.Perfil);
+            Intent intent = new Intent(getBaseContext(), PerfilActivity.class);
+            String title = menuItem.getTitle().toString();
+            intent.putExtra("name", title);
+            intent.putExtra("id", R.id.Perfil);
             startActivity(intent);
 
             /*
@@ -143,9 +168,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
              */
         }
-        if (menuItem.getItemId()==R.id.MisPedidos){
+        if (menuItem.getItemId() == R.id.MisPedidos) {
 
-            Intent intent=new Intent(getBaseContext(),PedidosActivity.class);
+            Intent intent = new Intent(getBaseContext(), PedidosActivity.class);
             startActivity(intent);
             /*
             transaction.replace(R.id.navigationContainer, new MisPedidosFragment());
@@ -156,6 +181,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
              */
 
         }
+        /*
+        if (menuItem.getItemId() == R.id.CerrarSesion) {
+
+            Session session = new Session(getApplicationContext());
+            session.destroySession();
+
+            Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
+            startActivity(intent);
+            finish();
+
+        }
+        
+         */
 
 
         return false;
@@ -188,24 +226,44 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
          */
     }
 
+
     private void llenarInfoUsuario() {
         Session session = new Session(getApplicationContext());
-        session.setToken(tokenTemp);
-        DatabaseHelper helper = new DatabaseHelper(getApplicationContext());
-        Acount acount = helper.login(tokenTemp);
-        if (acount != null) {
-            Toast.makeText(getApplicationContext(), "Esta loggeado", Toast.LENGTH_LONG).show();
-            View view = navigationView.getHeaderView(0);
-            lblUsername = view.findViewById(R.id.lblNombreUsuario);
-            lblEmail = view.findViewById(R.id.lblEmailUsuario);
+        final int token = session.getToken();
 
-            lblUsername.setText(acount.getNombre());
-            lblEmail.setText(acount.getEmail());
+
+        // Todo - Implementar en tiempo real el registro si existe el token
+        if (token != 0) {
+
+
+            Acount acount = DatabaseClient.getInstance(getApplicationContext())
+                    .getAppDatabase()
+                    .getAcountDao()
+                    .getUser(token);
+
+            if (acount != null) {
+
+                View view = navigationView.getHeaderView(0);
+                lblUsername = view.findViewById(R.id.lblNombreUsuario);
+                lblEmail = view.findViewById(R.id.lblEmailUsuario);
+
+                lblUsername.setText(acount.getNombre());
+                lblEmail.setText(acount.getEmail());
+
+                System.out.println(acount);
+
+            } else {
+                Toast.makeText(getApplicationContext(), "Error de  loggeado", Toast.LENGTH_LONG).show();
+            }
+
+            System.out.println("VALOR DE TOKEN " + token);
 
 
         } else {
-            Toast.makeText(getApplicationContext(), "Error de  loggeado", Toast.LENGTH_LONG).show();
+
+            System.out.println("LAS CREDENCIALES SON INVALIDAS");
         }
+
 
     }
 

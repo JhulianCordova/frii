@@ -11,21 +11,22 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="bottom"
-        >
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="0dp"
+        android:gravity="bottom">
 
         <com.google.android.material.bottomnavigation.BottomNavigationView
             android:id="@+id/BottomNavigation"
             android:layout_width="match_parent"
-            android:foregroundGravity="center"
             android:layout_height="wrap_content"
-            android:backgroundTint="@color/frii_Background"
-            app:menu="@menu/bottom_navigation"
             android:background="?android:attr/windowBackground"
-            />
+            android:backgroundTint="@color/frii_Background"
+            android:foregroundGravity="center"
+            app:menu="@menu/bottom_navigation" />
     </LinearLayout>
 
 

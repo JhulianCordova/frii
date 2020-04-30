@@ -12,15 +12,15 @@ public class Session {
         preferences = PreferenceManager.getDefaultSharedPreferences(context);
     }
 
-    public void setToken(String token) {
-        preferences.edit().putString("token", token).apply();
+    public void setToken(int token) {
+        preferences.edit().putInt("IdUsuario", token).apply();
     }
 
-    public String getToken() {
-        return preferences.getString("token", "");
+    public int getToken() {
+        return preferences.getInt("IdUsuario", 0);
     }
 
     public void destroySession() {
-        preferences.edit().remove("token").apply();
+        preferences.edit().putInt("IdUsuario", 0).apply();
     }
 }

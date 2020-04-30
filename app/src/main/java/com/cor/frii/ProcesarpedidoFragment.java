@@ -1,6 +1,7 @@
 package com.cor.frii;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 
@@ -9,6 +10,7 @@ import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 
 
 /**
@@ -28,6 +30,8 @@ public class ProcesarpedidoFragment extends Fragment {
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
+
+    private Button procesarPedido;
 
     private OnFragmentInteractionListener mListener;
 
@@ -66,7 +70,21 @@ public class ProcesarpedidoFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_procesarpedido, container, false);
+        View view=inflater.inflate(R.layout.fragment_procesarpedido, container, false);
+
+        procesarPedido=view.findViewById(R.id.ButtonConfirmarPedido);
+        procesarPedido.setOnClickListener(new View.OnClickListener(){
+
+            @Override
+            public void onClick(View v) {
+                Intent intent=new Intent(getContext(),MainActivity.class);
+                startActivity(intent);
+            }
+        });
+
+
+
+        return view;
     }
 
     // TODO: Rename method, update argument and hook method into UI event

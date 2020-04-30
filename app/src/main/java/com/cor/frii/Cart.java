@@ -13,8 +13,12 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.cor.frii.Login.LoginActivity;
+import com.cor.frii.persistence.Session;
 import com.google.android.material.navigation.NavigationView;
 
 public class Cart extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener,
@@ -32,6 +36,7 @@ public class Cart extends AppCompatActivity implements NavigationView.OnNavigati
     ActionBarDrawerToggle actionBarDrawerToggle;
     Toolbar toolbar;
     NavigationView navigationView;
+    TextView CerrarSecion;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         setContentView(R.layout.activity_cart);
@@ -59,6 +64,20 @@ public class Cart extends AppCompatActivity implements NavigationView.OnNavigati
         FragmentTransaction transaction=getSupportFragmentManager().beginTransaction();
         transaction.add(R.id.CartContainer,new CartdetailFragment()).commit();
          */
+
+        CerrarSecion=findViewById(R.id.CerrarSesion);
+        CerrarSecion.setOnClickListener(new View.OnClickListener(){
+
+            @Override
+            public void onClick(View v) {
+                Session session = new Session(getApplicationContext());
+                session.destroySession();
+
+                Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
+                startActivity(intent);
+                finish();
+            }
+        });
     }
 
     @Override
