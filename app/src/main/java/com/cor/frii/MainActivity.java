@@ -60,7 +60,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     FloatingActionButton flo_order_pedido;
 
     //--
-    TextView lblUsername, lblEmail,CerrarSecion;
+    TextView lblUsername, lblEmail, CerrarSecion;
     int id = 3;
 
     //e
@@ -107,8 +107,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         });
 
 
-        CerrarSecion=findViewById(R.id.CerrarSesion);
-        CerrarSecion.setOnClickListener(new View.OnClickListener(){
+        CerrarSecion = findViewById(R.id.CerrarSesion);
+        CerrarSecion.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View v) {

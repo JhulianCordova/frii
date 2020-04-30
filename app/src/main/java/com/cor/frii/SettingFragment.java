@@ -111,6 +111,7 @@ public class SettingFragment extends Fragment {
                 Guardar.setBackgroundResource(R.drawable.custom_button);
             }
         });
+
         llenarInformacionUsuario();
 
         return view;

@@ -36,6 +36,7 @@ import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class LoginActivity extends AppCompatActivity {
@@ -102,6 +103,7 @@ public class LoginActivity extends AppCompatActivity {
 
                                 JWT parsedJWT = new JWT(token);
                                 Claim subscriptionMetaData = parsedJWT.getClaim("user_id");
+
                                 int id_user = subscriptionMetaData.asInt();
 
                                 // Si es que existe el usuario en la DB - pasar al main activity
@@ -115,6 +117,7 @@ public class LoginActivity extends AppCompatActivity {
                                     Toast.makeText(getApplicationContext(), "Credenciales validas OK", Toast.LENGTH_LONG).show();
                                     Intent intent = new Intent(getApplicationContext(), MainActivity.class);
                                     startActivity(intent);
+                                    session.setToken(cuenta.getId());
                                     finish();
                                 } else {
                                     insertarUsuario(token, id_user, pass);
@@ -123,7 +126,7 @@ public class LoginActivity extends AppCompatActivity {
                                     startActivity(intent);
                                     finish();
                                 }
-                                session.setToken(cuenta.getId());
+
                             }
                         } catch (JSONException e) {
                             e.printStackTrace();
@@ -163,6 +166,33 @@ public class LoginActivity extends AppCompatActivity {
                 .deleteById(3);*/
         // Todo - Implementacion  de LOGIN si es que no tiene coneccion a INTERNET
         // code...
+        /*Acount cuenta = new Acount();
+        cuenta.setId(1);
+        cuenta.setNumDocumento("71847204");
+        cuenta.setNombre("Elvis Aldair");
+        cuenta.setPhoneOne("1412165");
+        cuenta.setPhoneTwo(null);
+        cuenta.setDireccion("JR LIBERTADORES 160");
+        cuenta.setEmail("aldaelvis@hotmail.com");
+        cuenta.setPassword("aldair123");
+
+        DatabaseClient.getInstance(getApplicationContext())
+                .getAppDatabase()
+                .getAcountDao()
+                .addUser(cuenta);
+*/
+
+        List<Acount> acounts = DatabaseClient.getInstance(getApplicationContext())
+                .getAppDatabase()
+                .getAcountDao()
+                .getUsers();
+
+        for (Acount a : acounts) {
+            System.out.println(a.getId());
+            System.out.println(a.getNombre());
+            System.out.println(a.getEmail());
+            System.out.println("------------------>");
+        }
     }
 
     // Implementacion de datos de usuario del servidor
