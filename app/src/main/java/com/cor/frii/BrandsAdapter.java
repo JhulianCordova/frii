@@ -31,6 +31,10 @@ public class BrandsAdapter extends RecyclerView.Adapter<BrandsAdapter.viewHolder
         }
     }
 
+    /*
+    * modificaciones
+    * */
+
     @NonNull
     @Override
     public viewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
