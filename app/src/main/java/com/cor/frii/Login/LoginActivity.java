@@ -219,7 +219,7 @@ public class LoginActivity extends AppCompatActivity {
                                     cuenta.setId(response.getJSONObject("client").getInt("client_id"));
                                     cuenta.setNumDocumento(response.getJSONObject("client").getString("num_document"));
                                     cuenta.setNombre(response.getJSONObject("client").getString("name"));
-                                    cuenta.setPhoneTwo(response.getJSONObject("client").getString("phone1"));
+                                    cuenta.setPhoneOne(response.getJSONObject("client").getString("phone1"));
                                     cuenta.setPhoneTwo(response.getJSONObject("client").getString("phone2"));
                                     cuenta.setDireccion(response.getJSONObject("client").getString("address"));
                                     cuenta.setEmail(response.getString("user"));
