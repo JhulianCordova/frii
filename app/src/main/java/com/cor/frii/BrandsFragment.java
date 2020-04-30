@@ -145,7 +145,14 @@ public class BrandsFragment extends Fragment {
                         Toast.makeText(getContext(), brandsTitle, Toast.LENGTH_SHORT).show();
                         if (brandsTitle.equals("gas normal") || brandsTitle.equals("gas premium")) {
                             GasFragment gasFragment = new GasFragment();
+                            Bundle b = new Bundle();
+                            if (brandsTitle.equals("gas normal")) {
+                                b.putString("type", "gas-normal");
+                            } else {
+                                b.putString("type", "gas-premium");
 
+                            }
+                            gasFragment.setArguments(b);
                             transaction.replace(R.id.mainContainer, gasFragment);
                             transaction.addToBackStack(null);
                             transaction.commit();
@@ -204,10 +211,18 @@ public class BrandsFragment extends Fragment {
                                     Toast.makeText(getContext(), brandsTitle, Toast.LENGTH_SHORT).show();
                                     if (brandsTitle.equals("gas normal") || brandsTitle.equals("gas premium")) {
                                         GasFragment gasFragment = new GasFragment();
+                                        Bundle b = new Bundle();
+                                        if (brandsTitle.equals("gas normal")) {
+                                            b.putString("type", "gas-normal");
+                                        } else {
+                                            b.putString("type", "gas-premium");
 
+                                        }
+                                        gasFragment.setArguments(b);
                                         transaction.replace(R.id.mainContainer, gasFragment);
                                         transaction.addToBackStack(null);
                                         transaction.commit();
+
                                     } else {
                                         Bundle b = new Bundle();
                                         b.putInt("IdMarke", brandsList.get(recyclerView.getChildAdapterPosition(v)).getId());

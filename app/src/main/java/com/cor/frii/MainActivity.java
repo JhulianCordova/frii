@@ -228,7 +228,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
 
     private void llenarInfoUsuario() {
-        Session session = new Session(getApplicationContext());
+        Session session = new Session(getBaseContext());
         final int token = session.getToken();
 
 
@@ -236,7 +236,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (token != 0) {
 
 
-            Acount acount = DatabaseClient.getInstance(getApplicationContext())
+            Acount acount = DatabaseClient.getInstance(getBaseContext())
                     .getAppDatabase()
                     .getAcountDao()
                     .getUser(token);
