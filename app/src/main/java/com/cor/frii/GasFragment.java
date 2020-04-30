@@ -158,6 +158,7 @@ public class GasFragment extends Fragment {
                                                 object.getJSONObject("detail_measurement_id").getString("name"),
                                         "",
                                         Float.parseFloat(object.getString("unit_price")),
+
                                         object.getString("measurement"),
                                         1,
                                         imagen_url);
