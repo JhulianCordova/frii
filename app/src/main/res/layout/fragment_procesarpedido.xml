@@ -83,73 +83,46 @@
                 android:textSize="20dp"
                 android:textStyle="bold" />
 
-            <LinearLayout
+
+            <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginTop="8dp">
+                android:layout_marginEnd="10dp"
+                android:layout_marginStart="10dp">
 
-                <ImageView
-                    android:id="@+id/imageView"
-                    android:layout_width="0dp"
-                    android:layout_height="30dp"
-                    android:layout_weight="1"
-                    android:src="@drawable/ic_credit_cart" />
-
-                <TextView
-                    android:id="@+id/textView9"
-                    android:layout_width="wrap_content"
+                <RadioGroup
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    >
+                    <RadioButton
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/pay_credit_card"
+                        android:theme="@style/RadioButton"
+                        android:layoutDirection="rtl"
+                        android:textStyle="bold"
 
-                    android:text="Pagar con targeta de credito"
-                    android:gravity="start"
-                    android:textSize="15dp"
-                    android:textStyle="bold"
-                    android:textColor="@color/marcasTitle"
-                    android:paddingRight="3dp"
-                    android:paddingLeft="3dp"/>
+                        android:textAlignment="textStart"
+                        android:drawableLeft="@drawable/ic_credit_card_outline"
+                        android:drawablePadding="10dp"
+                        android:padding="5dp"
+                        />
+                    <RadioButton
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layoutDirection="rtl"
+                        android:textAlignment="textStart"
+                        android:text="@string/pay_money"
+                        android:textStyle="bold"
+                        android:drawableLeft="@drawable/ic_cash_100"
+                        android:drawablePadding="10dp"
+                        android:padding="5dp"
 
-                <CheckBox
-                    android:id="@+id/checkBox"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:checked="false"
-                    android:enabled="false"
-                    android:layout_weight="1" />
-            </LinearLayout>
+                        android:theme="@style/RadioButton"
+                        />
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginTop="5dp">
-
-                <ImageView
-                    android:id="@+id/imageView1"
-                    android:layout_width="0dp"
-                    android:layout_height="30dp"
-                    android:layout_weight="1"
-                    android:src="@drawable/ic_money_foreground" />
-
-                <TextView
-                    android:id="@+id/textView91"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:textColor="@color/marcasTitle"
-                    android:textStyle="bold"
-                    android:textSize="15dp"
-                    android:gravity="start"
-                    android:text="Pagar en efectivo" />
-
-                <CheckBox
-                    android:id="@+id/checkBox1"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:checked="true"
-                    android:enabled="true"
-                    android:layout_weight="1" />
-            </LinearLayout>
+                </RadioGroup>
+            </RelativeLayout>
 
             <RadioGroup
                 android:layout_width="wrap_content"

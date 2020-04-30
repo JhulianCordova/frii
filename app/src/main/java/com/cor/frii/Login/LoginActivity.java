@@ -41,7 +41,7 @@ import java.util.Map;
 public class LoginActivity extends AppCompatActivity {
 
     private EditText email;
-    private TextView NewAccount;
+    private TextView NewAccount,forgottedPassword;
     private TextInputEditText password;
     //--
     public String baseUrl = "http://34.71.251.155";
@@ -55,6 +55,8 @@ public class LoginActivity extends AppCompatActivity {
         email = findViewById(R.id.EmailLogin);
         password = findViewById(R.id.txtPassword);
         NewAccount = findViewById(R.id.NewAccountLogin);
+        forgottedPassword=findViewById(R.id.ForgottenPasswordLogin);
+
         final Session s = new Session(getApplicationContext());
         if (s.getToken() > 0) {
             Intent intent = new Intent(getApplicationContext(), MainActivity.class);
@@ -67,7 +69,15 @@ public class LoginActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Intent intent = new Intent(getApplicationContext(), NewAccountActivity.class);
                 startActivity(intent);
-                finish();
+                //finish();
+            }
+        });
+
+        forgottedPassword.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent=new Intent(getApplicationContext(),ForgottenPasswordActivity.class);
+                startActivity(intent);
             }
         });
 
