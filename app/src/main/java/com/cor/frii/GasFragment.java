@@ -134,23 +134,31 @@ public class GasFragment extends Fragment {
 
     private void llenarDatos() {
         products = new ArrayList<>();
+        Bundle b = this.getArguments();
+        String type = "";
+        if (b != null) {
+            type = b.getString("type");
+        }
 
-        String url = this.urlBase + "/api/product/category/2";
+        String url = this.urlBase + "/api/product/gas/" + type;
         JSONObject jsonArray = new JSONObject();
         JsonObjectRequest arrayRequest =
                 new JsonObjectRequest(Request.Method.GET, url, jsonArray, new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
                         try {
+                            System.out.println(response);
                             JSONArray array = response.getJSONArray("data");
                             for (int i = 0; i < array.length(); i++) {
                                 JSONObject object = array.getJSONObject(i);
                                 String imagen_url = urlBase + object.getString("image");
                                 Product product = new Product(
                                         Integer.parseInt(object.getString("id")),
-                                        object.getJSONObject("marke_id").getString("name"),
+                                        object.getJSONObject("marke_id").getString("name") + " " +
+                                                object.getJSONObject("detail_measurement_id").getString("name"),
                                         "",
                                         Float.parseFloat(object.getString("unit_price")),
+
                                         object.getString("measurement"),
                                         1,
                                         imagen_url);
@@ -174,8 +182,7 @@ public class GasFragment extends Fragment {
                                 String res = new String(response.data, HttpHeaderParser.parseCharset(response.headers, "utf-8"));
                                 JSONObject obj = new JSONObject(res);
                                 Log.d("Voley post", obj.toString());
-                                String msj = obj.getString("message");
-                                Toast.makeText(getContext(), msj, Toast.LENGTH_SHORT).show();
+                                Toast.makeText(getContext(), "No hay productos :(", Toast.LENGTH_SHORT).show();
 
                             } catch (UnsupportedEncodingException | JSONException e1) {
                                 e1.printStackTrace();

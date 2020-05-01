@@ -11,12 +11,15 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.Toast;
 
 import com.cor.frii.persistence.DatabaseClient;
 import com.cor.frii.persistence.Session;
 import com.cor.frii.persistence.entity.Acount;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
+
+import java.util.Objects;
 
 
 /**
@@ -111,10 +114,33 @@ public class SettingFragment extends Fragment {
                 Guardar.setBackgroundResource(R.drawable.custom_button);
             }
         });
+        Guardar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                actualizarInfoUsuario(
+                        Objects.requireNonNull(Nombre.getText()).toString(),
+                        Objects.requireNonNull(Email.getText()).toString(),
+                        Objects.requireNonNull(Telefono1.getText()).toString(),
+                        Objects.requireNonNull(Telefono2.getText()).toString()
+                );
+
+                Nombre.setEnabled(false);
+                Email.setEnabled(false);
+                Direccion.setEnabled(false);
+                Telefono1.setEnabled(false);
+                Telefono2.setEnabled(false);
+                Guardar.setEnabled(false);
+                Guardar.setBackgroundResource(R.drawable.custom_button);
+
+
+            }
+        });
+
         llenarInformacionUsuario();
 
         return view;
     }
+
 
     // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(Uri uri) {
@@ -145,7 +171,7 @@ public class SettingFragment extends Fragment {
         void onFragmentInteraction(Uri uri);
     }
 
-    private synchronized void llenarInformacionUsuario() {
+    private void llenarInformacionUsuario() {
 
         Session session = new Session(getContext());
         int token = session.getToken();
@@ -166,8 +192,38 @@ public class SettingFragment extends Fragment {
             }
         }
 
+    }
 
-        // Verificar si existe el usuario si no insertar en la db
+    private void actualizarInfoUsuario(String nombre, String email, String phone1, String phone2) {
+        Session session = new Session(getContext());
+        int token = session.getToken();
 
+        if (nombre.length() > 0 && email.length() > 0 && phone1.length() > 0) {
+            if (token != 0) {
+                Acount cuenta = DatabaseClient.getInstance(getContext())
+                        .getAppDatabase()
+                        .getAcountDao()
+                        .getUser(token);
+
+                cuenta.setNombre(nombre);
+                cuenta.setEmail(email);
+                cuenta.setPhoneOne(phone1);
+                cuenta.setPhoneTwo(phone2);
+
+                DatabaseClient.getInstance(getContext())
+                        .getAppDatabase()
+                        .getAcountDao()
+                        .updateUser(cuenta);
+
+                Toast.makeText(getContext(), "Editado con éxito", Toast.LENGTH_LONG).show();
+
+            } else {
+                Toast.makeText(getContext(), "ERROR :(",
+                        Toast.LENGTH_LONG).show();
+            }
+        } else {
+            Toast.makeText(getContext(), "Por favor llene los campos (Telefono 2 - opcional)",
+                    Toast.LENGTH_LONG).show();
+        }
     }
 }

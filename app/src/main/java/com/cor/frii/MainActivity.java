@@ -60,7 +60,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     FloatingActionButton flo_order_pedido;
 
     //--
-    TextView lblUsername, lblEmail,CerrarSecion;
+    TextView lblUsername, lblEmail, CerrarSecion;
     int id = 3;
 
     //e
@@ -106,8 +106,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         });
 
 
-        CerrarSecion=findViewById(R.id.CerrarSesion);
-        CerrarSecion.setOnClickListener(new View.OnClickListener(){
+        CerrarSecion = findViewById(R.id.CerrarSesion);
+        CerrarSecion.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View v) {
@@ -227,7 +227,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
 
     private void llenarInfoUsuario() {
-        Session session = new Session(getApplicationContext());
+        Session session = new Session(getBaseContext());
         final int token = session.getToken();
 
 
@@ -235,7 +235,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (token != 0) {
 
 
-            Acount acount = DatabaseClient.getInstance(getApplicationContext())
+            Acount acount = DatabaseClient.getInstance(getBaseContext())
                     .getAppDatabase()
                     .getAcountDao()
                     .getUser(token);
