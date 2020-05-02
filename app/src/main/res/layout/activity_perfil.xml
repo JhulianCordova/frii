@@ -28,6 +28,7 @@
         android:layout_height="match_parent"
         app:menu="@menu/navigation_menu"
         app:headerLayout="@layout/navigation_header"
+        app:itemIconTint="@color/frii_Background"
         android:layout_gravity="start"
         android:fitsSystemWindows="true"
         >
