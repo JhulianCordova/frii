@@ -114,17 +114,12 @@ public class LoginActivity extends AppCompatActivity {
                                         .login(user, pass);
 
                                 if (cuenta != null) {
-                                    Toast.makeText(getApplicationContext(), "Credenciales validas OK", Toast.LENGTH_LONG).show();
                                     Intent intent = new Intent(getApplicationContext(), MainActivity.class);
                                     startActivity(intent);
                                     session.setToken(cuenta.getId());
                                     finish();
                                 } else {
                                     insertarUsuario(token, id_user, pass);
-                                    Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-                                    intent.putExtra("id", id_user);
-                                    startActivity(intent);
-                                    finish();
                                 }
 
                             }
@@ -182,17 +177,7 @@ public class LoginActivity extends AppCompatActivity {
                 .addUser(cuenta);
 */
 
-        List<Acount> acounts = DatabaseClient.getInstance(getApplicationContext())
-                .getAppDatabase()
-                .getAcountDao()
-                .getUsers();
 
-        for (Acount a : acounts) {
-            System.out.println(a.getId());
-            System.out.println(a.getNombre());
-            System.out.println(a.getEmail());
-            System.out.println("------------------>");
-        }
     }
 
     // Implementacion de datos de usuario del servidor
@@ -202,70 +187,71 @@ public class LoginActivity extends AppCompatActivity {
 
 
     public void insertarUsuario(final String token, final int id, final String pass) {
-        new AsyncTask<Void, Void, Void>() {
+        RequestQueue requestQueue = Volley.newRequestQueue(getApplicationContext());
+        JSONObject object = new JSONObject();
+        String url = baseUrl + "/api/clients/" + id;
+        JsonObjectRequest jsonObjectRequest =
+                new JsonObjectRequest(Request.Method.GET, url, object, new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
 
-            @Override
-            protected Void doInBackground(Void... voids) {
-                RequestQueue requestQueue = Volley.newRequestQueue(getApplicationContext());
-                JSONObject object = new JSONObject();
-                String url = baseUrl + "/api/clients/" + id;
-                JsonObjectRequest jsonObjectRequest =
-                        new JsonObjectRequest(Request.Method.GET, url, object, new Response.Listener<JSONObject>() {
-                            @Override
-                            public void onResponse(JSONObject response) {
+                        Acount cuenta = new Acount();
+                        try {
+                            int i = response.getJSONObject("client").getInt("client_id");
+                            cuenta.setId(response.getJSONObject("client").getInt("client_id"));
+                            cuenta.setNumDocumento(response.getJSONObject("client").getString("num_document"));
+                            cuenta.setNombre(response.getJSONObject("client").getString("name"));
+                            cuenta.setPhoneOne(response.getJSONObject("client").getString("phone1"));
+                            cuenta.setPhoneTwo(response.getJSONObject("client").getString("phone2"));
+                            cuenta.setDireccion(response.getJSONObject("client").getString("address"));
+                            cuenta.setEmail(response.getString("user"));
+                            cuenta.setPassword(pass);
 
-                                Acount cuenta = new Acount();
-                                try {
-                                    cuenta.setId(response.getJSONObject("client").getInt("client_id"));
-                                    cuenta.setNumDocumento(response.getJSONObject("client").getString("num_document"));
-                                    cuenta.setNombre(response.getJSONObject("client").getString("name"));
-                                    cuenta.setPhoneOne(response.getJSONObject("client").getString("phone1"));
-                                    cuenta.setPhoneTwo(response.getJSONObject("client").getString("phone2"));
-                                    cuenta.setDireccion(response.getJSONObject("client").getString("address"));
-                                    cuenta.setEmail(response.getString("user"));
-                                    cuenta.setPassword(pass);
-
-                                    DatabaseClient.getInstance(getApplicationContext())
-                                            .getAppDatabase()
-                                            .getAcountDao()
-                                            .addUser(cuenta);
+                            DatabaseClient.getInstance(getApplicationContext())
+                                    .getAppDatabase()
+                                    .getAcountDao()
+                                    .addUser(cuenta);
 
 
-                                } catch (JSONException e) {
-                                    e.printStackTrace();
-                                }
+                            Session session = new Session(getApplicationContext());
+                            session.setToken(i);
+                            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                            startActivity(intent);
+                            finish();
+
+                            System.out.println("ESTE EL TOKEN DEL REGISTROS DE PERFIL: " + i);
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.d("Volley post", "error voley" + error.toString());
+                        NetworkResponse response = error.networkResponse;
+                        if (error instanceof ServerError && response != null) {
+                            try {
+                                String res = new String(response.data,
+                                        HttpHeaderParser.parseCharset(response.headers, "utf-8"));
+                                JSONObject obj = new JSONObject(res);
+                                System.out.println(obj.toString());
+                            } catch (UnsupportedEncodingException | JSONException e1) {
+                                e1.printStackTrace();
                             }
-                        }, new Response.ErrorListener() {
-                            @Override
-                            public void onErrorResponse(VolleyError error) {
-                                Log.d("Volley post", "error voley" + error.toString());
-                                NetworkResponse response = error.networkResponse;
-                                if (error instanceof ServerError && response != null) {
-                                    try {
-                                        String res = new String(response.data,
-                                                HttpHeaderParser.parseCharset(response.headers, "utf-8"));
-                                        JSONObject obj = new JSONObject(res);
-                                        System.out.println(obj.toString());
-                                    } catch (UnsupportedEncodingException | JSONException e1) {
-                                        e1.printStackTrace();
-                                    }
-                                }
-                            }
-                        }) {
-                            @Override
-                            public Map<String, String> getHeaders() {
-                                Map<String, String> headers = new HashMap<>();
-                                Log.d("Voley get", token);
-                                headers.put("Authorization", "JWT " + token);
-                                headers.put("Content-Type", "application/json");
-                                return headers;
-                            }
-                        };
+                        }
+                    }
+                }) {
+                    @Override
+                    public Map<String, String> getHeaders() {
+                        Map<String, String> headers = new HashMap<>();
+                        Log.d("Voley get", token);
+                        headers.put("Authorization", "JWT " + token);
+                        headers.put("Content-Type", "application/json");
+                        return headers;
+                    }
+                };
 
-                requestQueue.add(jsonObjectRequest);
-
-                return null;
-            }
-        }.execute();
+        requestQueue.add(jsonObjectRequest);
     }
 }
