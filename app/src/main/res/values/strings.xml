@@ -19,4 +19,6 @@
     <!-- new account -->
     <string name="Nombre">Nombre o Razo Social</string>
 
+    <string name="map_key" translatable="false">AIzaSyBI2Vi-qI0muLVtbHGCQR7t5KkkBRoav5I</string>
+
 </resources>
