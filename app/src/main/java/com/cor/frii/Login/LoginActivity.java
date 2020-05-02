@@ -194,7 +194,7 @@ public class LoginActivity extends AppCompatActivity {
                 new JsonObjectRequest(Request.Method.GET, url, object, new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
-
+                        System.out.println(response);
                         Acount cuenta = new Acount();
                         try {
                             int i = response.getJSONObject("client").getInt("client_id");
@@ -235,7 +235,7 @@ public class LoginActivity extends AppCompatActivity {
                                 String res = new String(response.data,
                                         HttpHeaderParser.parseCharset(response.headers, "utf-8"));
                                 JSONObject obj = new JSONObject(res);
-                                System.out.println(obj.toString());
+                                System.out.println(res);
                             } catch (UnsupportedEncodingException | JSONException e1) {
                                 e1.printStackTrace();
                             }
