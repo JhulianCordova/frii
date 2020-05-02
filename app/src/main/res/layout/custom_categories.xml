@@ -47,5 +47,11 @@
             android:textSize="13dp"
             android:textStyle="bold"
             android:text="TextView" />
+
+        <TextView
+            android:id="@+id/probandoId"
+            android:layout_width="match_parent"
+            android:text="probando"
+            android:layout_height="wrap_content" />
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -60,7 +60,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     FloatingActionButton flo_order_pedido;
 
     //--
-    TextView lblUsername, lblEmail, CerrarSecion;
+    TextView lblUsername, lblEmail, CerrarSecion, ProbandoID;
     int id = 3;
 
     //e
@@ -122,7 +122,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
 
         Session session = new Session(getApplicationContext());
-        System.out.println(session.getToken());
+        System.out.println("VALOR DE TOKEN " + session.getToken());
+
+        List<Acount> acounts = DatabaseClient.getInstance(getApplicationContext())
+                .getAppDatabase()
+                .getAcountDao()
+                .getUsers();
+
+        for (Acount a : acounts) {
+            System.out.println(a.getId());
+            System.out.println(a.getNombre());
+            System.out.println(a.getEmail());
+            System.out.println("------------------>");
+        }
     }
 
     @Override
@@ -227,39 +239,35 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
 
     private void llenarInfoUsuario() {
-        Session session = new Session(getBaseContext());
+        Session session = new Session(getApplicationContext());
         final int token = session.getToken();
 
-
-        // Todo - Implementar en tiempo real el registro si existe el token
         if (token != 0) {
 
-
-            Acount acount = DatabaseClient.getInstance(getBaseContext())
+            Acount acount = DatabaseClient.getInstance(getApplicationContext())
                     .getAppDatabase()
                     .getAcountDao()
                     .getUser(token);
 
             if (acount != null) {
-
                 View view = navigationView.getHeaderView(0);
                 lblUsername = view.findViewById(R.id.lblNombreUsuario);
                 lblEmail = view.findViewById(R.id.lblEmailUsuario);
 
                 lblUsername.setText(acount.getNombre());
                 lblEmail.setText(acount.getEmail());
-
-                System.out.println(acount);
-
             } else {
                 Toast.makeText(getApplicationContext(), "Error de  loggeado", Toast.LENGTH_LONG).show();
+                Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
+                startActivity(intent);
+                finish();
             }
-
-            System.out.println("VALOR DE TOKEN " + token);
 
 
         } else {
-
+            Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
+            startActivity(intent);
+            finish();
             System.out.println("LAS CREDENCIALES SON INVALIDAS");
         }
 
