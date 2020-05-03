@@ -27,6 +27,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:menu="@menu/navigation_menu"
+        app:itemIconTint="@color/frii_Background"
         app:headerLayout="@layout/navigation_header"
         android:layout_gravity="start"
         android:fitsSystemWindows="true"
