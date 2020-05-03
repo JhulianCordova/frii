@@ -13,7 +13,8 @@ import com.cor.frii.persistence.dao.AcountDao;
         ECart.class
 }, version = 2)
 public abstract class AppDatabase extends RoomDatabase {
-    public abstract CartDao getCartDao();
 
+    public abstract CartDao getCartDao();
     public abstract AcountDao getAcountDao();
+
 }

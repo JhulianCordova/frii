@@ -58,6 +58,7 @@
                     android:layout_height="match_parent"
                     android:drawableLeft="@drawable/ic_account"
                     android:enabled="true"
+                    android:textColor="@color/white"
                     android:drawablePadding="@dimen/drawable_padding"
                     android:hint="Nombre o Razon social"
                     android:inputType="text" />
@@ -83,7 +84,7 @@
                     android:drawablePadding="@dimen/drawable_padding"
                     android:inputType="number"
                     android:maxLength="11"
-
+                    android:textColor="@color/white"
                     android:textColorHint="@color/white" />
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -101,6 +102,7 @@
                     android:enabled="true"
                     android:hint="Correo"
                     android:drawablePadding="@dimen/drawable_padding"
+                    android:textColor="@color/white"
                     android:inputType="textEmailAddress" />
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -123,6 +125,7 @@
                     android:hint="Numero de Celular"
                     android:drawablePadding="@dimen/drawable_padding"
                     android:inputType="phone"
+                    android:textColor="@color/white"
                     android:maxLength="9" />
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -139,6 +142,7 @@
                     android:drawableLeft="@drawable/ic_map"
                     android:enabled="true"
                     android:hint="Dirección"
+                    android:textColor="@color/white"
                     android:drawablePadding="@dimen/drawable_padding"
                     android:inputType="text" />
             </com.google.android.material.textfield.TextInputLayout>
@@ -156,6 +160,7 @@
                     android:drawableLeft="@drawable/ic_lock"
                     android:enabled="true"
                     android:hint="Contraseña"
+                    android:textColor="@color/white"
                     android:drawablePadding="@dimen/drawable_padding"
                     android:inputType="textPassword" />
             </com.google.android.material.textfield.TextInputLayout>
@@ -172,6 +177,7 @@
                     android:layout_height="match_parent"
                     android:drawableLeft="@drawable/ic_lock"
                     android:enabled="true"
+                    android:textColor="@color/white"
                     android:hint="Confirmar contraseña"
                     android:drawablePadding="@dimen/drawable_padding"
                     android:inputType="textPassword" />

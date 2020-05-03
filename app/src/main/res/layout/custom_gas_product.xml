@@ -48,7 +48,7 @@
                 android:paddingRight="3dp"
                 android:text="TextView"
                 android:textColor="@color/marcasTitle"
-                android:textSize="20dp"
+                android:textSize="14dp"
                 android:textStyle="bold"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/ProductGasImage"

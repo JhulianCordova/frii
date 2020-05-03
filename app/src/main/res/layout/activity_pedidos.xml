@@ -47,8 +47,11 @@
             android:foregroundGravity="center"
             android:layout_height="wrap_content"
             android:backgroundTint="@color/frii_Background"
+            app:itemTextColor="@color/white"
+            app:itemIconTint="@color/white"
+
             app:menu="@menu/bottom_navigation"
-            android:background="?android:attr/windowBackground"
+            android:background="@color/frii_Background"
             />
     </LinearLayout>
 

@@ -86,6 +86,7 @@
             android:layout_marginTop="16dp"
             android:layout_marginEnd="15dp"
             android:textColorHint="@color/white"
+            android:backgroundTint="@color/white"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/EmailLogin">
@@ -97,6 +98,7 @@
                 android:drawableLeft="@drawable/ic_lock"
                 android:drawablePadding="@dimen/drawable_padding"
                 android:hint="@string/password"
+                android:backgroundTint="@color/white"
                 android:inputType="textPassword"
                 android:textColor="@color/white"
                 android:textColorHint="@color/white" />

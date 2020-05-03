@@ -8,6 +8,7 @@
 
     <item android:id="@+id/PedidosBottom"
         android:icon="@drawable/ic_take_note"
+        
         android:title="Pedidos"
         />
 
