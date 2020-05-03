@@ -19,9 +19,6 @@
     <!-- new account -->
     <string name="Nombre">Nombre o Razo Social</string>
 
-<<<<<<< HEAD
-    <string name="title_activity_maps2">Map</string>
-=======
     <!--  Forgotted password-->
     <string name="email_forgottedpassword">Ingrese el correo con el que creo la cuenta</string>
     <string name="back_forgotted_password">Atras</string>
@@ -34,6 +31,5 @@
     <string name="pay_credit_card">Pagar con targeta</string>
     <string name="pay_money">Pagar en efectivo</string>
 
->>>>>>> master
 
 </resources>
