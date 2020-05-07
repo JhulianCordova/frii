@@ -61,4 +61,6 @@ dependencies {
 
     implementation 'com.auth0.android:jwtdecode:2.0.0'
     implementation "android.arch.persistence.room:rxjava2:1.0.0-alpha5"
+
+    implementation 'com.google.maps.android:android-maps-utils:0.5+'
 }

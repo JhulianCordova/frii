@@ -93,7 +93,7 @@ public class Cart extends AppCompatActivity implements NavigationView.OnNavigati
         Intent intent;
         if (menuItem.getItemId()==R.id.home){
 
-             intent=new Intent(this,MainActivity.class);
+            intent=new Intent(this,MainActivity.class);
             //transaction.replace(R.id.navigationContainer,new MainFragment());
             startActivity(intent);
             finish();
@@ -101,7 +101,7 @@ public class Cart extends AppCompatActivity implements NavigationView.OnNavigati
             Toast.makeText(this,"ingreso a home",Toast.LENGTH_SHORT).show();
         }
         if (menuItem.getItemId()==R.id.account){
-             intent=new Intent(getBaseContext(),PerfilActivity.class);
+            intent=new Intent(getBaseContext(),PerfilActivity.class);
             intent.putExtra("id",R.id.account);
             startActivity(intent);
             Toast.makeText(this,"ingreso a account",Toast.LENGTH_SHORT).show();
