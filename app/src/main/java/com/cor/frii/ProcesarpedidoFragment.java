@@ -11,6 +11,7 @@ import android.os.Bundle;
 
 import android.util.Log;
 import android.widget.TextView;
+
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -20,6 +21,21 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.Toast;
+
+import com.android.volley.NetworkResponse;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.ServerError;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.HttpHeaderParser;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
+import com.cor.frii.persistence.DatabaseClient;
+import com.cor.frii.persistence.Session;
+import com.cor.frii.persistence.entity.Acount;
+import com.cor.frii.persistence.entity.ECart;
 import com.cor.frii.utils.GpsUtils;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
@@ -31,27 +47,24 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.ExecutionException;
 
-
-/**
- * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- * {@link ProcesarpedidoFragment.OnFragmentInteractionListener} interface
- * to handle interaction events.
- * Use the {@link ProcesarpedidoFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
 public class ProcesarpedidoFragment extends Fragment implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener {
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
 
-    // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
 
@@ -67,11 +80,12 @@ public class ProcesarpedidoFragment extends Fragment implements OnMapReadyCallba
     private Marker marcador;
     private Marker marcador_carro;
     private Address address;
+    private String baseURL = "http://34.71.251.155/api";
 
 
     private ArrayList<LatLng> mMarkerPoints;
 
-    TextView lblDireccion;
+    private TextView lblDireccion;
 
     private OnFragmentInteractionListener mListener;
 
@@ -106,14 +120,6 @@ public class ProcesarpedidoFragment extends Fragment implements OnMapReadyCallba
         lblDireccion = view.findViewById(R.id.lblDireccion);
 
         procesarPedido = view.findViewById(R.id.ButtonConfirmarPedido);
-        procesarPedido.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(getContext(), PedidosActivity.class);
-                startActivity(intent);
-            }
-        });
 
         mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(getActivity());
         SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager()
@@ -123,10 +129,21 @@ public class ProcesarpedidoFragment extends Fragment implements OnMapReadyCallba
 
         mMarkerPoints = new ArrayList<>();
 
+
+        procesarPedido.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                confirmarPedido();
+                Intent intent = new Intent(getContext(), PedidosActivity.class);
+                startActivity(intent);
+                getActivity().finish();
+            }
+        });
+
         return view;
     }
 
-    // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(Uri uri) {
         if (mListener != null) {
             mListener.onFragmentInteraction(uri);
@@ -196,8 +213,8 @@ public class ProcesarpedidoFragment extends Fragment implements OnMapReadyCallba
                 map.addMarker(new MarkerOptions()
                         .position(point)
                         .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
-                System.out.println(mMarkerPoints);
-                System.out.println(mMarkerPoints.size());
+
+
             }
         });
 
@@ -265,7 +282,6 @@ public class ProcesarpedidoFragment extends Fragment implements OnMapReadyCallba
         }
     }
 
-
     private void getLocationPermission() {
         if (ContextCompat.checkSelfPermission(getActivity().getApplicationContext(),
                 android.Manifest.permission.ACCESS_FINE_LOCATION)
@@ -314,9 +330,108 @@ public class ProcesarpedidoFragment extends Fragment implements OnMapReadyCallba
         }
     }
 
-
     public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
     }
+
+    // Confirmar pedido
+    public void confirmarPedido() {
+        //Obtener el token del cliente
+        final Acount acount = DatabaseClient.getInstance(getContext())
+                .getAppDatabase()
+                .getAcountDao()
+                .getUser(new Session(getContext()).getToken());
+
+        if (lblDireccion.getText().toString().length() == 0 && lblDireccion.getText().toString().equals("")) {
+            return;
+        }
+
+        JSONObject jsonObject = new JSONObject();
+        RequestQueue queue = Volley.newRequestQueue(Objects.requireNonNull(getContext()));
+        try {
+            jsonObject.put("latitud", String.valueOf(mMarkerPoints.get(0).latitude));
+            jsonObject.put("longitud", String.valueOf(mMarkerPoints.get(0).longitude));
+            jsonObject.put("client_id", new Session(getContext()).getToken());
+
+            JSONArray jsonArray = new JSONArray();
+            List<ECart> eCarts = DatabaseClient.getInstance(getContext())
+                    .getAppDatabase()
+                    .getCartDao()
+                    .getCarts();
+
+            if (eCarts != null) {
+                for (ECart e : eCarts) {
+                    JSONObject orders_detal = new JSONObject();
+                    orders_detal.put("description", e.getName());
+                    orders_detal.put("quantity", e.getCantidad());
+                    orders_detal.put("unit_price", e.getPrice());
+                    jsonArray.put(orders_detal);
+                }
+            }
+
+            jsonObject.put("detalle_orden", jsonArray);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        String url = this.baseURL + "/client/order/";
+
+
+        System.out.println(jsonObject.toString());
+
+        JsonObjectRequest jsonObjectRequest =
+                new JsonObjectRequest(Request.Method.POST, url, jsonObject, new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+
+                        try {
+                            int status = response.getInt("status");
+                            if (status == 201) {
+                                String message = response.getString("message");
+                                Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
+
+                                DatabaseClient.getInstance(getContext())
+                                        .getAppDatabase()
+                                        .getCartDao()
+                                        .deleteAllCart();
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+
+                    }
+                }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.d("Volley get", "error voley" + error.toString());
+                        NetworkResponse response = error.networkResponse;
+                        if (error instanceof ServerError && response != null) {
+                            try {
+                                String res = new String(response.data, HttpHeaderParser.parseCharset(response.headers, "utf-8"));
+                                /*JSONObject obj = new JSONObject(res);
+                                Log.d("Voley post", obj.toString());
+                                String msj = obj.getString("message");
+                                Toast.makeText(getContext(), msj, Toast.LENGTH_SHORT).show();*/
+
+                                System.out.println(res);
+
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                }) {
+                    @Override
+                    public Map<String, String> getHeaders() {
+                        Map<String, String> headers = new HashMap<>();
+                        Log.d("Voley get", acount.getToken());
+                        headers.put("Authorization", "JWT " + acount.getToken());
+                        headers.put("Content-Type", "application/json");
+                        return headers;
+                    }
+                };
+
+        queue.add(jsonObjectRequest);
+    }
+
 }

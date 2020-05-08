@@ -8,50 +8,60 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.android.volley.NetworkResponse;
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.ServerError;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.HttpHeaderParser;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.cor.frii.persistence.DatabaseClient;
+import com.cor.frii.persistence.Session;
+import com.cor.frii.persistence.entity.Acount;
+import com.cor.frii.pojo.Order;
+import com.cor.frii.utils.VolleySingleton;
+import com.github.nkzawa.emitter.Emitter;
+import com.github.nkzawa.socketio.client.IO;
+import com.github.nkzawa.socketio.client.Socket;
+
+import java.util.Calendar;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-
-/**
- * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- * {@link MisPedidosFragment.OnFragmentInteractionListener} interface
- * to handle interaction events.
- * Use the {@link MisPedidosFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
 public class MisPedidosFragment extends Fragment {
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
 
-    // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
 
     private OnFragmentInteractionListener mListener;
 
-    ArrayList<String> data;
-    RecyclerView recyclerView;
-    MisPedidosAdapter misPedidosAdapter;
+    private ArrayList<Order> data;
+    private RecyclerView recyclerView;
+    private MisPedidosAdapter misPedidosAdapter;
+    //--
+    private String baseURL = "http://34.71.251.155/api";
+    static Socket SOCKET;
+    public String HOST_NODEJS = "http://34.71.251.155:9000";
 
     public MisPedidosFragment() {
         // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment MisPedidosFragment.
-     */
-    // TODO: Rename and change types and number of parameters
     public static MisPedidosFragment newInstance(String param1, String param2) {
         MisPedidosFragment fragment = new MisPedidosFragment();
         Bundle args = new Bundle();
@@ -68,25 +78,24 @@ public class MisPedidosFragment extends Fragment {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
+
+        initSocket();
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view=inflater.inflate(R.layout.fragment_mispedidos, container, false);
-        recyclerView=view.findViewById(R.id.MisPedidosContainer);
+        View view = inflater.inflate(R.layout.fragment_mispedidos, container, false);
+        recyclerView = view.findViewById(R.id.MisPedidosContainer);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        data=new ArrayList<>();
-        data.add("av.sol 203 \n2012/12/23 12:45:00");
-        misPedidosAdapter=new MisPedidosAdapter(data);
-        recyclerView.setAdapter(misPedidosAdapter);
 
+        llenarPedidos();
 
+//        initSocket();
         return view;
     }
 
-    // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(Uri uri) {
         if (mListener != null) {
             mListener.onFragmentInteraction(uri);
@@ -110,18 +119,258 @@ public class MisPedidosFragment extends Fragment {
         mListener = null;
     }
 
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
     public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
+    }
+
+    // Llenar información de pedidos
+    public void llenarPedidos() {
+        //--Usuario
+        int token = new Session(getContext()).getToken();
+        String url = this.baseURL + "/client/order/" + token;
+        final Acount acount = DatabaseClient.getInstance(getContext())
+                .getAppDatabase()
+                .getAcountDao()
+                .getUser(token);
+
+        JSONObject jsonObject = new JSONObject();
+        data = new ArrayList<>();
+
+        JsonObjectRequest request =
+                new JsonObjectRequest(Request.Method.GET, url, jsonObject, new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        try {
+                            int status = response.getInt("status");
+                            if (status == 200) {
+                                JSONArray jsonArray = response.getJSONArray("data");
+                                for (int i = 0; i < jsonArray.length(); i++) {
+                                    JSONObject obj = jsonArray.getJSONObject(i);
+                                    Order order = new Order();
+
+                                    order.setDate(obj.getJSONObject("orden").getString("date"));
+                                    order.setStatus(obj.getJSONObject("orden").getString("status"));
+                                    JSONArray details_data = obj.getJSONArray("order_detail");
+                                    List<String> details = new ArrayList<>();
+                                    ;
+                                    for (int j = 0; j < details_data.length(); j++) {
+                                        JSONObject jsonObject1 = details_data.getJSONObject(j);
+                                        details.add(jsonObject1.getString("description"));
+                                    }
+                                    order.setDetalles(details);
+
+                                    data.add(order);
+                                }
+
+                                misPedidosAdapter = new MisPedidosAdapter(data);
+                                recyclerView.setAdapter(misPedidosAdapter);
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.d("Volley get", "error voley" + error.toString());
+                        NetworkResponse response = error.networkResponse;
+                        if (error instanceof ServerError && response != null) {
+                            try {
+                                String res = new String(response.data, HttpHeaderParser.parseCharset(response.headers, "utf-8"));
+                                /*JSONObject obj = new JSONObject(res);
+                                Log.d("Voley post", obj.toString());
+                                String msj = obj.getString("message");
+                                Toast.makeText(getContext(), msj, Toast.LENGTH_SHORT).show();*/
+
+                                System.out.println(res);
+
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                }) {
+                    @Override
+                    public Map<String, String> getHeaders() {
+                        Map<String, String> headers = new HashMap<>();
+                        Log.d("Voley get", acount.getToken());
+                        headers.put("Authorization", "JWT " + acount.getToken());
+                        headers.put("Content-Type", "application/json");
+                        return headers;
+                    }
+                };
+
+        VolleySingleton.getInstance(getContext()).addToRequestQueue(request);
+    }
+
+    private Socket mSocket;
+
+    {
+        try {
+            mSocket = IO.socket("http://34.71.251.155/api/categories");
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+
+        mSocket.on("HOLA", new Emitter.Listener() {
+            @Override
+            public void call(final Object... args) {
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        JSONObject data = (JSONObject) args[0];
+                        System.out.println(data);
+                    }
+                });
+            }
+        });
+    }
+
+    private void initSocket() {
+        final JSONObject json_connect = new JSONObject();
+        IO.Options opts = new IO.Options();
+
+        opts.reconnection = true;
+        opts.query = "auth_token=thisgo77";
+        try {
+            json_connect.put("ID", "US01");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            SOCKET = IO.socket(HOST_NODEJS, opts);
+            SOCKET.connect();
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+
+        SOCKET.on(Socket.EVENT_CONNECT, new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                //SOCKET.emit("new connect", json_connect);
+                connect();
+                String date = java.text.DateFormat.getDateTimeInstance().format(Calendar.getInstance().getTime());
+                Log.d("Friibusiness", "SERVER connect " + date);
+            }
+        });
+
+        SOCKET.on(Socket.EVENT_DISCONNECT, new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                String date = java.text.DateFormat.getDateTimeInstance().format(Calendar.getInstance().getTime());
+                Log.d("Friibusiness", "SERVER disconnect " + date);
+            }
+        });
+
+        SOCKET.on(Socket.EVENT_RECONNECT, new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                String my_date = java.text.DateFormat.getDateTimeInstance().format(Calendar.getInstance().getTime());
+                Log.d("Friibusiness", "SERVER reconnect " + my_date);
+            }
+        });
+
+        SOCKET.on(Socket.EVENT_CONNECT_TIMEOUT, new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                String my_date = java.text.DateFormat.getDateTimeInstance().format(Calendar.getInstance().getTime());
+                Log.d("Friibusiness", "SERVER timeout " + my_date);
+            }
+        });
+
+        SOCKET.on(Socket.EVENT_RECONNECTING, new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                String my_date = java.text.DateFormat.getDateTimeInstance().format(Calendar.getInstance().getTime());
+                Log.d("Friibusiness", "SERVER reconnecting " + my_date);
+            }
+        });
+
+
+        SOCKET.on("list orders client", new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                if (this == null) {
+                    return;
+                }
+                final JSONObject jsonObject = (JSONObject) args[0];
+                System.out.println(jsonObject);
+                Log.d("Friibusiness", "delivered Order: " + jsonObject.toString());
+                try {
+                    final int status = jsonObject.getInt("status");
+                    if (status == 200) {
+                        getActivity().runOnUiThread(new Runnable() {
+
+                            @Override
+                            public void run() {
+                                try {
+
+
+                                    JSONArray jsonArray = jsonObject.getJSONArray("data");
+                                    for (int i = 0; i < jsonArray.length(); i++) {
+                                        JSONObject obj = null;
+                                        try {
+                                            obj = jsonArray.getJSONObject(i);
+                                        } catch (JSONException e) {
+                                            e.printStackTrace();
+                                        }
+                                        Order order = new Order();
+
+                                        order.setDate(obj.getJSONObject("orden").getString("date"));
+                                        order.setStatus(obj.getJSONObject("orden").getString("status"));
+                                        JSONArray details_data = obj.getJSONArray("order_detail");
+                                        List<String> details = new ArrayList<>();
+                                        ;
+                                        for (int j = 0; j < details_data.length(); j++) {
+                                            JSONObject jsonObject1 = details_data.getJSONObject(j);
+                                            details.add(jsonObject1.getString("description"));
+                                        }
+                                        order.setDetalles(details);
+
+                                        data.add(order);
+                                    }
+
+
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+
+                        });
+
+                        misPedidosAdapter = new MisPedidosAdapter(data);
+                        recyclerView.setAdapter(misPedidosAdapter);
+                    } else {
+
+                    }
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+
+            }
+        });
+
+    }
+
+    private void connect() {
+        int token = new Session(getContext()).getToken();
+        final Acount acount = DatabaseClient.getInstance(getContext())
+                .getAppDatabase()
+                .getAcountDao()
+                .getUser(token);
+
+        Log.d("Friibusiness", "New connect");
+        JSONObject jsonObject = new JSONObject();
+        try {
+            jsonObject.put("ID_CLIENT", token);
+            jsonObject.put("TOKEN", acount.getToken());
+            SOCKET.emit("list orders", jsonObject);
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 }

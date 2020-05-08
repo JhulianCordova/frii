@@ -42,7 +42,7 @@ import java.util.Map;
 public class LoginActivity extends AppCompatActivity {
 
     private EditText email;
-    private TextView NewAccount,forgottedPassword;
+    private TextView NewAccount, forgottedPassword;
     private TextInputEditText password;
     //--
     public String baseUrl = "http://34.71.251.155";
@@ -56,7 +56,7 @@ public class LoginActivity extends AppCompatActivity {
         email = findViewById(R.id.EmailLogin);
         password = findViewById(R.id.txtPassword);
         NewAccount = findViewById(R.id.NewAccountLogin);
-        forgottedPassword=findViewById(R.id.ForgottenPasswordLogin);
+        forgottedPassword = findViewById(R.id.ForgottenPasswordLogin);
 
         final Session s = new Session(getApplicationContext());
         if (s.getToken() > 0) {
@@ -77,7 +77,7 @@ public class LoginActivity extends AppCompatActivity {
         forgottedPassword.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent=new Intent(getApplicationContext(),ForgottenPasswordActivity.class);
+                Intent intent = new Intent(getApplicationContext(), ForgottenPasswordActivity.class);
                 startActivity(intent);
             }
         });
@@ -124,6 +124,13 @@ public class LoginActivity extends AppCompatActivity {
                                         .login(user, pass);
 
                                 if (cuenta != null) {
+
+                                    cuenta.setToken(token);
+                                    DatabaseClient.getInstance(getApplicationContext())
+                                            .getAppDatabase()
+                                            .getAcountDao()
+                                            .updateUser(cuenta);
+
                                     Intent intent = new Intent(getApplicationContext(), MainActivity.class);
                                     startActivity(intent);
                                     session.setToken(cuenta.getId());
@@ -216,6 +223,7 @@ public class LoginActivity extends AppCompatActivity {
                             cuenta.setDireccion(response.getJSONObject("client").getString("address"));
                             cuenta.setEmail(response.getString("user"));
                             cuenta.setPassword(pass);
+                            cuenta.setToken(token);
 
                             DatabaseClient.getInstance(getApplicationContext())
                                     .getAppDatabase()

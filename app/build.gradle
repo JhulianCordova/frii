@@ -63,4 +63,6 @@ dependencies {
     implementation "android.arch.persistence.room:rxjava2:1.0.0-alpha5"
 
     implementation 'com.google.maps.android:android-maps-utils:0.5+'
+
+    implementation 'com.github.nkzawa:socket.io-client:0.6.0'
 }
