@@ -2,13 +2,19 @@ package com.cor.frii;
 
 import android.content.Context;
 
+import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.location.Address;
+import android.location.Geocoder;
+import android.location.Location;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 
 import android.util.Log;
 import android.widget.Toast;
+
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import android.view.LayoutInflater;
@@ -16,11 +22,13 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.cor.frii.utils.DirectionJSONParser;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.*;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -34,6 +42,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 
 
 public class MapsPerdidos extends Fragment implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener {
@@ -49,7 +58,13 @@ public class MapsPerdidos extends Fragment implements OnMapReadyCallback, Google
     private Polyline mPolyline;
     private LatLng mOrigin;
     private LatLng mDestination;
-    ArrayList<LatLng> mMarkedPoints;
+    private ArrayList<LatLng> mMarkedPoints;
+    private String baseURL = "http://34.71.251.155/api";
+
+    private final LatLng mDefaultLocation = new LatLng(-33.8523341, 151.2106085);
+    private static final int DEFAULT_ZOOM = 16;
+    private Location mLastKnownLocation;
+    private Address address;
 
     private OnFragmentInteractionListener mListener;
 
@@ -123,36 +138,19 @@ public class MapsPerdidos extends Fragment implements OnMapReadyCallback, Google
     public void onMapReady(GoogleMap googleMap) {
         map = googleMap;
 
-        if (mMarkedPoints.size() > 1) {
-            mMarkedPoints.clear();
-            map.clear();
+        if (ContextCompat.checkSelfPermission(getContext(), android.Manifest.permission.ACCESS_FINE_LOCATION) ==
+                PackageManager.PERMISSION_GRANTED &&
+                ContextCompat.checkSelfPermission(getContext(), android.Manifest.permission.ACCESS_COARSE_LOCATION) ==
+                        PackageManager.PERMISSION_GRANTED) {
+
+            UiSettings uiSettings = map.getUiSettings();
+            uiSettings.setZoomControlsEnabled(true);
+            map.setMyLocationEnabled(true);
+
+            llenarDatos();
+        } else {
+            Toast.makeText(getContext(), "Error de permisos", Toast.LENGTH_LONG).show();
         }
-
-        //Ruta inicial
-        LatLng lng = new LatLng(-13.5146148, -71.9885687);
-        mMarkedPoints.add(lng);
-
-        //Ruta final
-        LatLng lng1 = new LatLng(-13.5166488, -71.9851357);
-        mMarkedPoints.add(lng1);
-
-
-        map.addMarker(new MarkerOptions().position(lng1).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
-        map.addMarker(new MarkerOptions().position(lng).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
-
-
-        System.out.println(mMarkedPoints.size());
-
-        mOrigin = mMarkedPoints.get(0);
-        mDestination = mMarkedPoints.get(1);
-
-        UiSettings uiSettings = map.getUiSettings();
-        uiSettings.setZoomControlsEnabled(true);
-        map.setMyLocationEnabled(true);
-
-        System.out.println(getURL(mOrigin, mDestination));
-
-        drawRoute();
 
     }
 
@@ -162,7 +160,54 @@ public class MapsPerdidos extends Fragment implements OnMapReadyCallback, Google
     }
 
 
-    private void drawRoute() {
+    private void llenarDatos() {
+        Bundle bundle = getArguments();
+        assert bundle != null;
+        LatLng companyDirection = bundle.getParcelable("DCOMPANY");
+        LatLng clientDirection = bundle.getParcelable("DCLIENT");
+
+        mMarkedPoints = new ArrayList<>();
+
+
+        assert companyDirection != null;
+        LatLng company = new LatLng(companyDirection.latitude, companyDirection.longitude);
+
+        assert clientDirection != null;
+        LatLng destination = new LatLng(clientDirection.latitude, clientDirection.longitude);
+        map.animateCamera(CameraUpdateFactory.newLatLngZoom(destination, DEFAULT_ZOOM));
+
+        map.addMarker(new MarkerOptions()
+                .position(company)
+                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE))
+                .title("Local de distribución")
+        );
+
+        Geocoder geocoder = new Geocoder(getContext(), Locale.getDefault());
+        try {
+            List<Address> addresses = geocoder.getFromLocation(destination.latitude, destination.longitude, 1);
+
+            if (addresses.size() > 0) {
+                address = addresses.get(0);
+                map.addMarker(new MarkerOptions()
+                        .position(destination)
+                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN))
+                        .title("Mi direcion: " + address.getAddressLine(0))
+                );
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        mMarkedPoints.add(company);
+        mMarkedPoints.add(destination);
+        drawRoute(company, destination);
+
+
+    }
+
+
+    private void drawRoute(LatLng mOrigin, LatLng mDestination) {
 
         String url = getURL(mOrigin, mDestination);
         DownloadTask downloadTask = new DownloadTask();

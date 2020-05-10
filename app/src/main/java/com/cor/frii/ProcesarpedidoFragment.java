@@ -9,6 +9,7 @@ import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 
+import android.os.Handler;
 import android.util.Log;
 import android.widget.TextView;
 
@@ -81,9 +82,11 @@ public class ProcesarpedidoFragment extends Fragment implements OnMapReadyCallba
     private Marker marcador_carro;
     private Address address;
     private String baseURL = "http://34.71.251.155/api";
+    private Thread thread = null;
 
 
     private ArrayList<LatLng> mMarkerPoints;
+    LatLng point_move;
 
     private TextView lblDireccion;
 
@@ -128,7 +131,6 @@ public class ProcesarpedidoFragment extends Fragment implements OnMapReadyCallba
         mapFragment.getMapAsync(this);
 
         mMarkerPoints = new ArrayList<>();
-
 
         procesarPedido.setOnClickListener(new View.OnClickListener() {
 
@@ -182,39 +184,37 @@ public class ProcesarpedidoFragment extends Fragment implements OnMapReadyCallba
         uiSettings.setZoomControlsEnabled(true);
 
         getLocationPermission();
-        updateLocationUI();
         getDeviceLocation();
+        updateLocationUI();
 
-        System.out.println(mMarkerPoints);
-        System.out.println(mMarkerPoints.size());
-        map.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+        Objects.requireNonNull(getActivity()).runOnUiThread(new Runnable() {
             @Override
-            public void onMapClick(LatLng point) {
-                if (mMarkerPoints.size() > 0) {
-                    mMarkerPoints.clear();
-                    map.clear();
-                }
+            public void run() {
+                map.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+                    @Override
+                    public void onMapClick(LatLng point) {
+                        map.clear();
 
-                Geocoder geocoder = new Geocoder(getContext(), Locale.getDefault());
+                        Geocoder geocoder = new Geocoder(getContext(), Locale.getDefault());
 
-                try {
-                    List<Address> addresses = geocoder.getFromLocation(point.latitude, point.longitude, 1);
+                        try {
+                            List<Address> addresses = geocoder.getFromLocation(point.latitude, point.longitude, 1);
 
-                    if (addresses.size() > 0) {
-                        address = addresses.get(0);
-                        lblDireccion.setText(address.getAddressLine(0));
+                            if (addresses.size() > 0) {
+                                address = addresses.get(0);
+                                lblDireccion.setText(address.getAddressLine(0));
+                            }
+
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+
+                        point_move = point;
+                        map.addMarker(new MarkerOptions()
+                                .position(point)
+                                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
                     }
-
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-                mMarkerPoints.add(point);
-                map.addMarker(new MarkerOptions()
-                        .position(point)
-                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
-
-
+                });
             }
         });
 
@@ -237,8 +237,8 @@ public class ProcesarpedidoFragment extends Fragment implements OnMapReadyCallba
                                 LatLng latLng = new LatLng(mLastKnownLocation.getLatitude(), mLastKnownLocation.getLongitude());
                                 map.animateCamera(CameraUpdateFactory.newLatLng(latLng));
                                 map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, DEFAULT_ZOOM));
-                                mMarkerPoints.add(new LatLng(mLastKnownLocation.getLatitude(), mLastKnownLocation.getLongitude()));
-                                map.addMarker(new MarkerOptions().position(mMarkerPoints.get(0))
+                                point_move = new LatLng(mLastKnownLocation.getLatitude(), mLastKnownLocation.getLongitude());
+                                map.addMarker(new MarkerOptions().position(point_move)
                                         .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
 
                                 Geocoder geocoder = new Geocoder(getContext(), Locale.getDefault());
@@ -349,8 +349,8 @@ public class ProcesarpedidoFragment extends Fragment implements OnMapReadyCallba
         JSONObject jsonObject = new JSONObject();
         RequestQueue queue = Volley.newRequestQueue(Objects.requireNonNull(getContext()));
         try {
-            jsonObject.put("latitud", String.valueOf(mMarkerPoints.get(0).latitude));
-            jsonObject.put("longitud", String.valueOf(mMarkerPoints.get(0).longitude));
+            jsonObject.put("latitud", String.valueOf(point_move.latitude));
+            jsonObject.put("longitud", String.valueOf(point_move.longitude));
             jsonObject.put("client_id", new Session(getContext()).getToken());
 
             JSONArray jsonArray = new JSONArray();

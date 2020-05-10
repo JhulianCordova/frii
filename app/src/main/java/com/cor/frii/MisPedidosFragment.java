@@ -5,6 +5,8 @@ import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -25,21 +27,18 @@ import com.cor.frii.persistence.Session;
 import com.cor.frii.persistence.entity.Acount;
 import com.cor.frii.pojo.Order;
 import com.cor.frii.utils.VolleySingleton;
-import com.github.nkzawa.emitter.Emitter;
-import com.github.nkzawa.socketio.client.IO;
 import com.github.nkzawa.socketio.client.Socket;
-
-import java.util.Calendar;
+import com.google.android.gms.maps.model.LatLng;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public class MisPedidosFragment extends Fragment {
     private static final String ARG_PARAM1 = "param1";
@@ -79,7 +78,6 @@ public class MisPedidosFragment extends Fragment {
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
 
-        initSocket();
     }
 
     @Override
@@ -88,7 +86,9 @@ public class MisPedidosFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_mispedidos, container, false);
         recyclerView = view.findViewById(R.id.MisPedidosContainer);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity());
+        recyclerView.setLayoutManager(layoutManager);
+
 
         llenarPedidos();
 
@@ -124,7 +124,7 @@ public class MisPedidosFragment extends Fragment {
     }
 
     // Llenar información de pedidos
-    public void llenarPedidos() {
+    private void llenarPedidos() {
         //--Usuario
         int token = new Session(getContext()).getToken();
         String url = this.baseURL + "/client/order/" + token;
@@ -146,13 +146,25 @@ public class MisPedidosFragment extends Fragment {
                                 JSONArray jsonArray = response.getJSONArray("data");
                                 for (int i = 0; i < jsonArray.length(); i++) {
                                     JSONObject obj = jsonArray.getJSONObject(i);
-                                    Order order = new Order();
+                                    final Order order = new Order();
 
                                     order.setDate(obj.getJSONObject("orden").getString("date"));
                                     order.setStatus(obj.getJSONObject("orden").getString("status"));
+                                    order.setClientDirection(new LatLng(
+                                            obj.getJSONObject("orden").getDouble("latitude"),
+                                            obj.getJSONObject("orden").getDouble("longitude")
+                                    ));
+                                    if (obj.getJSONObject("company").length() > 0) {
+                                        order.setPhone(obj.getJSONObject("company").getString("phone"));
+                                        LatLng latLng = new LatLng(
+                                                obj.getJSONObject("company").getDouble("latitude"),
+                                                obj.getJSONObject("company").getDouble("longitude")
+                                        );
+                                        order.setCompanyDirection(latLng);
+                                    }
+
                                     JSONArray details_data = obj.getJSONArray("order_detail");
                                     List<String> details = new ArrayList<>();
-                                    ;
                                     for (int j = 0; j < details_data.length(); j++) {
                                         JSONObject jsonObject1 = details_data.getJSONObject(j);
                                         details.add(jsonObject1.getString("description"));
@@ -164,6 +176,29 @@ public class MisPedidosFragment extends Fragment {
 
                                 misPedidosAdapter = new MisPedidosAdapter(data);
                                 recyclerView.setAdapter(misPedidosAdapter);
+                                misPedidosAdapter.setOnClickListener(new View.OnClickListener() {
+
+
+                                    @Override
+                                    public void onClick(View v) {
+                                        FragmentManager manager = Objects.requireNonNull(getActivity()).getSupportFragmentManager();
+                                        FragmentTransaction transaction = manager.beginTransaction();
+                                        String status = data.get(recyclerView.getChildAdapterPosition(v)).getStatus();
+                                        if (status.equals("confirm")) {
+                                            MapsPerdidos misPedidosFragment = new MapsPerdidos();
+                                            Bundle bundle = new Bundle();
+                                            LatLng d_company = data.get(recyclerView.getChildAdapterPosition(v)).getCompanyDirection();
+                                            LatLng d_client = data.get(recyclerView.getChildAdapterPosition(v)).getClientDirection();
+                                            bundle.putParcelable("DCOMPANY", d_company);
+                                            bundle.putParcelable("DCLIENT", d_client);
+                                            misPedidosFragment.setArguments(bundle);
+                                            transaction.add(R.id.navigationContainer, misPedidosFragment);
+                                            transaction.addToBackStack(null);
+                                            transaction.commit();
+                                        }
+                                    }
+                                });
+
                             }
                         } catch (JSONException e) {
                             e.printStackTrace();
@@ -177,13 +212,7 @@ public class MisPedidosFragment extends Fragment {
                         if (error instanceof ServerError && response != null) {
                             try {
                                 String res = new String(response.data, HttpHeaderParser.parseCharset(response.headers, "utf-8"));
-                                /*JSONObject obj = new JSONObject(res);
-                                Log.d("Voley post", obj.toString());
-                                String msj = obj.getString("message");
-                                Toast.makeText(getContext(), msj, Toast.LENGTH_SHORT).show();*/
-
                                 System.out.println(res);
-
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }
@@ -203,174 +232,5 @@ public class MisPedidosFragment extends Fragment {
         VolleySingleton.getInstance(getContext()).addToRequestQueue(request);
     }
 
-    private Socket mSocket;
 
-    {
-        try {
-            mSocket = IO.socket("http://34.71.251.155/api/categories");
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        }
-
-        mSocket.on("HOLA", new Emitter.Listener() {
-            @Override
-            public void call(final Object... args) {
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        JSONObject data = (JSONObject) args[0];
-                        System.out.println(data);
-                    }
-                });
-            }
-        });
-    }
-
-    private void initSocket() {
-        final JSONObject json_connect = new JSONObject();
-        IO.Options opts = new IO.Options();
-
-        opts.reconnection = true;
-        opts.query = "auth_token=thisgo77";
-        try {
-            json_connect.put("ID", "US01");
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        try {
-            SOCKET = IO.socket(HOST_NODEJS, opts);
-            SOCKET.connect();
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        }
-
-        SOCKET.on(Socket.EVENT_CONNECT, new Emitter.Listener() {
-            @Override
-            public void call(Object... args) {
-                //SOCKET.emit("new connect", json_connect);
-                connect();
-                String date = java.text.DateFormat.getDateTimeInstance().format(Calendar.getInstance().getTime());
-                Log.d("Friibusiness", "SERVER connect " + date);
-            }
-        });
-
-        SOCKET.on(Socket.EVENT_DISCONNECT, new Emitter.Listener() {
-            @Override
-            public void call(Object... args) {
-                String date = java.text.DateFormat.getDateTimeInstance().format(Calendar.getInstance().getTime());
-                Log.d("Friibusiness", "SERVER disconnect " + date);
-            }
-        });
-
-        SOCKET.on(Socket.EVENT_RECONNECT, new Emitter.Listener() {
-            @Override
-            public void call(Object... args) {
-                String my_date = java.text.DateFormat.getDateTimeInstance().format(Calendar.getInstance().getTime());
-                Log.d("Friibusiness", "SERVER reconnect " + my_date);
-            }
-        });
-
-        SOCKET.on(Socket.EVENT_CONNECT_TIMEOUT, new Emitter.Listener() {
-            @Override
-            public void call(Object... args) {
-                String my_date = java.text.DateFormat.getDateTimeInstance().format(Calendar.getInstance().getTime());
-                Log.d("Friibusiness", "SERVER timeout " + my_date);
-            }
-        });
-
-        SOCKET.on(Socket.EVENT_RECONNECTING, new Emitter.Listener() {
-            @Override
-            public void call(Object... args) {
-                String my_date = java.text.DateFormat.getDateTimeInstance().format(Calendar.getInstance().getTime());
-                Log.d("Friibusiness", "SERVER reconnecting " + my_date);
-            }
-        });
-
-
-        SOCKET.on("list orders client", new Emitter.Listener() {
-            @Override
-            public void call(Object... args) {
-                if (this == null) {
-                    return;
-                }
-                final JSONObject jsonObject = (JSONObject) args[0];
-                System.out.println(jsonObject);
-                Log.d("Friibusiness", "delivered Order: " + jsonObject.toString());
-                try {
-                    final int status = jsonObject.getInt("status");
-                    if (status == 200) {
-                        getActivity().runOnUiThread(new Runnable() {
-
-                            @Override
-                            public void run() {
-                                try {
-
-
-                                    JSONArray jsonArray = jsonObject.getJSONArray("data");
-                                    for (int i = 0; i < jsonArray.length(); i++) {
-                                        JSONObject obj = null;
-                                        try {
-                                            obj = jsonArray.getJSONObject(i);
-                                        } catch (JSONException e) {
-                                            e.printStackTrace();
-                                        }
-                                        Order order = new Order();
-
-                                        order.setDate(obj.getJSONObject("orden").getString("date"));
-                                        order.setStatus(obj.getJSONObject("orden").getString("status"));
-                                        JSONArray details_data = obj.getJSONArray("order_detail");
-                                        List<String> details = new ArrayList<>();
-                                        ;
-                                        for (int j = 0; j < details_data.length(); j++) {
-                                            JSONObject jsonObject1 = details_data.getJSONObject(j);
-                                            details.add(jsonObject1.getString("description"));
-                                        }
-                                        order.setDetalles(details);
-
-                                        data.add(order);
-                                    }
-
-
-                                } catch (JSONException e) {
-                                    e.printStackTrace();
-                                }
-                            }
-
-                        });
-
-                        misPedidosAdapter = new MisPedidosAdapter(data);
-                        recyclerView.setAdapter(misPedidosAdapter);
-                    } else {
-
-                    }
-
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-
-
-            }
-        });
-
-    }
-
-    private void connect() {
-        int token = new Session(getContext()).getToken();
-        final Acount acount = DatabaseClient.getInstance(getContext())
-                .getAppDatabase()
-                .getAcountDao()
-                .getUser(token);
-
-        Log.d("Friibusiness", "New connect");
-        JSONObject jsonObject = new JSONObject();
-        try {
-            jsonObject.put("ID_CLIENT", token);
-            jsonObject.put("TOKEN", acount.getToken());
-            SOCKET.emit("list orders", jsonObject);
-
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-    }
 }

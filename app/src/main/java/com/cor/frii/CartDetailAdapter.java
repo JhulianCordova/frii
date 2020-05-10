@@ -66,6 +66,7 @@ public class CartDetailAdapter extends RecyclerView.Adapter<CartDetailAdapter.vi
                 notifyItemRemoved(position);
                 cartDetails.remove(position);
                 notifyDataSetChanged();
+                eventListener.calcularTotal(calcularTotal());
             }
         });
 
