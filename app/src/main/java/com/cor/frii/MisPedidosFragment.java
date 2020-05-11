@@ -9,6 +9,7 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -17,11 +18,13 @@ import android.view.ViewGroup;
 
 import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
+import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.ServerError;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.HttpHeaderParser;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
 import com.cor.frii.persistence.DatabaseClient;
 import com.cor.frii.persistence.Session;
 import com.cor.frii.persistence.entity.Acount;
@@ -48,6 +51,7 @@ public class MisPedidosFragment extends Fragment {
     private String mParam2;
 
     private OnFragmentInteractionListener mListener;
+    private SwipeRefreshLayout swipeRefreshLayout;
 
     private ArrayList<Order> data;
     private RecyclerView recyclerView;
@@ -56,6 +60,8 @@ public class MisPedidosFragment extends Fragment {
     private String baseURL = "http://34.71.251.155/api";
     static Socket SOCKET;
     public String HOST_NODEJS = "http://34.71.251.155:9000";
+
+    RequestQueue queue;
 
     public MisPedidosFragment() {
         // Required empty public constructor
@@ -89,6 +95,14 @@ public class MisPedidosFragment extends Fragment {
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(layoutManager);
 
+        swipeRefreshLayout = view.findViewById(R.id.swipeRefreshLayout);
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                llenarPedidos();
+                queue.getCache().clear();
+            }
+        });
 
         llenarPedidos();
 
@@ -135,6 +149,7 @@ public class MisPedidosFragment extends Fragment {
 
         JSONObject jsonObject = new JSONObject();
         data = new ArrayList<>();
+        queue = Volley.newRequestQueue(getContext());
 
         JsonObjectRequest request =
                 new JsonObjectRequest(Request.Method.GET, url, jsonObject, new Response.Listener<JSONObject>() {
@@ -148,6 +163,7 @@ public class MisPedidosFragment extends Fragment {
                                     JSONObject obj = jsonArray.getJSONObject(i);
                                     final Order order = new Order();
 
+                                    order.setId(obj.getJSONObject("orden").getInt("id"));
                                     order.setDate(obj.getJSONObject("orden").getString("date"));
                                     order.setStatus(obj.getJSONObject("orden").getString("status"));
                                     order.setClientDirection(new LatLng(
@@ -199,6 +215,9 @@ public class MisPedidosFragment extends Fragment {
                                     }
                                 });
 
+                                if (swipeRefreshLayout != null)
+                                    swipeRefreshLayout.setRefreshing(false);
+
                             }
                         } catch (JSONException e) {
                             e.printStackTrace();
@@ -229,7 +248,7 @@ public class MisPedidosFragment extends Fragment {
                     }
                 };
 
-        VolleySingleton.getInstance(getContext()).addToRequestQueue(request);
+        queue.add(request);
     }
 
 
