@@ -19,10 +19,10 @@ import android.widget.Toast;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
 
-public class PedidosActivity extends AppCompatActivity implements  NavigationView.OnNavigationItemSelectedListener,
-    MisPedidosFragment.OnFragmentInteractionListener,
-    MapsPerdidos.OnFragmentInteractionListener,
-    AccountFragment.OnFragmentInteractionListener{
+public class PedidosActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener,
+        MisPedidosFragment.OnFragmentInteractionListener,
+        MapsPerdidos.OnFragmentInteractionListener,
+        AccountFragment.OnFragmentInteractionListener {
 
     DrawerLayout drawerLayout;
     ActionBarDrawerToggle actionBarDrawerToggle;
@@ -51,40 +51,36 @@ public class PedidosActivity extends AppCompatActivity implements  NavigationVie
 
          */
 
-        FragmentManager manager=getSupportFragmentManager();
-        FragmentTransaction transaction=manager.beginTransaction();
+        FragmentManager manager = getSupportFragmentManager();
+        FragmentTransaction transaction = manager.beginTransaction();
         transaction.add(R.id.navigationContainer, new MisPedidosFragment());
         //transaction.addToBackStack(null);
         transaction.commit();
 
 
-
-
-        BottomNavigationView bottomNavigationView=findViewById(R.id.BottomNavigation);
+        BottomNavigationView bottomNavigationView = findViewById(R.id.BottomNavigation);
         bottomNavigationView.setOnNavigationItemSelectedListener(navListener);
-
 
 
     }
 
-    private BottomNavigationView.OnNavigationItemSelectedListener navListener=new BottomNavigationView.OnNavigationItemSelectedListener() {
+    private BottomNavigationView.OnNavigationItemSelectedListener navListener = new BottomNavigationView.OnNavigationItemSelectedListener() {
         @Override
         public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
-            FragmentManager manager=getSupportFragmentManager();
-            FragmentTransaction transaction=manager.beginTransaction();
+            FragmentManager manager = getSupportFragmentManager();
+            FragmentTransaction transaction = manager.beginTransaction();
             Intent intent;
-            switch (menuItem.getItemId()){
+            switch (menuItem.getItemId()) {
                 case R.id.HomeBottom:
-                    intent=new Intent(getBaseContext(),MainActivity.class);
+                    intent = new Intent(getBaseContext(), MainActivity.class);
                     startActivity(intent);
                     break;
                 case R.id.MapaBottom:
-                    transaction.replace(R.id.navigationContainer,new MapsPerdidos());
-                    transaction.commit();
-                    //Toast.makeText(getBaseContext(), "en implementacion el mapa", Toast.LENGTH_SHORT).show();
+
+                    Toast.makeText(getBaseContext(), "Por favor haga click en un pedido", Toast.LENGTH_SHORT).show();
                     break;
                 case R.id.PedidosBottom:
-                    transaction.replace(R.id.navigationContainer,new MisPedidosFragment());
+                    transaction.replace(R.id.navigationContainer, new MisPedidosFragment());
                     transaction.commit();
                     break;
 
@@ -97,7 +93,6 @@ public class PedidosActivity extends AppCompatActivity implements  NavigationVie
     public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
 
 
-
         return false;
     }
 
@@ -105,10 +100,6 @@ public class PedidosActivity extends AppCompatActivity implements  NavigationVie
     public void onFragmentInteraction(Uri uri) {
 
     }
-
-
-
-
 
 
 }

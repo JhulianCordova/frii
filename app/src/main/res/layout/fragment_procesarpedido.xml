@@ -21,11 +21,11 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
-            <include
-                android:id="@+id/include"
-                layout="@layout/activity_maps"
+            <fragment
+                android:id="@+id/google_map_pedidos"
+                android:name="com.google.android.gms.maps.SupportMapFragment"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="match_parent"></fragment>
         </LinearLayout>
 
         <LinearLayout
@@ -53,21 +53,22 @@
                     android:padding="3dp"
                     android:textSize="14dp"
                     android:gravity="end"
-                    android:text="Ingrese su dirección:"/>
+                    android:text="Dirección: " />
 
                 <TextView
+                    android:id="@+id/lblDireccion"
                     android:layout_width="match_parent"
                     android:padding="3dp"
                     android:textSize="14dp"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="my direction av. aaa f12"/>
+                    android:layout_weight="1" />
 
             </LinearLayout>
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="2dp"
-                android:background="@color/Gray"/>
+                android:background="@color/Gray" />
 
             <TextView
                 android:id="@+id/textView5"
@@ -92,8 +93,8 @@
 
                 <RadioGroup
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    >
+                    android:layout_height="wrap_content">
+
                     <RadioButton
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -105,8 +106,8 @@
                         android:textAlignment="textStart"
                         android:drawableLeft="@drawable/ic_credit_card_outline"
                         android:drawablePadding="10dp"
-                        android:padding="5dp"
-                        />
+                        android:padding="5dp" />
+
                     <RadioButton
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -118,8 +119,7 @@
                         android:drawablePadding="10dp"
                         android:padding="5dp"
 
-                        android:theme="@style/RadioButton"
-                        />
+                        android:theme="@style/RadioButton" />
 
                 </RadioGroup>
             </RelativeLayout>
@@ -158,7 +158,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="2dp"
                 android:background="@color/Gray"
-                android:layout_marginBottom="3dp"/>
+                android:layout_marginBottom="3dp" />
+
             <Button
                 android:id="@+id/ButtonConfirmarPedido"
                 android:layout_width="match_parent"

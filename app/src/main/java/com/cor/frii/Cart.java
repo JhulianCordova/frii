@@ -92,7 +92,6 @@ public class Cart extends AppCompatActivity implements NavigationView.OnNavigati
         FragmentTransaction transaction=manager.beginTransaction();
         Intent intent;
         if (menuItem.getItemId()==R.id.home){
-
             intent=new Intent(this,MainActivity.class);
             //transaction.replace(R.id.navigationContainer,new MainFragment());
             startActivity(intent);

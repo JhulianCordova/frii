@@ -1,6 +1,7 @@
 package com.cor.frii;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 
@@ -92,6 +93,20 @@ public class CartdetailFragment extends Fragment implements CartDetailAdapter.Ev
         llenarCarrito();
 
         procesarPedido = view.findViewById(R.id.ButtonCartProcesarPedido);
+
+        List<ECart> eCarts = DatabaseClient.getInstance(getContext())
+                .getAppDatabase()
+                .getCartDao()
+                .getCarts();
+
+        assert eCarts != null;
+        if (eCarts.size() == 0) {
+            procesarPedido.setEnabled(false);
+            procesarPedido.setBackgroundColor(Color.GRAY);
+        } else {
+            procesarPedido.setEnabled(true);
+        }
+
         procesarPedido.setOnClickListener(new View.OnClickListener() {
             FragmentManager manager = getActivity().getSupportFragmentManager();
             FragmentTransaction transaction = manager.beginTransaction();
@@ -136,6 +151,11 @@ public class CartdetailFragment extends Fragment implements CartDetailAdapter.Ev
 
     @Override
     public void calcularTotal(float total) {
+        if (total == 0) {
+            procesarPedido.setEnabled(false);
+            procesarPedido.setBackgroundColor(Color.GRAY);
+        }
+
         lblTotal.setText(String.valueOf(total));
     }
 

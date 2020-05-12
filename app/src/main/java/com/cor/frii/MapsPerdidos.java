@@ -1,54 +1,48 @@
 package com.cor.frii;
 
-import android.Manifest;
 import android.content.Context;
+
 import android.content.pm.PackageManager;
-import android.graphics.Camera;
 import android.graphics.Color;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 
-import androidx.annotation.NonNull;
-import androidx.core.app.ActivityCompat;
+import android.util.Log;
+import android.widget.Toast;
+
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
-import com.cor.frii.utils.GpsUtils;
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationServices;
+import com.cor.frii.utils.DirectionJSONParser;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.UiSettings;
-import com.google.android.gms.maps.model.CameraPosition;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.model.Polyline;
-import com.google.android.gms.maps.model.PolylineOptions;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.maps.android.PolyUtil;
+import com.google.android.gms.maps.model.*;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Objects;
+import java.util.Locale;
 
 
 public class MapsPerdidos extends Fragment implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener {
@@ -60,11 +54,17 @@ public class MapsPerdidos extends Fragment implements OnMapReadyCallback, Google
     private String mParam2;
 
     private View view;
-    private FusedLocationProviderClient mFusedLocationProviderClient;
     private GoogleMap map;
-    Boolean actualPosicion = true;
-    JSONObject jsonObject;
-    Double longitudOrigen, latitudOrigen;
+    private Polyline mPolyline;
+    private LatLng mOrigin;
+    private LatLng mDestination;
+    private ArrayList<LatLng> mMarkedPoints;
+    private String baseURL = "http://34.71.251.155/api";
+
+    private final LatLng mDefaultLocation = new LatLng(-33.8523341, 151.2106085);
+    private static final int DEFAULT_ZOOM = 16;
+    private Location mLastKnownLocation;
+    private Address address;
 
     private OnFragmentInteractionListener mListener;
 
@@ -78,6 +78,7 @@ public class MapsPerdidos extends Fragment implements OnMapReadyCallback, Google
         args.putString(ARG_PARAM1, param1);
         args.putString(ARG_PARAM2, param2);
         fragment.setArguments(args);
+
         return fragment;
     }
 
@@ -95,14 +96,16 @@ public class MapsPerdidos extends Fragment implements OnMapReadyCallback, Google
                              Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.fragment_mapsperdidos, container, false);
 
-        mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(getActivity());
         SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager()
                 .findFragmentById(R.id.google_map);
+        assert mapFragment != null;
         mapFragment.getMapAsync(this);
+
+        mMarkedPoints = new ArrayList<>();
+
         return view;
     }
 
-    // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(Uri uri) {
         if (mListener != null) {
             mListener.onFragmentInteraction(uri);
@@ -135,117 +138,200 @@ public class MapsPerdidos extends Fragment implements OnMapReadyCallback, Google
     public void onMapReady(GoogleMap googleMap) {
         map = googleMap;
 
-        if (ActivityCompat.shouldShowRequestPermissionRationale(Objects.requireNonNull(getActivity()),
-                Manifest.permission.ACCESS_COARSE_LOCATION)) {
+        if (ContextCompat.checkSelfPermission(getContext(), android.Manifest.permission.ACCESS_FINE_LOCATION) ==
+                PackageManager.PERMISSION_GRANTED &&
+                ContextCompat.checkSelfPermission(getContext(), android.Manifest.permission.ACCESS_COARSE_LOCATION) ==
+                        PackageManager.PERMISSION_GRANTED) {
 
+            UiSettings uiSettings = map.getUiSettings();
+            uiSettings.setZoomControlsEnabled(true);
+            map.setMyLocationEnabled(true);
+
+            llenarDatos();
         } else {
-            ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, 1);
+            Toast.makeText(getContext(), "Error de permisos", Toast.LENGTH_LONG).show();
         }
 
-        if (ActivityCompat.shouldShowRequestPermissionRationale(Objects.requireNonNull(getActivity()),
-                Manifest.permission.ACCESS_FINE_LOCATION)) {
-
-        } else {
-            ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
-        }
-
-        map.setMyLocationEnabled(true);
-        map.setOnMyLocationChangeListener(new GoogleMap.OnMyLocationChangeListener() {
-            @Override
-            public void onMyLocationChange(Location location) {
-
-                //Pocicion destino
-                //String url = "https://maps.googleapis.com/maps/api/directions/" + output + "?" + parameters + "&key=" + getString(R.string.map_key);
-                //-13.516545, -71.979574
-                String mode = "mode=driving";
-
-                if (actualPosicion) {
-                    latitudOrigen = location.getLatitude();
-                    longitudOrigen = location.getLongitude();
-                    actualPosicion = false;
-
-                    String parameters = "origin=" + latitudOrigen + "," + longitudOrigen + "&destination=" + -13.516545 + "," + -71.979574;
-                    String url = "https://maps.googleapis.com/maps/api/directions/json?" + parameters + "&key=" + getString(R.string.google_maps_key);
-
-
-                    LatLng miPosicion = new LatLng(latitudOrigen, longitudOrigen);
-                    map.addMarker(new MarkerOptions().position(miPosicion).title("Mi pocicion altual"));
-
-                    CameraPosition cameraPosition = new CameraPosition.Builder()
-                            .target(new LatLng(latitudOrigen, longitudOrigen))
-                            .zoom(17)
-                            .bearing(90)
-                            .build();
-
-                    map.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
-
-                    RequestQueue requestQueue = Volley.newRequestQueue(Objects.requireNonNull(getActivity()));
-                    StringRequest stringRequest =
-                            new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
-                                @Override
-                                public void onResponse(String response) {
-                                    try {
-                                        jsonObject = new JSONObject(response);
-                                        trazarRuta(jsonObject);
-
-                                        Log.i("jsonRuta:  ", " " + response);
-                                    } catch (JSONException e) {
-                                        e.printStackTrace();
-                                    }
-                                }
-                            }, new Response.ErrorListener() {
-                                @Override
-                                public void onErrorResponse(VolleyError error) {
-
-                                }
-                            });
-
-                    requestQueue.add(stringRequest);
-                }
-            }
-        });
     }
 
-    private void trazarRuta(JSONObject json) {
-        JSONArray jRoutes;
-        JSONArray jLegs;
-        JSONArray jSteps;
-
-
-        try {
-            jRoutes = json.getJSONArray("routes");
-            for (int i = 0; i < jRoutes.length(); i++) {
-                jLegs = ((JSONObject) (jRoutes.get(i))).getJSONArray("legs");
-                for (int j = 0; j < jLegs.length(); j++) {
-                    jSteps = ((JSONObject) jLegs.get(j)).getJSONArray("steps");
-                    for (int k = 0; k < jSteps.length(); k++) {
-                        String polyline = "" + ((JSONObject) ((JSONObject) jSteps.get(k)).get("polyline")).get("points");
-                        Log.i("end", "" + polyline);
-                        List<LatLng> list = PolyUtil.decode(polyline);
-                        map.addPolyline(new PolylineOptions().addAll(list).color(Color.GRAY).width(5));
-                    }
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        if (requestCode == 1) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-
-            } else {
-
-            }
-        }
-    }
 
     public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
     }
 
 
+    private void llenarDatos() {
+        Bundle bundle = getArguments();
+        assert bundle != null;
+        LatLng companyDirection = bundle.getParcelable("DCOMPANY");
+        LatLng clientDirection = bundle.getParcelable("DCLIENT");
+
+        mMarkedPoints = new ArrayList<>();
+
+
+        assert companyDirection != null;
+        LatLng company = new LatLng(companyDirection.latitude, companyDirection.longitude);
+
+        assert clientDirection != null;
+        LatLng destination = new LatLng(clientDirection.latitude, clientDirection.longitude);
+        map.animateCamera(CameraUpdateFactory.newLatLngZoom(destination, DEFAULT_ZOOM));
+
+        map.addMarker(new MarkerOptions()
+                .position(company)
+                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE))
+                .title("Local de distribución")
+        );
+
+        Geocoder geocoder = new Geocoder(getContext(), Locale.getDefault());
+        try {
+            List<Address> addresses = geocoder.getFromLocation(destination.latitude, destination.longitude, 1);
+
+            if (addresses.size() > 0) {
+                address = addresses.get(0);
+                map.addMarker(new MarkerOptions()
+                        .position(destination)
+                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN))
+                        .title("Mi direcion: " + address.getAddressLine(0))
+                );
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        mMarkedPoints.add(company);
+        mMarkedPoints.add(destination);
+        drawRoute(company, destination);
+
+
+    }
+
+
+    private void drawRoute(LatLng mOrigin, LatLng mDestination) {
+
+        String url = getURL(mOrigin, mDestination);
+        DownloadTask downloadTask = new DownloadTask();
+        downloadTask.execute(url);
+    }
+
+
+    // Obtener la ruta
+    private String getURL(LatLng origin, LatLng destination) {
+        String str_origin = "origin=" + origin.latitude + "," + origin.longitude;
+        String str_dest = "destination=" + destination.latitude + "," + destination.longitude;
+        String key = "key=" + getString(R.string.google_maps_key);
+        String parameters = str_origin + "&" + str_dest + "&" + key;
+        String output = "json";
+        return "https://maps.googleapis.com/maps/api/directions/" + output + "?" + parameters;
+    }
+
+    private String downloadURL(String URL) throws IOException {
+        String data = "";
+        InputStream iStream = null;
+        HttpURLConnection urlConnection = null;
+        try {
+            URL url = new URL(URL);
+
+            urlConnection = (HttpURLConnection) url.openConnection();
+            urlConnection.connect();
+
+            iStream = urlConnection.getInputStream();
+            BufferedReader br = new BufferedReader(new InputStreamReader(iStream));
+            StringBuffer sb = new StringBuffer();
+            String line = "";
+            while ((line = br.readLine()) != null) {
+                sb.append(line);
+            }
+
+            data = sb.toString();
+            br.close();
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        } finally {
+            iStream.close();
+            urlConnection.disconnect();
+
+        }
+
+        return data;
+    }
+
+    private class DownloadTask extends AsyncTask<String, Void, String> {
+
+        @Override
+        protected String doInBackground(String... url) {
+            String data = "";
+            try {
+                data = downloadURL(url[0]);
+                Log.d("Download Task", "DownloadTask: " + data);
+            } catch (IOException e) {
+                Log.d("Background Task ", e.toString());
+            }
+
+            return data;
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            super.onPostExecute(result);
+
+            ParserTask parserTask = new ParserTask();
+            parserTask.execute(result);
+        }
+    }
+
+    private class ParserTask extends AsyncTask<String, Integer, List<List<HashMap<String, String>>>> {
+
+        @Override
+        protected List<List<HashMap<String, String>>> doInBackground(String... jsonData) {
+            JSONObject object;
+            List<List<HashMap<String, String>>> routes = null;
+            try {
+                object = new JSONObject(jsonData[0]);
+                DirectionJSONParser parser = new DirectionJSONParser();
+                routes = parser.parse(object);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+            return routes;
+        }
+
+        @Override
+        protected void onPostExecute(List<List<HashMap<String, String>>> result) {
+            ArrayList<LatLng> points;
+            PolylineOptions lineOptions = null;
+
+            for (int i = 0; i < result.size(); i++) {
+                points = new ArrayList<LatLng>();
+                lineOptions = new PolylineOptions();
+                List<HashMap<String, String>> path = result.get(i);
+
+                // Fetching all the points in i-th route
+                for (int j = 0; j < path.size(); j++) {
+                    HashMap<String, String> point = path.get(j);
+
+                    double lat = Double.parseDouble(point.get("lat"));
+                    double lng = Double.parseDouble(point.get("lng"));
+                    LatLng position = new LatLng(lat, lng);
+
+                    points.add(position);
+                }
+
+                lineOptions.addAll(points);
+                lineOptions.width(8);
+                lineOptions.color(Color.RED);
+            }
+
+            if (lineOptions != null) {
+                if (mPolyline != null) {
+                    mPolyline.remove();
+                }
+                mPolyline = map.addPolyline(lineOptions);
+
+            } else
+                Toast.makeText(getContext(), "No route is found", Toast.LENGTH_LONG).show();
+        }
+
+    }
 }

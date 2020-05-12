@@ -65,7 +65,7 @@ public class GasProductAdapter extends RecyclerView.Adapter<GasProductAdapter.vi
         RadioGroup radioGroup;
         RadioButton peso;
 
-        public viewHolder(@NonNull View itemView) {
+        public viewHolder(@NonNull final View itemView) {
             super(itemView);
             gasProductTitle = itemView.findViewById(R.id.ProductGasTitle);
             gasProductImage = itemView.findViewById(R.id.ProductGasImage);
@@ -73,8 +73,26 @@ public class GasProductAdapter extends RecyclerView.Adapter<GasProductAdapter.vi
             productGasAddCart = itemView.findViewById(R.id.ProductGasAddCart);
             radioGroup = itemView.findViewById(R.id.radioGroup);
 
-            int radioButtonID = radioGroup.getCheckedRadioButtonId();
-            peso = radioGroup.findViewById(radioButtonID);
+
+            radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+                public void onCheckedChanged(RadioGroup group, int checkedId) {
+                    switch (checkedId) {
+                        case R.id.gas5kl:
+                            peso = itemView.findViewById(R.id.gas5kl);
+                            break;
+                        case R.id.gas10kl:
+                            peso = itemView.findViewById(R.id.gas10kl);
+                            break;
+                        case R.id.gas15kl:
+                            peso = itemView.findViewById(R.id.gas15kl);
+                            break;
+
+                        case R.id.gas45kl:
+                            peso = itemView.findViewById(R.id.gas45kl);
+                            break;
+                    }
+                }
+            });
         }
 
         void bind(final Product product) {
@@ -91,10 +109,10 @@ public class GasProductAdapter extends RecyclerView.Adapter<GasProductAdapter.vi
                 @Override
                 public void onClick(View v) {
 
-                    String pesoText = (String) peso.getText();
+                    String pesoText = peso.getText().toString();
 
                     ECart eCart = new ECart();
-                    eCart.setName(product.getName() + " " + pesoText + " KG" );
+                    eCart.setName(product.getName() + " " + pesoText + " KG");
                     eCart.setPrice(product.getPrice());
 
                     if (productGasCantidad.getText().length() > 0) {

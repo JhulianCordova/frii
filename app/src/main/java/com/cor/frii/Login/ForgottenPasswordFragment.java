@@ -4,15 +4,13 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.ProgressBar;
+
 import android.widget.TextView;
 
 import androidx.fragment.app.Fragment;
 
 import com.cor.frii.R;
-import com.google.android.material.textfield.TextInputLayout;
+
 
 public class ForgottenPasswordFragment extends Fragment implements View.OnClickListener {
 
@@ -35,22 +33,15 @@ public class ForgottenPasswordFragment extends Fragment implements View.OnClickL
 
         /*
         ForgottenPassword.setOnClickListener(new View.OnClickListener(){
-
             @Override
             public void onClick(View v) {
-
             }
         });
-
-
         NewAccount.setOnClickListener(new View.OnClickListener(){
-
             @Override
             public void onClick(View v) {
-
             }
         });
-
          */
 
         // init views
