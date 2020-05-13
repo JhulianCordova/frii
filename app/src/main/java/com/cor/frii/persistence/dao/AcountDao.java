@@ -1,3 +1,4 @@
+
 package com.cor.frii.persistence.dao;
 
 import android.database.Cursor;

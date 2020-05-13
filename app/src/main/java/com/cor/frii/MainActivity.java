@@ -37,7 +37,7 @@ import java.util.List;
 CategoriesFragment.OnFragmentInteractionListener,
     BrandsFragment.OnFragmentInteractionListener,ProductsFragment.OnFragmentInteractionListener,
     GasFragment.OnFragmentInteractionListener,CartdetailFragment.OnFragmentInteractionListener
- */
+*/
 
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener,
