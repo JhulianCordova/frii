@@ -84,6 +84,7 @@ public class ProcesarpedidoFragment extends Fragment implements OnMapReadyCallba
     private String baseURL = "http://34.71.251.155/api";
     private Thread thread = null;
 
+    private Context context;
 
     private ArrayList<LatLng> mMarkerPoints;
     LatLng point_move;
@@ -161,6 +162,8 @@ public class ProcesarpedidoFragment extends Fragment implements OnMapReadyCallba
             throw new RuntimeException(context.toString()
                     + " must implement OnFragmentInteractionListener");
         }
+
+        this.context = context;
     }
 
     @Override
@@ -388,7 +391,7 @@ public class ProcesarpedidoFragment extends Fragment implements OnMapReadyCallba
                             int status = response.getInt("status");
                             if (status == 201) {
                                 String message = response.getString("message");
-                                Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
+                                Toast.makeText(context, message, Toast.LENGTH_LONG).show();
 
                                 DatabaseClient.getInstance(getContext())
                                         .getAppDatabase()
