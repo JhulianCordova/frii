@@ -279,6 +279,9 @@ public class ProcesarpedidoFragment extends Fragment implements OnMapReadyCallba
                         }
                     }
                 });
+            } else {
+                updateLocationUI();
+                getDeviceLocation();
             }
         } catch (SecurityException e) {
             Log.e("Exception: %s", e.getMessage());
@@ -290,10 +293,13 @@ public class ProcesarpedidoFragment extends Fragment implements OnMapReadyCallba
                 android.Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
             mLocationPermissionGranted = true;
+
         } else {
             ActivityCompat.requestPermissions(getActivity(),
                     new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
         }
+
+
     }
 
     @Override
@@ -307,6 +313,8 @@ public class ProcesarpedidoFragment extends Fragment implements OnMapReadyCallba
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     mLocationPermissionGranted = true;
+
+
                 }
             }
         }
@@ -321,7 +329,6 @@ public class ProcesarpedidoFragment extends Fragment implements OnMapReadyCallba
             if (mLocationPermissionGranted) {
                 map.setMyLocationEnabled(true);
                 map.getUiSettings().setMyLocationButtonEnabled(true);
-
             } else {
                 map.setMyLocationEnabled(false);
                 map.getUiSettings().setMyLocationButtonEnabled(false);

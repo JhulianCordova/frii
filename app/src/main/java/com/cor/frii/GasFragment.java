@@ -142,12 +142,12 @@ public class GasFragment extends Fragment {
 
         String url = this.urlBase + "/api/product/gas/" + type;
         JSONObject jsonArray = new JSONObject();
+        final String finalType = type;
         JsonObjectRequest arrayRequest =
                 new JsonObjectRequest(Request.Method.GET, url, jsonArray, new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
                         try {
-                            System.out.println(response);
                             JSONArray array = response.getJSONArray("data");
                             for (int i = 0; i < array.length(); i++) {
                                 JSONObject object = array.getJSONObject(i);
@@ -159,9 +159,11 @@ public class GasFragment extends Fragment {
                                         "",
                                         Float.parseFloat(object.getString("unit_price")),
 
-                                        object.getString("measurement"),
+                                        object.getInt("measurement"),
                                         1,
-                                        imagen_url);
+                                        imagen_url,
+                                        finalType,
+                                        object.getJSONObject("marke_id").getString("name"));
 
                                 products.add(product);
                             }

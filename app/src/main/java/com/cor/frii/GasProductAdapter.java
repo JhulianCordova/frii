@@ -1,6 +1,7 @@
 package com.cor.frii;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,20 +14,36 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.loader.content.CursorLoader;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.android.volley.DefaultRetryPolicy;
+import com.android.volley.NetworkResponse;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.ServerError;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.HttpHeaderParser;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
 import com.cor.frii.persistence.DatabaseClient;
 import com.cor.frii.persistence.entity.ECart;
 import com.cor.frii.pojo.Product;
 import com.cor.frii.utils.LoadImage;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.UnsupportedEncodingException;
 import java.util.List;
 
 public class GasProductAdapter extends RecyclerView.Adapter<GasProductAdapter.viewHolder> implements View.OnClickListener {
 
 
-    List<Product> products;
+    private List<Product> products;
     private Context context;
+
 
     public GasProductAdapter(List<Product> products) {
         this.products = products;
@@ -57,7 +74,7 @@ public class GasProductAdapter extends RecyclerView.Adapter<GasProductAdapter.vi
         return products.size();
     }
 
-    public class viewHolder extends RecyclerView.ViewHolder {
+    class viewHolder extends RecyclerView.ViewHolder {
         TextView gasProductTitle;
         ImageView gasProductImage;
         EditText productGasCantidad;
@@ -65,14 +82,14 @@ public class GasProductAdapter extends RecyclerView.Adapter<GasProductAdapter.vi
         RadioGroup radioGroup;
         RadioButton peso;
 
-        public viewHolder(@NonNull final View itemView) {
+        viewHolder(@NonNull final View itemView) {
             super(itemView);
             gasProductTitle = itemView.findViewById(R.id.ProductGasTitle);
             gasProductImage = itemView.findViewById(R.id.ProductGasImage);
             productGasCantidad = itemView.findViewById(R.id.ProductGasCantidad);
             productGasAddCart = itemView.findViewById(R.id.ProductGasAddCart);
             radioGroup = itemView.findViewById(R.id.radioGroup);
-
+            peso = itemView.findViewById(R.id.gas10kl);
 
             radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
                 public void onCheckedChanged(RadioGroup group, int checkedId) {
@@ -97,6 +114,9 @@ public class GasProductAdapter extends RecyclerView.Adapter<GasProductAdapter.vi
 
         void bind(final Product product) {
 
+            double precio = 0.0;
+            float price = 0;
+
             productGasCantidad.setText("1");
 
             gasProductTitle.setText(product.getName());
@@ -108,27 +128,76 @@ public class GasProductAdapter extends RecyclerView.Adapter<GasProductAdapter.vi
 
                 @Override
                 public void onClick(View v) {
+                    String marke = product.getMarke();
 
-                    String pesoText = peso.getText().toString();
+                    final String pesoText = peso.getText().toString();
+                    final int cantidad = Integer.parseInt(productGasCantidad.getText().toString());
 
-                    ECart eCart = new ECart();
-                    eCart.setName(product.getName() + " " + pesoText + " KG");
-                    eCart.setPrice(product.getPrice());
-
-                    if (productGasCantidad.getText().length() > 0) {
-                        eCart.setCantidad(Integer.parseInt(productGasCantidad.getText().toString()));
-                        eCart.setTotal(Float.parseFloat(productGasCantidad.getText().toString()) * product.getPrice());
-                        DatabaseClient.getInstance(context)
-                                .getAppDatabase()
-                                .getCartDao()
-                                .addCart(eCart);
-                        Toast.makeText(context, "Agregado al Carrito", Toast.LENGTH_LONG).show();
-                    } else {
-                        Toast.makeText(context, "Ingrese una cantidad mayor a 0", Toast.LENGTH_LONG).show();
+                    JSONObject object = new JSONObject();
+                    try {
+                        object.put("name", marke);
+                        object.put("measurement", Integer.parseInt(pesoText));
+                        object.put("gas_type", product.getType());
+                    } catch (JSONException e) {
+                        e.printStackTrace();
                     }
+
+                    RequestQueue queue = Volley.newRequestQueue(context);
+
+                    String url = "http://34.71.251.155/api/product/price/";
+                    JsonObjectRequest objectRequest =
+                            new JsonObjectRequest(Request.Method.POST, url, object, new Response.Listener<JSONObject>() {
+                                @Override
+                                public void onResponse(JSONObject response) {
+                                    try {
+                                        int status = response.getInt("status");
+                                        if (status == 200) {
+                                            double precio = response.getDouble("data");
+
+                                            ECart eCart = new ECart();
+                                            eCart.setName(product.getName() + " " + pesoText + " KG");
+                                            eCart.setPrice((float) precio);
+                                            eCart.setCantidad(cantidad);
+                                            eCart.setTotal((float) (cantidad * precio));
+                                            DatabaseClient.getInstance(context)
+                                                    .getAppDatabase()
+                                                    .getCartDao()
+                                                    .addCart(eCart);
+                                            Toast.makeText(context, "Agregado al Carrito", Toast.LENGTH_LONG).show();
+                                        } else {
+                                            Toast.makeText(context, "Ingrese una cantidad mayor a 0", Toast.LENGTH_LONG).show();
+                                        }
+
+                                    } catch (JSONException e) {
+                                        e.printStackTrace();
+                                    }
+
+                                }
+                            }, new Response.ErrorListener() {
+                                @Override
+                                public void onErrorResponse(VolleyError error) {
+                                    Log.d("Volley get", "error voley" + error.toString());
+                                    NetworkResponse response = error.networkResponse;
+                                    if (error instanceof ServerError && response != null) {
+                                        try {
+                                            String res = new String(response.data, HttpHeaderParser.parseCharset(response.headers, "utf-8"));
+                                            JSONObject obj = new JSONObject(res);
+                                            Log.d("Voley post", obj.toString());
+                                            String msj = obj.getString("message");
+                                            Toast.makeText(context, msj, Toast.LENGTH_SHORT).show();
+
+                                        } catch (UnsupportedEncodingException | JSONException e1) {
+                                            e1.printStackTrace();
+                                        }
+                                    }
+                                }
+                            });
+                    objectRequest.setRetryPolicy(new DefaultRetryPolicy(0, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+                    queue.add(objectRequest);
 
                 }
             });
         }
     }
+
 }
