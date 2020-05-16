@@ -1,11 +1,17 @@
 package com.cor.frii;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
+import android.media.RingtoneManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.CountDownTimer;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -16,6 +22,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.volley.NetworkResponse;
@@ -36,6 +44,8 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.List;
 
+import static android.content.Context.NOTIFICATION_SERVICE;
+
 public class MisPedidosAdapter extends RecyclerView.Adapter<MisPedidosAdapter.viewHolder> implements View.OnClickListener {
 
     private List<Order> data;
@@ -43,6 +53,9 @@ public class MisPedidosAdapter extends RecyclerView.Adapter<MisPedidosAdapter.vi
     private View view;
     private View.OnClickListener listener;
 
+    public static final String TAG = "firebase";
+    private final static int NOTIFICATION_ID = 0;
+    private final static String CHANNEL_ID = "NOTIFICACION";
 
     public static int nuMin = 10;
     public static int numSeg = 0;
@@ -68,10 +81,8 @@ public class MisPedidosAdapter extends RecyclerView.Adapter<MisPedidosAdapter.vi
         view.setOnClickListener(this);
         context = parent.getContext();
 
-
         return new viewHolder(view);
     }
-
 
     @Override
     public void onBindViewHolder(@NonNull final viewHolder holder, final int position) {
@@ -136,6 +147,7 @@ public class MisPedidosAdapter extends RecyclerView.Adapter<MisPedidosAdapter.vi
 
             if (data.get(position).getStatus().equals("wait")) {
                 holder.timer = new CountDownTimer(100000, 1000) {
+                    @SuppressLint("SetTextI18n")
                     @Override
                     public void onTick(long millisUntilFinished) {
                         NumberFormat f = new DecimalFormat("00");
@@ -149,6 +161,7 @@ public class MisPedidosAdapter extends RecyclerView.Adapter<MisPedidosAdapter.vi
                     @Override
                     public void onFinish() {
                         tiempoCancelar(data.get(position).getId());
+                        notificacionCancelado("Pedido cancelado", "El pedido fue cancelado, el tiempo expiro");
                     }
                 }.start();
             }
@@ -163,6 +176,10 @@ public class MisPedidosAdapter extends RecyclerView.Adapter<MisPedidosAdapter.vi
             });
         }
 
+        if (data.get(position).getStatus().equals("confirm")) {
+            notificacionCancelado("Pedido ha sido tomado", "El pedido que realizo ha sido tomado por un proveedor");
+        }
+
 
     }
 
@@ -171,13 +188,13 @@ public class MisPedidosAdapter extends RecyclerView.Adapter<MisPedidosAdapter.vi
         return data.size();
     }
 
-    public class viewHolder extends RecyclerView.ViewHolder {
+    class viewHolder extends RecyclerView.ViewHolder {
         TextView titlePedido, estadoPedido, detallePedido;
         Button llamar, mensaje, cancelar;
         CountDownTimer timer;
         TextView timerAuto;
 
-        public viewHolder(@NonNull View itemView) {
+        viewHolder(@NonNull View itemView) {
             super(itemView);
             titlePedido = itemView.findViewById(R.id.TitlePedidos);
             estadoPedido = itemView.findViewById(R.id.EstadoPedido);
@@ -199,6 +216,7 @@ public class MisPedidosAdapter extends RecyclerView.Adapter<MisPedidosAdapter.vi
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         tiempoCancelar(idOrden);
+//                        notificacionCancelado();
                     }
 
 
@@ -252,6 +270,33 @@ public class MisPedidosAdapter extends RecyclerView.Adapter<MisPedidosAdapter.vi
                     }
                 });
         queue.add(jsonObjectRequest);
+    }
+
+    private void notificacionCancelado(String title, String body) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            CharSequence name = TAG;
+            NotificationChannel notificationChannel =
+                    new NotificationChannel(CHANNEL_ID, name, NotificationManager.IMPORTANCE_DEFAULT);
+            NotificationManager notificationManager = (NotificationManager) context.getSystemService(NOTIFICATION_SERVICE);
+            notificationManager.createNotificationChannel(notificationChannel);
+        }
+
+        Intent intent = new Intent(context, MainActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_ONE_SHOT);
+
+        Uri soundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+
+        NotificationCompat.Builder noBuilder = new NotificationCompat.Builder(context, CHANNEL_ID)
+                .setSmallIcon(R.drawable.ic_cart)
+                .setContentTitle(title)
+                .setContentText(body)
+                .setAutoCancel(true)
+                .setSound(soundUri)
+                .setContentIntent(pendingIntent);
+
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
+        notificationManager.notify(NOTIFICATION_ID, noBuilder.build());
     }
 
 }

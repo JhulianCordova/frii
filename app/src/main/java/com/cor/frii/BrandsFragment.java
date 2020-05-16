@@ -129,7 +129,7 @@ public class BrandsFragment extends Fragment {
             if (bundle.getInt("idCategory") == 2) {
                 gas_categories.add(new Brands(1, "Gas Normal", "", urlBase + "/media/images/gas-regular.png"));
                 gas_categories.add(new Brands(2, "Gas Premium", "", urlBase + "/media/images/gas-premium.png"));
-                gas_categories.add(new Brands(3, "Camion", "", urlBase + "/media/images/none-img.png"));
+                gas_categories.add(new Brands(3, "Camion", "", urlBase + "/media/images/gas-cisterna.png"));
 
                 brandsAdapter = new BrandsAdapter(gas_categories);
                 recyclerView.setAdapter(brandsAdapter);
@@ -176,7 +176,7 @@ public class BrandsFragment extends Fragment {
             url = this.urlBase + "/api/markes";
             brandsList.add(new Brands(1, "Gas Normal", "", urlBase + "/media/images/gas-regular.png"));
             brandsList.add(new Brands(2, "Gas Premium", "", urlBase + "/media/images/gas-premium.png"));
-            brandsList.add(new Brands(3, "Camion", "", urlBase + "/media/images/none-img.png"));
+            brandsList.add(new Brands(3, "Camion", "", urlBase + "/media/images/gas-cisterna.png"));
         }
 
         JSONArray jsonArray = new JSONArray();

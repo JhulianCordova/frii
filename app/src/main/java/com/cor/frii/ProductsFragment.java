@@ -166,9 +166,11 @@ public class ProductsFragment extends Fragment {
                                                 object.getJSONObject("unit_measurement_id").getString("name"),
 
                                         Float.parseFloat(object.getString("unit_price")),
-                                        object.getString("measurement"),
+                                        object.getInt("measurement"),
                                         1,
-                                        imagen_url
+                                        imagen_url,
+                                        "",
+                                        object.getJSONObject("marke_id").getString("name")
                                 );
 
                                 products.add(product);

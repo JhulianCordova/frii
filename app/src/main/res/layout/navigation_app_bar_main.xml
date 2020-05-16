@@ -10,8 +10,6 @@
 
     <include layout="@layout/navigation_content_main"
         />
-
-
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:layout_height="wrap_content"
         android:layout_width="match_parent"
@@ -19,9 +17,7 @@
         android:src="@drawable/ic_cart"
         app:backgroundTint="@color/fondoitems"
         android:id="@+id/fad_cart_order"
-        >
-
-    </com.google.android.material.floatingactionbutton.FloatingActionButton>
+        />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:layout_height="wrap_content"

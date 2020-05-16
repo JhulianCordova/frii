@@ -32,8 +32,8 @@ public class BrandsAdapter extends RecyclerView.Adapter<BrandsAdapter.viewHolder
     }
 
     /*
-     * modificaciones
-     * */
+    * modificaciones
+    * */
 
     @NonNull
     @Override
