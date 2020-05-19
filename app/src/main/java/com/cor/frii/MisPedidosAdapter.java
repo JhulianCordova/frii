@@ -37,6 +37,7 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.cor.frii.pojo.Order;
 
+import com.cor.frii.utils.AgendarPedido;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -52,14 +53,13 @@ public class MisPedidosAdapter extends RecyclerView.Adapter<MisPedidosAdapter.vi
     private Context context;
     private View view;
     private View.OnClickListener listener;
+    ViewGroup viewGroup;
 
     public static final String TAG = "firebase";
     private final static int NOTIFICATION_ID = 0;
     private final static String CHANNEL_ID = "NOTIFICACION";
 
-    public static int nuMin = 10;
-    public static int numSeg = 0;
-    public static int numHor = 0;
+    private String buttonEstado = "cancelar";
 
     public MisPedidosAdapter(List<Order> data) {
         this.data = data;
@@ -80,18 +80,18 @@ public class MisPedidosAdapter extends RecyclerView.Adapter<MisPedidosAdapter.vi
         view = LayoutInflater.from(parent.getContext()).inflate(R.layout.custom_mispedidos, parent, false);
         view.setOnClickListener(this);
         context = parent.getContext();
-
+        viewGroup = parent;
         return new viewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull final viewHolder holder, final int position) {
 
-
         holder.titlePedido.setText(data.get(position).getDate());
         switch (data.get(position).getStatus()) {
             case "wait":
                 holder.estadoPedido.setText("En espera");
+                holder.cancelar.setText("Cancelar");
                 break;
             case "refuse":
                 holder.estadoPedido.setText("Rechazado");
@@ -99,13 +99,20 @@ public class MisPedidosAdapter extends RecyclerView.Adapter<MisPedidosAdapter.vi
             case "confirm":
                 holder.estadoPedido.setText("Confirmado");
                 holder.cancelar.setEnabled(true);
+                holder.cancelar.setText("Cancelar");
                 break;
             case "delivered":
                 holder.estadoPedido.setText("Entregado");
+                holder.cancelar.setText("Calificar");
+                holder.cancelar.setBackgroundColor(Color.rgb(23, 162, 184));
                 break;
             default:
                 holder.estadoPedido.setText("Cancelado");
-                holder.cancelar.setEnabled(false);
+                holder.cancelar.setText("Repedir");
+                holder.cancelar.setBackgroundColor(Color.rgb(40, 167, 69));
+                holder.mensaje.setVisibility(View.GONE);
+                holder.llamar.setVisibility(View.GONE);
+
                 break;
         }
         StringBuilder details = new StringBuilder();
@@ -141,12 +148,12 @@ public class MisPedidosAdapter extends RecyclerView.Adapter<MisPedidosAdapter.vi
         }
 
         if (data.get(position).getStatus().equals("cancel")) {
-            holder.cancelar.setEnabled(false);
-            holder.cancelar.setBackgroundColor(Color.GRAY);
+            holder.cancelar.setText("Repedir");
+            holder.cancelar.setBackgroundColor(Color.rgb(40, 167, 69));
         } else {
 
             if (data.get(position).getStatus().equals("wait")) {
-                holder.timer = new CountDownTimer(100000, 1000) {
+                /*holder.timer = new CountDownTimer(100000, 1000) {
                     @SuppressLint("SetTextI18n")
                     @Override
                     public void onTick(long millisUntilFinished) {
@@ -163,14 +170,22 @@ public class MisPedidosAdapter extends RecyclerView.Adapter<MisPedidosAdapter.vi
                         tiempoCancelar(data.get(position).getId());
                         notificacionCancelado("Pedido cancelado", "El pedido fue cancelado, el tiempo expiro");
                     }
-                }.start();
+                }.start();*/
             }
 
             holder.cancelar.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    mensajeConfirmacion(data.get(position).getId());
-                    notifyDataSetChanged();
+                    if (holder.cancelar.getText().equals("Cancelar")) {
+                        mensajeConfirmacion(data.get(position).getId());
+                        notifyDataSetChanged();
+                    } else if (holder.cancelar.getText().equals("Calificar")) {
+                        AgendarPedido agendarPedido = new AgendarPedido(context, data.get(position).getId(),
+                                data.get(position).getCalification());
+                        agendarPedido.show();
+                    } else if (holder.cancelar.getText().equals("Repedir")) {
+                        Toast.makeText(context, "En implementacion", Toast.LENGTH_LONG).show();
+                    }
 
                 }
             });
@@ -188,7 +203,7 @@ public class MisPedidosAdapter extends RecyclerView.Adapter<MisPedidosAdapter.vi
         return data.size();
     }
 
-    class viewHolder extends RecyclerView.ViewHolder {
+    static class viewHolder extends RecyclerView.ViewHolder {
         TextView titlePedido, estadoPedido, detallePedido;
         Button llamar, mensaje, cancelar;
         CountDownTimer timer;
@@ -216,10 +231,7 @@ public class MisPedidosAdapter extends RecyclerView.Adapter<MisPedidosAdapter.vi
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         tiempoCancelar(idOrden);
-//                        notificacionCancelado();
                     }
-
-
                 })
                 .setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
                     @Override
@@ -274,10 +286,10 @@ public class MisPedidosAdapter extends RecyclerView.Adapter<MisPedidosAdapter.vi
 
     private void notificacionCancelado(String title, String body) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            CharSequence name = TAG;
             NotificationChannel notificationChannel =
-                    new NotificationChannel(CHANNEL_ID, name, NotificationManager.IMPORTANCE_DEFAULT);
+                    new NotificationChannel(CHANNEL_ID, TAG, NotificationManager.IMPORTANCE_DEFAULT);
             NotificationManager notificationManager = (NotificationManager) context.getSystemService(NOTIFICATION_SERVICE);
+            assert notificationManager != null;
             notificationManager.createNotificationChannel(notificationChannel);
         }
 
@@ -291,6 +303,7 @@ public class MisPedidosAdapter extends RecyclerView.Adapter<MisPedidosAdapter.vi
                 .setSmallIcon(R.drawable.ic_cart)
                 .setContentTitle(title)
                 .setContentText(body)
+                .setStyle(new NotificationCompat.BigTextStyle().bigText(body))
                 .setAutoCancel(true)
                 .setSound(soundUri)
                 .setContentIntent(pendingIntent);

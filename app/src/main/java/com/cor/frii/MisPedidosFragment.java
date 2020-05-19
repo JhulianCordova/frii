@@ -166,6 +166,7 @@ public class MisPedidosFragment extends Fragment {
                                     order.setId(obj.getJSONObject("orden").getInt("id"));
                                     order.setDate(obj.getJSONObject("orden").getString("date"));
                                     order.setStatus(obj.getJSONObject("orden").getString("status"));
+                                    order.setCalification((float) obj.getJSONObject("orden").getDouble("calification"));
                                     order.setClientDirection(new LatLng(
                                             obj.getJSONObject("orden").getDouble("latitude"),
                                             obj.getJSONObject("orden").getDouble("longitude")

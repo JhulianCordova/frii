@@ -69,6 +69,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+
         toolbar = findViewById(R.id.navigationToolbar);
         setSupportActionBar(toolbar);
         drawerLayout = findViewById(R.id.navigationDrawer);
@@ -90,7 +91,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         flo_cart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(v.getContext(), Cart.class);
+                Intent intent = new Intent(getApplicationContext(), Cart.class);
                 startActivity(intent);
                 //finish();
             }

@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
 
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
@@ -20,6 +20,11 @@
         <item name="colorAccent">@color/Blue</item>
         <item name="android:textColorSecondary">@color/deleteFondo</item>
         <item name="colorControlNormal">@color/black</item>
+    </style>
+
+    <style name="Base.TextAppearance.AppCompat.Medium" tools:ignore="PrivateResource">
+        <item name="android:textSize">@dimen/abc_text_size_medium_material</item>
+        <item name="android:textColor">?android:attr/textColorSecondary</item>
     </style>
 
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
