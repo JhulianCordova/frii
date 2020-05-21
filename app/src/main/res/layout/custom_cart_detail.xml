@@ -30,14 +30,16 @@
                 android:layout_marginStart="5dp"
                 android:layout_marginTop="8dp"
                 android:layout_marginEnd="4dp"
-                android:text="TextView"
+                android:layout_marginBottom="3dp"
                 android:gravity="center"
                 android:paddingLeft="3dp"
                 android:paddingRight="3dp"
+                android:text="TextView"
                 android:textColor="@color/marcasTitle"
-                android:textStyle="bold"
                 android:textSize="20dp"
 
+                android:textStyle="bold"
+                app:layout_constraintBottom_toTopOf="@+id/textView6"
                 app:layout_constraintEnd_toStartOf="@+id/cartDeleteButton"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
@@ -57,39 +59,43 @@
                 android:id="@+id/textView6"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="2dp"
-                android:text="Cantidad:"
                 android:layout_marginStart="5dp"
+                android:layout_marginTop="3dp"
+                android:layout_marginBottom="2dp"
                 android:gravity="center"
+                android:text="Cantidad:"
                 android:textColor="@color/subtitle"
                 app:layout_constraintBottom_toTopOf="@+id/cartEditcantidad"
                 app:layout_constraintEnd_toStartOf="@+id/textView7"
-                app:layout_constraintStart_toStartOf="parent" />
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/cartProductTitle" />
 
             <TextView
                 android:id="@+id/textView7"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="Precio U:"
+                android:layout_marginTop="4dp"
                 android:gravity="center"
+                android:text="Precio U:"
                 android:textColor="@color/subtitle"
                 app:layout_constraintBottom_toTopOf="@+id/cartPrecioU"
                 app:layout_constraintEnd_toStartOf="@+id/textView8"
-                app:layout_constraintStart_toEndOf="@+id/textView6" />
+                app:layout_constraintStart_toEndOf="@+id/textView6"
+                app:layout_constraintTop_toBottomOf="@+id/cartProductTitle" />
 
             <TextView
                 android:id="@+id/textView8"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="Sub Total:"
+                android:layout_marginTop="5dp"
                 android:layout_marginEnd="5dp"
                 android:gravity="center"
+                android:text="Sub Total:"
                 android:textColor="@color/subtitle"
                 app:layout_constraintBottom_toTopOf="@+id/cartSubTotal"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/textView7"
-                app:layout_constraintTop_toBottomOf="@+id/cartDeleteButton" />
+                app:layout_constraintTop_toBottomOf="@+id/cartProductTitle" />
 
             <TextView
                 android:id="@+id/cartPrecioU"
@@ -108,13 +114,12 @@
                 android:layout_width="0dp"
                 android:layout_height="24dp"
                 android:layout_marginBottom="8dp"
-                android:text=""
-                android:gravity="center"
                 android:background="@drawable/custom_subtotal"
+                android:gravity="center"
+                android:text=""
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@+id/cartPrecioU"
-                app:layout_constraintTop_toBottomOf="@+id/textView8" />
+                app:layout_constraintStart_toEndOf="@+id/cartPrecioU" />
 
             <EditText
                 android:id="@+id/cartEditcantidad"
