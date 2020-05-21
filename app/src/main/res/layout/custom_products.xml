@@ -47,6 +47,7 @@
                 android:textColor="@color/marcasTitle"
                 android:textSize="20dp"
                 android:textStyle="bold"
+                app:layout_constraintBottom_toTopOf="@+id/ProductDescription"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/ProductImage"
                 app:layout_constraintTop_toTopOf="parent" />
@@ -55,12 +56,13 @@
                 android:id="@+id/ProductDescription"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="4dp"
+                android:layout_marginStart="16dp"
                 android:layout_marginTop="2dp"
                 android:layout_marginEnd="4dp"
 
                 android:text="TextView"
                 android:textColor="@color/subtitle"
+                app:layout_constraintBottom_toTopOf="@+id/textView3"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/ProductImage"
                 app:layout_constraintTop_toBottomOf="@+id/ProductTitle" />

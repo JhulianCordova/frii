@@ -158,7 +158,7 @@ public class ProductsFragment extends Fragment {
                                 Product product = new Product(
                                         object.getInt("id"),
                                         object.getString("description"),
-                                        "Precio UU: S/." +
+                                        "Precio U: S/." +
                                                 object.getString("unit_price"),
                                         Float.parseFloat(object.getString("unit_price")),
                                         object.getInt("measurement"),
