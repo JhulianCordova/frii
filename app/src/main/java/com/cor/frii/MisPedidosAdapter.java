@@ -35,14 +35,23 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.HttpHeaderParser;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.cor.frii.persistence.DatabaseClient;
+import com.cor.frii.persistence.Session;
+import com.cor.frii.persistence.entity.Acount;
 import com.cor.frii.pojo.Order;
 
 import com.cor.frii.utils.AgendarPedido;
+import com.github.nkzawa.emitter.Emitter;
+import com.github.nkzawa.socketio.client.IO;
+import com.github.nkzawa.socketio.client.Socket;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.net.URISyntaxException;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.util.Calendar;
 import java.util.List;
 
 import static android.content.Context.NOTIFICATION_SERVICE;
@@ -54,6 +63,8 @@ public class MisPedidosAdapter extends RecyclerView.Adapter<MisPedidosAdapter.vi
     private View view;
     private View.OnClickListener listener;
     ViewGroup viewGroup;
+    private Socket socket;
+    public String HOST_NODEJS = "http://34.71.251.155:9000";
 
     public static final String TAG = "firebase";
     private final static int NOTIFICATION_ID = 0;
@@ -260,6 +271,7 @@ public class MisPedidosAdapter extends RecyclerView.Adapter<MisPedidosAdapter.vi
                             int status = response.getInt("status");
                             if (status == 200) {
                                 Toast.makeText(context, response.getString("message"), Toast.LENGTH_LONG).show();
+                                initSocket();
                             }
                         } catch (JSONException e) {
                             e.printStackTrace();
@@ -310,6 +322,108 @@ public class MisPedidosAdapter extends RecyclerView.Adapter<MisPedidosAdapter.vi
 
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
         notificationManager.notify(NOTIFICATION_ID, noBuilder.build());
+    }
+
+
+    private void initSocket() {
+
+        int id_user = new Session(context).getToken();
+        JSONObject data = new JSONObject();
+        Acount cuenta = DatabaseClient.getInstance(context)
+                .getAppDatabase()
+                .getAcountDao()
+                .getUser(id_user);
+
+        final JSONObject json_connect = new JSONObject();
+        IO.Options opts = new IO.Options();
+        // opts.forceNew = true;
+        opts.reconnection = true;
+        opts.query = "auth_token=thisgo77";
+        try {
+            json_connect.put("ID", "US01");
+            json_connect.put("TOKEN", cuenta.getToken());
+            json_connect.put("ID_CLIENT", 2);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            socket = IO.socket(HOST_NODEJS, opts);
+            socket.connect();
+            // SOCKET.io().reconnectionDelay(10000);
+            Log.d(TAG, "Node connect ok");
+            //conect();
+        } catch (URISyntaxException e) {
+            Log.d(TAG, "Node connect error");
+        }
+
+        socket.on(Socket.EVENT_CONNECT, new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                Log.d(TAG, "emitiendo new conect");
+                JSONObject data = new JSONObject();
+                int id = new Session(context).getToken();
+                Acount cuenta = DatabaseClient.getInstance(context)
+                        .getAppDatabase()
+                        .getAcountDao()
+                        .getUser(id);
+                try {
+                    data.put("ID", cuenta.getId());
+                    data.put("type", "client");
+                    Log.d(TAG, "conect " + data.toString());
+                    socket.emit("new connect", data);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                String date = java.text.DateFormat.getDateTimeInstance().format(Calendar.getInstance().getTime());
+                Log.d(TAG, "SERVER connect " + date);
+
+
+            }
+        });
+
+        socket.on(Socket.EVENT_DISCONNECT, new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                String date = java.text.DateFormat.getDateTimeInstance().format(Calendar.getInstance().getTime());
+                Log.d(TAG, "SERVER disconnect " + date);
+            }
+        });
+
+        socket.on(Socket.EVENT_RECONNECT, new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                String my_date = java.text.DateFormat.getDateTimeInstance().format(Calendar.getInstance().getTime());
+                Log.d(TAG, "SERVER reconnect " + my_date);
+            }
+        });
+
+        socket.on(Socket.EVENT_CONNECT_TIMEOUT, new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                String my_date = java.text.DateFormat.getDateTimeInstance().format(Calendar.getInstance().getTime());
+                Log.d(TAG, "SERVER timeout " + my_date);
+            }
+        });
+
+        socket.on(Socket.EVENT_RECONNECTING, new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                String my_date = java.text.DateFormat.getDateTimeInstance().format(Calendar.getInstance().getTime());
+                Log.d(TAG, "SERVER reconnecting " + my_date);
+            }
+        });
+
+        JSONObject datas = new JSONObject();
+        try {
+            datas.put("id", id_user);
+            datas.put("token", cuenta.getToken());
+            Log.d(TAG, "conect " + datas.toString());
+            socket.emit("status order", datas);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
     }
 
 }

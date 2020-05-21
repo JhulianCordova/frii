@@ -157,14 +157,9 @@ public class ProductsFragment extends Fragment {
                                 String imagen_url = urlBase + object.getString("image");
                                 Product product = new Product(
                                         object.getInt("id"),
-                                        object.getJSONObject("marke_id").getString("name") + " " +
-                                                object.getJSONObject("detail_measurement_id").getString("name"),
-
-                                        object.getJSONObject("marke_id").getString("name") + " " +
-                                                object.getJSONObject("detail_measurement_id").getString("name") + " " +
-                                                object.getString("measurement") + " " +
-                                                object.getJSONObject("unit_measurement_id").getString("name"),
-
+                                        object.getString("description"),
+                                        "Precio UU: S/." +
+                                                object.getString("unit_price"),
                                         Float.parseFloat(object.getString("unit_price")),
                                         object.getInt("measurement"),
                                         1,

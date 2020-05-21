@@ -30,6 +30,8 @@ import com.cor.frii.persistence.Session;
 import com.cor.frii.persistence.entity.Acount;
 import com.cor.frii.pojo.Order;
 import com.cor.frii.utils.VolleySingleton;
+import com.github.nkzawa.emitter.Emitter;
+import com.github.nkzawa.socketio.client.IO;
 import com.github.nkzawa.socketio.client.Socket;
 import com.google.android.gms.maps.model.LatLng;
 
@@ -37,11 +39,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.net.URISyntaxException;
+import java.util.*;
 
 public class MisPedidosFragment extends Fragment {
     private static final String ARG_PARAM1 = "param1";
@@ -60,6 +59,9 @@ public class MisPedidosFragment extends Fragment {
     private String baseURL = "http://34.71.251.155/api";
     static Socket SOCKET;
     public String HOST_NODEJS = "http://34.71.251.155:9000";
+    //    public String HOST_NODEJS = "http://35.202.77.151";
+    private final String TAG = "friibusiness";
+    private Socket socket;
 
     RequestQueue queue;
 
@@ -83,6 +85,8 @@ public class MisPedidosFragment extends Fragment {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
+        initSocket();
+        socket.on("status order", onStatusOrder);
 
     }
 
@@ -105,8 +109,6 @@ public class MisPedidosFragment extends Fragment {
         });
 
         llenarPedidos();
-
-//        initSocket();
         return view;
     }
 
@@ -148,10 +150,10 @@ public class MisPedidosFragment extends Fragment {
                 .getUser(token);
 
         JSONObject jsonObject = new JSONObject();
-        data = new ArrayList<>();
+
         queue = Volley.newRequestQueue(getContext());
 
-        JsonObjectRequest request =
+        /*JsonObjectRequest request =
                 new JsonObjectRequest(Request.Method.GET, url, jsonObject, new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
@@ -249,8 +251,175 @@ public class MisPedidosFragment extends Fragment {
                     }
                 };
 
-        queue.add(request);
+        queue.add(request);*/
     }
 
+
+    private void initSocket() {
+
+        int id_user = new Session(getContext()).getToken();
+        JSONObject data = new JSONObject();
+        Acount cuenta = DatabaseClient.getInstance(getContext())
+                .getAppDatabase()
+                .getAcountDao()
+                .getUser(id_user);
+
+        final JSONObject json_connect = new JSONObject();
+        IO.Options opts = new IO.Options();
+        // opts.forceNew = true;
+        opts.reconnection = true;
+        opts.query = "auth_token=thisgo77";
+        try {
+            json_connect.put("ID", "US01");
+            json_connect.put("TOKEN", cuenta.getToken());
+            json_connect.put("ID_CLIENT", 2);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            socket = IO.socket(HOST_NODEJS, opts);
+            socket.connect();
+            // SOCKET.io().reconnectionDelay(10000);
+            Log.d(TAG, "Node connect ok");
+            //conect();
+        } catch (URISyntaxException e) {
+            Log.d(TAG, "Node connect error");
+        }
+
+        socket.on(Socket.EVENT_CONNECT, new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                Log.d(TAG, "emitiendo new conect");
+                JSONObject data = new JSONObject();
+                int id = new Session(getContext()).getToken();
+                Acount cuenta = DatabaseClient.getInstance(getContext())
+                        .getAppDatabase()
+                        .getAcountDao()
+                        .getUser(id);
+                try {
+                    data.put("ID", cuenta.getId());
+                    data.put("type", "client");
+                    Log.d(TAG, "conect " + data.toString());
+                    socket.emit("new connect", data);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                String date = java.text.DateFormat.getDateTimeInstance().format(Calendar.getInstance().getTime());
+                Log.d(TAG, "SERVER connect " + date);
+
+
+            }
+        });
+
+        socket.on(Socket.EVENT_DISCONNECT, new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                String date = java.text.DateFormat.getDateTimeInstance().format(Calendar.getInstance().getTime());
+                Log.d(TAG, "SERVER disconnect " + date);
+            }
+        });
+
+        socket.on(Socket.EVENT_RECONNECT, new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                String my_date = java.text.DateFormat.getDateTimeInstance().format(Calendar.getInstance().getTime());
+                Log.d(TAG, "SERVER reconnect " + my_date);
+            }
+        });
+
+        socket.on(Socket.EVENT_CONNECT_TIMEOUT, new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                String my_date = java.text.DateFormat.getDateTimeInstance().format(Calendar.getInstance().getTime());
+                Log.d(TAG, "SERVER timeout " + my_date);
+            }
+        });
+
+        socket.on(Socket.EVENT_RECONNECTING, new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                String my_date = java.text.DateFormat.getDateTimeInstance().format(Calendar.getInstance().getTime());
+                Log.d(TAG, "SERVER reconnecting " + my_date);
+            }
+        });
+
+        int token = new Session(getContext()).getToken();
+        String url = this.baseURL + "/client/order/" + token;
+        final Acount acount = DatabaseClient.getInstance(getContext())
+                .getAppDatabase()
+                .getAcountDao()
+                .getUser(token);
+        JSONObject datas = new JSONObject();
+        try {
+            datas.put("id", token);
+            datas.put("token", acount.getToken());
+            Log.d(TAG, "conect " + datas.toString());
+            socket.emit("status order", datas);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    private Emitter.Listener onStatusOrder = new Emitter.Listener() {
+        @Override
+        public void call(final Object... args) {
+            if (getActivity() == null)
+                return;
+
+            data = new ArrayList<>();
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    JSONObject response = (JSONObject) args[0];
+                    try {
+                        int status = response.getInt("status");
+                        if (status == 200) {
+                            JSONArray jsonArray = response.getJSONArray("data");
+                            for (int i = 0; i < jsonArray.length(); i++) {
+                                JSONObject obj = jsonArray.getJSONObject(i);
+                                final Order order = new Order();
+
+                                order.setId(obj.getJSONObject("orden").getInt("id"));
+                                order.setDate(obj.getJSONObject("orden").getString("date"));
+                                order.setStatus(obj.getJSONObject("orden").getString("status"));
+                                order.setCalification((float) obj.getJSONObject("orden").getDouble("calification"));
+                                order.setClientDirection(new LatLng(
+                                        obj.getJSONObject("orden").getDouble("latitude"),
+                                        obj.getJSONObject("orden").getDouble("longitude")
+                                ));
+                                if (obj.getJSONObject("company").length() > 0) {
+                                    order.setPhone(obj.getJSONObject("company").getString("phone"));
+                                    LatLng latLng = new LatLng(
+                                            obj.getJSONObject("company").getDouble("latitude"),
+                                            obj.getJSONObject("company").getDouble("longitude")
+                                    );
+                                    order.setCompanyDirection(latLng);
+                                }
+
+                                JSONArray details_data = obj.getJSONArray("order_detail");
+                                List<String> details = new ArrayList<>();
+                                for (int j = 0; j < details_data.length(); j++) {
+                                    JSONObject jsonObject1 = details_data.getJSONObject(j);
+                                    details.add(jsonObject1.getString("description"));
+                                }
+                                order.setDetalles(details);
+
+                                data.add(order);
+                            }
+
+                            misPedidosAdapter = new MisPedidosAdapter(data);
+                            misPedidosAdapter.notifyDataSetChanged();
+                            recyclerView.setAdapter(misPedidosAdapter);
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+
+        }
+    };
 
 }
