@@ -13,6 +13,15 @@ public class Order {
     private LatLng companyDirection;
     private LatLng clientDirection;
     private List<String> detalles;
+    private float calification;
+
+    public float getCalification() {
+        return calification;
+    }
+
+    public void setCalification(float calification) {
+        this.calification = calification;
+    }
 
     public int getId() {
         return id;

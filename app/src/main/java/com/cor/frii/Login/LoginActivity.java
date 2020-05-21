@@ -1,5 +1,6 @@
 package com.cor.frii.Login;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.LiveData;
 
@@ -29,8 +30,12 @@ import com.cor.frii.R;
 import com.cor.frii.persistence.DatabaseClient;
 import com.cor.frii.persistence.Session;
 import com.cor.frii.persistence.entity.Acount;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.textfield.TextInputEditText;
 
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.iid.InstanceIdResult;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -134,9 +139,12 @@ public class LoginActivity extends AppCompatActivity {
                                     Intent intent = new Intent(getApplicationContext(), MainActivity.class);
                                     startActivity(intent);
                                     session.setToken(cuenta.getId());
+
+                                    saveTokenBackend(id_user, token);
                                     finish();
                                 } else {
                                     insertarUsuario(token, id_user, pass);
+
                                 }
 
                             }
@@ -235,9 +243,11 @@ public class LoginActivity extends AppCompatActivity {
                             session.setToken(i);
                             Intent intent = new Intent(getApplicationContext(), MainActivity.class);
                             startActivity(intent);
-                            finish();
 
-                            System.out.println("ESTE EL TOKEN DEL REGISTROS DE PERFIL: " + i);
+
+                            saveTokenBackend(i, token);
+
+                            finish();
 
                         } catch (JSONException e) {
                             e.printStackTrace();
@@ -271,5 +281,70 @@ public class LoginActivity extends AppCompatActivity {
                 };
 
         requestQueue.add(jsonObjectRequest);
+    }
+
+
+    private void saveTokenBackend(final int id, final String tokenClient) {
+        FirebaseInstanceId.getInstance().getInstanceId()
+                .addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<InstanceIdResult> task) {
+                        if (!task.isSuccessful()) {
+                            Log.w("Friibusiness", "getInstanceId failed", task.getException());
+                            return;
+                        }
+
+                        String token = task.getResult().getToken();
+
+                        RequestQueue requestQueue = Volley.newRequestQueue(getApplicationContext());
+                        JSONObject object = new JSONObject();
+                        try {
+                            object.put("token", token);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+
+                        String url = "http://34.71.251.155/api/device/save/";
+                        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, url, object,
+                                new Response.Listener<JSONObject>() {
+                                    @Override
+                                    public void onResponse(JSONObject response) {
+                                        try {
+                                            int status = response.getInt("status");
+                                            if (status == 200) {
+                                                System.out.println("Mensaje: " + response.getString("message"));
+                                            }
+                                        } catch (JSONException e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+                                }, new Response.ErrorListener() {
+                            @Override
+                            public void onErrorResponse(VolleyError error) {
+                                Log.d("Volley post", "error voley" + error.toString());
+                                NetworkResponse response = error.networkResponse;
+                                if (error instanceof ServerError && response != null) {
+                                    try {
+                                        String res = new String(response.data,
+                                                HttpHeaderParser.parseCharset(response.headers, "utf-8"));
+                                        JSONObject obj = new JSONObject(res);
+                                        System.out.println(res);
+                                    } catch (UnsupportedEncodingException | JSONException e1) {
+                                        e1.printStackTrace();
+                                    }
+                                }
+                            }
+                        }) {
+                            @Override
+                            public Map<String, String> getHeaders() {
+                                Map<String, String> headers = new HashMap<>();
+                                headers.put("Authorization", "JWT " + tokenClient);
+                                headers.put("Content-Type", "application/json");
+                                return headers;
+                            }
+                        };
+                        requestQueue.add(jsonObjectRequest);
+                    }
+                });
     }
 }

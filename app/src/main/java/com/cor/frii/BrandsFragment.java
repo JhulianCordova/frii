@@ -208,7 +208,6 @@ public class BrandsFragment extends Fragment {
                                 public void onClick(View v) {
                                     String brandsTitle = brandsList.get(recyclerView.getChildAdapterPosition(v)).getName();
                                     brandsTitle = brandsTitle.toLowerCase();
-                                    Toast.makeText(getContext(), brandsTitle, Toast.LENGTH_SHORT).show();
                                     if (brandsTitle.equals("gas normal") || brandsTitle.equals("gas premium")) {
                                         GasFragment gasFragment = new GasFragment();
                                         Bundle b = new Bundle();
@@ -216,13 +215,14 @@ public class BrandsFragment extends Fragment {
                                             b.putString("type", "gas-normal");
                                         } else {
                                             b.putString("type", "gas-premium");
-
                                         }
                                         gasFragment.setArguments(b);
                                         transaction.replace(R.id.mainContainer, gasFragment);
                                         transaction.addToBackStack(null);
                                         transaction.commit();
 
+                                    } else if (brandsTitle.equals("camion")) {
+                                        Toast.makeText(getContext(), "En implementacion", Toast.LENGTH_LONG).show();
                                     } else {
                                         Bundle b = new Bundle();
                                         b.putInt("IdMarke", brandsList.get(recyclerView.getChildAdapterPosition(v)).getId());

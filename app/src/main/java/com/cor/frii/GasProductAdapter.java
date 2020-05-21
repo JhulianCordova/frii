@@ -32,6 +32,7 @@ import com.cor.frii.persistence.entity.ECart;
 import com.cor.frii.pojo.Product;
 import com.cor.frii.utils.LoadImage;
 
+import com.squareup.picasso.Picasso;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -120,8 +121,7 @@ public class GasProductAdapter extends RecyclerView.Adapter<GasProductAdapter.vi
             productGasCantidad.setText("1");
 
             gasProductTitle.setText(product.getName());
-            new LoadImage(gasProductImage).execute(product.getUrl());
-
+            Picasso.get().load(product.getUrl()).into(gasProductImage);
 
             productGasAddCart.setOnClickListener(new View.OnClickListener() {
 

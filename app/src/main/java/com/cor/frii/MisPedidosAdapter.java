@@ -35,13 +35,23 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.HttpHeaderParser;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.cor.frii.persistence.DatabaseClient;
+import com.cor.frii.persistence.Session;
+import com.cor.frii.persistence.entity.Acount;
 import com.cor.frii.pojo.Order;
+
+import com.cor.frii.utils.AgendarPedido;
+import com.github.nkzawa.emitter.Emitter;
+import com.github.nkzawa.socketio.client.IO;
+import com.github.nkzawa.socketio.client.Socket;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.net.URISyntaxException;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.util.Calendar;
 import java.util.List;
 
 import static android.content.Context.NOTIFICATION_SERVICE;
@@ -52,14 +62,15 @@ public class MisPedidosAdapter extends RecyclerView.Adapter<MisPedidosAdapter.vi
     private Context context;
     private View view;
     private View.OnClickListener listener;
+    ViewGroup viewGroup;
+    private Socket socket;
+    public String HOST_NODEJS = "http://34.71.251.155:9000";
 
     public static final String TAG = "firebase";
     private final static int NOTIFICATION_ID = 0;
     private final static String CHANNEL_ID = "NOTIFICACION";
 
-    public static int nuMin = 10;
-    public static int numSeg = 0;
-    public static int numHor = 0;
+    private String buttonEstado = "cancelar";
 
     public MisPedidosAdapter(List<Order> data) {
         this.data = data;
@@ -80,18 +91,18 @@ public class MisPedidosAdapter extends RecyclerView.Adapter<MisPedidosAdapter.vi
         view = LayoutInflater.from(parent.getContext()).inflate(R.layout.custom_mispedidos, parent, false);
         view.setOnClickListener(this);
         context = parent.getContext();
-
+        viewGroup = parent;
         return new viewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull final viewHolder holder, final int position) {
 
-
         holder.titlePedido.setText(data.get(position).getDate());
         switch (data.get(position).getStatus()) {
             case "wait":
                 holder.estadoPedido.setText("En espera");
+                holder.cancelar.setText("Cancelar");
                 break;
             case "refuse":
                 holder.estadoPedido.setText("Rechazado");
@@ -99,13 +110,20 @@ public class MisPedidosAdapter extends RecyclerView.Adapter<MisPedidosAdapter.vi
             case "confirm":
                 holder.estadoPedido.setText("Confirmado");
                 holder.cancelar.setEnabled(true);
+                holder.cancelar.setText("Cancelar");
                 break;
             case "delivered":
                 holder.estadoPedido.setText("Entregado");
+                holder.cancelar.setText("Calificar");
+                holder.cancelar.setBackgroundColor(Color.rgb(23, 162, 184));
                 break;
             default:
                 holder.estadoPedido.setText("Cancelado");
-                holder.cancelar.setEnabled(false);
+                holder.cancelar.setText("Repedir");
+                holder.cancelar.setBackgroundColor(Color.rgb(40, 167, 69));
+                holder.mensaje.setVisibility(View.GONE);
+                holder.llamar.setVisibility(View.GONE);
+
                 break;
         }
         StringBuilder details = new StringBuilder();
@@ -141,12 +159,12 @@ public class MisPedidosAdapter extends RecyclerView.Adapter<MisPedidosAdapter.vi
         }
 
         if (data.get(position).getStatus().equals("cancel")) {
-            holder.cancelar.setEnabled(false);
-            holder.cancelar.setBackgroundColor(Color.GRAY);
+            holder.cancelar.setText("Repedir");
+            holder.cancelar.setBackgroundColor(Color.rgb(40, 167, 69));
         } else {
 
             if (data.get(position).getStatus().equals("wait")) {
-                holder.timer = new CountDownTimer(100000, 1000) {
+                /*holder.timer = new CountDownTimer(100000, 1000) {
                     @SuppressLint("SetTextI18n")
                     @Override
                     public void onTick(long millisUntilFinished) {
@@ -163,14 +181,22 @@ public class MisPedidosAdapter extends RecyclerView.Adapter<MisPedidosAdapter.vi
                         tiempoCancelar(data.get(position).getId());
                         notificacionCancelado("Pedido cancelado", "El pedido fue cancelado, el tiempo expiro");
                     }
-                }.start();
+                }.start();*/
             }
 
             holder.cancelar.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    mensajeConfirmacion(data.get(position).getId());
-                    notifyDataSetChanged();
+                    if (holder.cancelar.getText().equals("Cancelar")) {
+                        mensajeConfirmacion(data.get(position).getId());
+                        notifyDataSetChanged();
+                    } else if (holder.cancelar.getText().equals("Calificar")) {
+                        AgendarPedido agendarPedido = new AgendarPedido(context, data.get(position).getId(),
+                                data.get(position).getCalification());
+                        agendarPedido.show();
+                    } else if (holder.cancelar.getText().equals("Repedir")) {
+                        Toast.makeText(context, "En implementacion", Toast.LENGTH_LONG).show();
+                    }
 
                 }
             });
@@ -188,7 +214,7 @@ public class MisPedidosAdapter extends RecyclerView.Adapter<MisPedidosAdapter.vi
         return data.size();
     }
 
-    class viewHolder extends RecyclerView.ViewHolder {
+    static class viewHolder extends RecyclerView.ViewHolder {
         TextView titlePedido, estadoPedido, detallePedido;
         Button llamar, mensaje, cancelar;
         CountDownTimer timer;
@@ -216,10 +242,7 @@ public class MisPedidosAdapter extends RecyclerView.Adapter<MisPedidosAdapter.vi
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         tiempoCancelar(idOrden);
-//                        notificacionCancelado();
                     }
-
-
                 })
                 .setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
                     @Override
@@ -248,6 +271,7 @@ public class MisPedidosAdapter extends RecyclerView.Adapter<MisPedidosAdapter.vi
                             int status = response.getInt("status");
                             if (status == 200) {
                                 Toast.makeText(context, response.getString("message"), Toast.LENGTH_LONG).show();
+                                initSocket();
                             }
                         } catch (JSONException e) {
                             e.printStackTrace();
@@ -274,10 +298,10 @@ public class MisPedidosAdapter extends RecyclerView.Adapter<MisPedidosAdapter.vi
 
     private void notificacionCancelado(String title, String body) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            CharSequence name = TAG;
             NotificationChannel notificationChannel =
-                    new NotificationChannel(CHANNEL_ID, name, NotificationManager.IMPORTANCE_DEFAULT);
+                    new NotificationChannel(CHANNEL_ID, TAG, NotificationManager.IMPORTANCE_DEFAULT);
             NotificationManager notificationManager = (NotificationManager) context.getSystemService(NOTIFICATION_SERVICE);
+            assert notificationManager != null;
             notificationManager.createNotificationChannel(notificationChannel);
         }
 
@@ -291,12 +315,115 @@ public class MisPedidosAdapter extends RecyclerView.Adapter<MisPedidosAdapter.vi
                 .setSmallIcon(R.drawable.ic_cart)
                 .setContentTitle(title)
                 .setContentText(body)
+                .setStyle(new NotificationCompat.BigTextStyle().bigText(body))
                 .setAutoCancel(true)
                 .setSound(soundUri)
                 .setContentIntent(pendingIntent);
 
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
         notificationManager.notify(NOTIFICATION_ID, noBuilder.build());
+    }
+
+
+    private void initSocket() {
+
+        int id_user = new Session(context).getToken();
+        JSONObject data = new JSONObject();
+        Acount cuenta = DatabaseClient.getInstance(context)
+                .getAppDatabase()
+                .getAcountDao()
+                .getUser(id_user);
+
+        final JSONObject json_connect = new JSONObject();
+        IO.Options opts = new IO.Options();
+        // opts.forceNew = true;
+        opts.reconnection = true;
+        opts.query = "auth_token=thisgo77";
+        try {
+            json_connect.put("ID", "US01");
+            json_connect.put("TOKEN", cuenta.getToken());
+            json_connect.put("ID_CLIENT", 2);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            socket = IO.socket(HOST_NODEJS, opts);
+            socket.connect();
+            // SOCKET.io().reconnectionDelay(10000);
+            Log.d(TAG, "Node connect ok");
+            //conect();
+        } catch (URISyntaxException e) {
+            Log.d(TAG, "Node connect error");
+        }
+
+        socket.on(Socket.EVENT_CONNECT, new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                Log.d(TAG, "emitiendo new conect");
+                JSONObject data = new JSONObject();
+                int id = new Session(context).getToken();
+                Acount cuenta = DatabaseClient.getInstance(context)
+                        .getAppDatabase()
+                        .getAcountDao()
+                        .getUser(id);
+                try {
+                    data.put("ID", cuenta.getId());
+                    data.put("type", "client");
+                    Log.d(TAG, "conect " + data.toString());
+                    socket.emit("new connect", data);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                String date = java.text.DateFormat.getDateTimeInstance().format(Calendar.getInstance().getTime());
+                Log.d(TAG, "SERVER connect " + date);
+
+
+            }
+        });
+
+        socket.on(Socket.EVENT_DISCONNECT, new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                String date = java.text.DateFormat.getDateTimeInstance().format(Calendar.getInstance().getTime());
+                Log.d(TAG, "SERVER disconnect " + date);
+            }
+        });
+
+        socket.on(Socket.EVENT_RECONNECT, new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                String my_date = java.text.DateFormat.getDateTimeInstance().format(Calendar.getInstance().getTime());
+                Log.d(TAG, "SERVER reconnect " + my_date);
+            }
+        });
+
+        socket.on(Socket.EVENT_CONNECT_TIMEOUT, new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                String my_date = java.text.DateFormat.getDateTimeInstance().format(Calendar.getInstance().getTime());
+                Log.d(TAG, "SERVER timeout " + my_date);
+            }
+        });
+
+        socket.on(Socket.EVENT_RECONNECTING, new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                String my_date = java.text.DateFormat.getDateTimeInstance().format(Calendar.getInstance().getTime());
+                Log.d(TAG, "SERVER reconnecting " + my_date);
+            }
+        });
+
+        JSONObject datas = new JSONObject();
+        try {
+            datas.put("id", id_user);
+            datas.put("token", cuenta.getToken());
+            Log.d(TAG, "conect " + datas.toString());
+            socket.emit("status order", datas);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
     }
 
 }

@@ -1,5 +1,6 @@
 package com.cor.frii;
 
+import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,7 +11,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.cor.frii.pojo.Brands;
-import com.cor.frii.utils.LoadImage;
+import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
@@ -32,8 +33,8 @@ public class BrandsAdapter extends RecyclerView.Adapter<BrandsAdapter.viewHolder
     }
 
     /*
-    * modificaciones
-    * */
+     * modificaciones
+     * */
 
     @NonNull
     @Override
@@ -73,7 +74,8 @@ public class BrandsAdapter extends RecyclerView.Adapter<BrandsAdapter.viewHolder
 
         void bind(final Brands brands) {
             brandsTitle.setText(brands.getName());
-            new LoadImage(brandsImage).execute(brands.getUrl());
+
+            Picasso.get().load(brands.getUrl()).into(brandsImage);
         }
     }
 }

@@ -17,6 +17,7 @@ import com.cor.frii.persistence.DatabaseClient;
 import com.cor.frii.persistence.entity.ECart;
 import com.cor.frii.pojo.Product;
 import com.cor.frii.utils.LoadImage;
+import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
@@ -82,7 +83,8 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.viewHold
             productCantidad.setText("1");
             productTilte.setText(product.getName());
             productDescription.setText(product.getDescription());
-            new LoadImage(productImage).execute(product.getUrl());
+
+            Picasso.get().load(product.getUrl()).into(productImage);
 
             productButtonAdd.setOnClickListener(new View.OnClickListener() {
 
