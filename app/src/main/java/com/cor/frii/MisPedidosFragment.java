@@ -99,11 +99,13 @@ public class MisPedidosFragment extends Fragment {
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(layoutManager);
 
+        initSocket();
         swipeRefreshLayout = view.findViewById(R.id.swipeRefreshLayout);
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                llenarPedidos();
+                initSocket();
+                socket.on("status order", onStatusOrder);
                 queue.getCache().clear();
             }
         });
@@ -414,7 +416,6 @@ public class MisPedidosFragment extends Fragment {
                             recyclerView.setAdapter(misPedidosAdapter);
                             misPedidosAdapter.setOnClickListener(new View.OnClickListener() {
 
-
                                 @Override
                                 public void onClick(View v) {
                                     FragmentManager manager = Objects.requireNonNull(getActivity()).getSupportFragmentManager();
@@ -434,6 +435,9 @@ public class MisPedidosFragment extends Fragment {
                                     }
                                 }
                             });
+
+                            if (swipeRefreshLayout != null)
+                                swipeRefreshLayout.setRefreshing(false);
                         }
                     } catch (JSONException e) {
                         e.printStackTrace();
