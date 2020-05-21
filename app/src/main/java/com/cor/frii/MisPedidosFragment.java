@@ -412,6 +412,28 @@ public class MisPedidosFragment extends Fragment {
                             misPedidosAdapter = new MisPedidosAdapter(data);
                             misPedidosAdapter.notifyDataSetChanged();
                             recyclerView.setAdapter(misPedidosAdapter);
+                            misPedidosAdapter.setOnClickListener(new View.OnClickListener() {
+
+
+                                @Override
+                                public void onClick(View v) {
+                                    FragmentManager manager = Objects.requireNonNull(getActivity()).getSupportFragmentManager();
+                                    FragmentTransaction transaction = manager.beginTransaction();
+                                    String status = data.get(recyclerView.getChildAdapterPosition(v)).getStatus();
+                                    if (status.equals("confirm")) {
+                                        MapsPerdidos misPedidosFragment = new MapsPerdidos();
+                                        Bundle bundle = new Bundle();
+                                        LatLng d_company = data.get(recyclerView.getChildAdapterPosition(v)).getCompanyDirection();
+                                        LatLng d_client = data.get(recyclerView.getChildAdapterPosition(v)).getClientDirection();
+                                        bundle.putParcelable("DCOMPANY", d_company);
+                                        bundle.putParcelable("DCLIENT", d_client);
+                                        misPedidosFragment.setArguments(bundle);
+                                        transaction.add(R.id.navigationContainer, misPedidosFragment);
+                                        transaction.addToBackStack(null);
+                                        transaction.commit();
+                                    }
+                                }
+                            });
                         }
                     } catch (JSONException e) {
                         e.printStackTrace();
