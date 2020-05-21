@@ -93,7 +93,9 @@
 
                 <RadioGroup
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/custom_radiogroup"
+                    >
 
                     <RadioButton
                         android:layout_width="match_parent"
@@ -118,7 +120,7 @@
                         android:drawableLeft="@drawable/ic_cash_100"
                         android:drawablePadding="10dp"
                         android:padding="5dp"
-
+                        android:checked="true"
                         android:theme="@style/RadioButton" />
 
                 </RadioGroup>
