@@ -93,7 +93,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.viewHold
                 public void onClick(View v) {
 
                     ECart eCart = new ECart();
-                    eCart.setName(product.getDescription());
+                    eCart.setName(product.getName());
                     eCart.setPrice(product.getPrice());
 
                     if (productCantidad.getText().length() > 0) {
