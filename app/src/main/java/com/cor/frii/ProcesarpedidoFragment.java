@@ -38,6 +38,9 @@ import com.cor.frii.persistence.Session;
 import com.cor.frii.persistence.entity.Acount;
 import com.cor.frii.persistence.entity.ECart;
 import com.cor.frii.utils.GpsUtils;
+import com.github.nkzawa.emitter.Emitter;
+import com.github.nkzawa.socketio.client.IO;
+import com.github.nkzawa.socketio.client.Socket;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.*;
@@ -54,7 +57,9 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -82,12 +87,14 @@ public class ProcesarpedidoFragment extends Fragment implements OnMapReadyCallba
     private Marker marcador_carro;
     private Address address;
     private String baseURL = "http://34.71.251.155/api";
+    public String HOST_NODEJS = "http://34.71.251.155:9000";
     private Thread thread = null;
 
     private Context context;
 
     private ArrayList<LatLng> mMarkerPoints;
     LatLng point_move;
+    private Socket socket;
 
     private TextView lblDireccion;
 
@@ -114,6 +121,8 @@ public class ProcesarpedidoFragment extends Fragment implements OnMapReadyCallba
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
+
+        initSocket();
     }
 
     @Override
@@ -400,6 +409,14 @@ public class ProcesarpedidoFragment extends Fragment implements OnMapReadyCallba
                                 String message = response.getString("message");
                                 Toast.makeText(context, message, Toast.LENGTH_LONG).show();
 
+
+                                JSONObject datas = new JSONObject();
+                                datas.put("id", response.getJSONObject("data").getInt("order_id"));
+                                datas.put("latitude", point_move.latitude);
+                                datas.put("longitude", point_move.longitude);
+                                Log.d(TAG, "conect " + datas.toString());
+                                socket.emit("get orders", datas);
+
                                 DatabaseClient.getInstance(getContext())
                                         .getAppDatabase()
                                         .getCartDao()
@@ -442,6 +459,98 @@ public class ProcesarpedidoFragment extends Fragment implements OnMapReadyCallba
                 };
 
         queue.add(jsonObjectRequest);
+    }
+
+    private void initSocket() {
+
+        int id_user = new Session(context).getToken();
+        JSONObject data = new JSONObject();
+        Acount cuenta = DatabaseClient.getInstance(context)
+                .getAppDatabase()
+                .getAcountDao()
+                .getUser(id_user);
+
+        final JSONObject json_connect = new JSONObject();
+        IO.Options opts = new IO.Options();
+        // opts.forceNew = true;
+        opts.reconnection = true;
+        opts.query = "auth_token=thisgo77";
+        try {
+            json_connect.put("ID", "US01");
+            json_connect.put("TOKEN", cuenta.getToken());
+            json_connect.put("ID_CLIENT", id_user);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            socket = IO.socket(HOST_NODEJS, opts);
+            socket.connect();
+            // SOCKET.io().reconnectionDelay(10000);
+            Log.d(TAG, "Node connect ok");
+            //conect();
+        } catch (URISyntaxException e) {
+            Log.d(TAG, "Node connect error");
+        }
+
+        socket.on(Socket.EVENT_CONNECT, new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                Log.d(TAG, "emitiendo new conect");
+                JSONObject data = new JSONObject();
+                int id = new Session(context).getToken();
+                Acount cuenta = DatabaseClient.getInstance(context)
+                        .getAppDatabase()
+                        .getAcountDao()
+                        .getUser(id);
+                try {
+                    data.put("ID", cuenta.getId());
+                    data.put("type", "client");
+                    Log.d(TAG, "conect " + data.toString());
+                    socket.emit("new connect", data);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                String date = java.text.DateFormat.getDateTimeInstance().format(Calendar.getInstance().getTime());
+                Log.d(TAG, "SERVER connect " + date);
+
+
+            }
+        });
+
+        socket.on(Socket.EVENT_DISCONNECT, new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                String date = java.text.DateFormat.getDateTimeInstance().format(Calendar.getInstance().getTime());
+                Log.d(TAG, "SERVER disconnect " + date);
+            }
+        });
+
+        socket.on(Socket.EVENT_RECONNECT, new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                String my_date = java.text.DateFormat.getDateTimeInstance().format(Calendar.getInstance().getTime());
+                Log.d(TAG, "SERVER reconnect " + my_date);
+            }
+        });
+
+        socket.on(Socket.EVENT_CONNECT_TIMEOUT, new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                String my_date = java.text.DateFormat.getDateTimeInstance().format(Calendar.getInstance().getTime());
+                Log.d(TAG, "SERVER timeout " + my_date);
+            }
+        });
+
+        socket.on(Socket.EVENT_RECONNECTING, new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                String my_date = java.text.DateFormat.getDateTimeInstance().format(Calendar.getInstance().getTime());
+                Log.d(TAG, "SERVER reconnecting " + my_date);
+            }
+        });
+
+
     }
 
 }
