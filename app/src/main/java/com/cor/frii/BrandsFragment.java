@@ -153,7 +153,7 @@ public class BrandsFragment extends Fragment {
 
                             }
                             gasFragment.setArguments(b);
-                            transaction.replace(R.id.navigationContainer, gasFragment);
+                            transaction.replace(R.id.mainContainer, gasFragment);
                             transaction.addToBackStack(null);
                             transaction.commit();
                         } else {
