@@ -101,7 +101,7 @@ public class MisPedidosAdapter extends RecyclerView.Adapter<MisPedidosAdapter.vi
         holder.titlePedido.setText(data.get(position).getDate());
         switch (data.get(position).getStatus()) {
             case "wait":
-                holder.estadoPedido.setText("En espera");
+                holder.estadoPedido.setText("Buscando proveedor...");
                 holder.cancelar.setText("Cancelar");
                 break;
             case "refuse":
@@ -162,7 +162,6 @@ public class MisPedidosAdapter extends RecyclerView.Adapter<MisPedidosAdapter.vi
             holder.cancelar.setText("Repedir");
             holder.cancelar.setBackgroundColor(Color.rgb(40, 167, 69));
         } else {
-
             if (data.get(position).getStatus().equals("wait")) {
                 /*holder.timer = new CountDownTimer(100000, 1000) {
                     @SuppressLint("SetTextI18n")
@@ -187,6 +186,7 @@ public class MisPedidosAdapter extends RecyclerView.Adapter<MisPedidosAdapter.vi
             holder.cancelar.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    System.out.println("entro...." + holder.cancelar.getText());
                     if (holder.cancelar.getText().equals("Cancelar")) {
                         mensajeConfirmacion(data.get(position).getId());
                         notifyDataSetChanged();
@@ -194,10 +194,16 @@ public class MisPedidosAdapter extends RecyclerView.Adapter<MisPedidosAdapter.vi
                         AgendarPedido agendarPedido = new AgendarPedido(context, data.get(position).getId(),
                                 data.get(position).getCalification());
                         agendarPedido.show();
-                    } else if (holder.cancelar.getText().equals("Repedir")) {
-                        Toast.makeText(context, "En implementacion", Toast.LENGTH_LONG).show();
                     }
+                }
+            });
+        }
 
+        if (holder.cancelar.getText().equals("Repedir")) {
+            holder.cancelar.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    repedirOrden(data.get(position).getId());
                 }
             });
         }
@@ -216,7 +222,7 @@ public class MisPedidosAdapter extends RecyclerView.Adapter<MisPedidosAdapter.vi
 
     static class viewHolder extends RecyclerView.ViewHolder {
         TextView titlePedido, estadoPedido, detallePedido;
-        Button llamar, mensaje, cancelar;
+        Button llamar, mensaje, cancelar, btnRepedir;
         CountDownTimer timer;
         TextView timerAuto;
 
@@ -229,6 +235,7 @@ public class MisPedidosAdapter extends RecyclerView.Adapter<MisPedidosAdapter.vi
             llamar = itemView.findViewById(R.id.ButtonLLamarPedido);
             mensaje = itemView.findViewById(R.id.ButtonMensajePedido);
             cancelar = itemView.findViewById(R.id.ButtonCancelarPedido);
+            btnRepedir = itemView.findViewById(R.id.buttonRepedir);
             timerAuto = itemView.findViewById(R.id.timerAuto);
         }
     }
@@ -259,6 +266,48 @@ public class MisPedidosAdapter extends RecyclerView.Adapter<MisPedidosAdapter.vi
         final JSONObject jsonObject = new JSONObject();
         try {
             jsonObject.put("id", idOrden);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        final RequestQueue queue = Volley.newRequestQueue(context);
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, url, jsonObject,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        try {
+                            int status = response.getInt("status");
+                            if (status == 200) {
+                                Toast.makeText(context, response.getString("message"), Toast.LENGTH_LONG).show();
+                                initSocket();
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.d("Volley get", "error voley" + error.toString());
+                        NetworkResponse response = error.networkResponse;
+                        if (error instanceof ServerError && response != null) {
+                            try {
+                                String res = new String(response.data, HttpHeaderParser.parseCharset(response.headers, "utf-8"));
+                                System.out.println(res);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                });
+        queue.add(jsonObjectRequest);
+    }
+
+    private void repedirOrden(int idOrden) {
+        final String url = "http://34.71.251.155/api/client/order/repedir/";
+        final JSONObject jsonObject = new JSONObject();
+        try {
+            jsonObject.put("id_orden", idOrden);
         } catch (JSONException e) {
             e.printStackTrace();
         }
