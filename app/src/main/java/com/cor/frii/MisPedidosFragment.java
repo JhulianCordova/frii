@@ -2,6 +2,7 @@ package com.cor.frii;
 
 import android.content.Context;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
@@ -52,7 +53,7 @@ public class MisPedidosFragment extends Fragment {
     private OnFragmentInteractionListener mListener;
     private SwipeRefreshLayout swipeRefreshLayout;
 
-    private ArrayList<Order> data;
+    private List<Order> data;
     private RecyclerView recyclerView;
     private MisPedidosAdapter misPedidosAdapter;
     //--
@@ -85,9 +86,6 @@ public class MisPedidosFragment extends Fragment {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
-        initSocket();
-        socket.on("status order", onStatusOrder);
-
     }
 
     @Override
@@ -99,14 +97,20 @@ public class MisPedidosFragment extends Fragment {
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(layoutManager);
 
+        //Iniciamos el socket para traer los pedidos
         initSocket();
+        socket.on("status order", onStatusOrder);
+        //--
+
         swipeRefreshLayout = view.findViewById(R.id.swipeRefreshLayout);
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                initSocket();
-                socket.on("status order", onStatusOrder);
-                queue.getCache().clear();
+                MisPedidosFragment fragment = new MisPedidosFragment();
+                FragmentManager fragmentManager = Objects.requireNonNull(getActivity()).getSupportFragmentManager();
+                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+                fragmentTransaction.add(R.id.navigationContainer, fragment);
+                fragmentTransaction.commit();
             }
         });
 
@@ -154,7 +158,6 @@ public class MisPedidosFragment extends Fragment {
         JSONObject jsonObject = new JSONObject();
 
         queue = Volley.newRequestQueue(getContext());
-
         /*JsonObjectRequest request =
                 new JsonObjectRequest(Request.Method.GET, url, jsonObject, new Response.Listener<JSONObject>() {
                     @Override
@@ -437,6 +440,7 @@ public class MisPedidosFragment extends Fragment {
                             });
 
                             if (swipeRefreshLayout != null)
+
                                 swipeRefreshLayout.setRefreshing(false);
                         }
                     } catch (JSONException e) {
@@ -447,5 +451,14 @@ public class MisPedidosFragment extends Fragment {
 
         }
     };
+
+    public void reLoadFragment(Fragment fragment) {
+        if (fragment instanceof MisPedidosFragment) {
+            FragmentTransaction fragTransaction = getActivity().getSupportFragmentManager().beginTransaction();
+            fragTransaction.detach(fragment);
+            fragTransaction.attach(fragment);
+            fragTransaction.commit();
+        }
+    }
 
 }

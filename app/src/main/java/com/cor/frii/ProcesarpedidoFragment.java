@@ -45,6 +45,7 @@ import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.*;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -223,10 +224,35 @@ public class ProcesarpedidoFragment extends Fragment implements OnMapReadyCallba
 
                         point_move = point;
                         map.addMarker(new MarkerOptions()
-                                .position(point)
-                                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
+                                .position(point));
                     }
                 });
+            }
+        });
+
+        final Geocoder geocoder = new Geocoder(getContext(), Locale.getDefault());
+
+        map.setOnCameraMoveListener(new GoogleMap.OnCameraMoveListener() {
+            @Override
+            public void onCameraMove() {
+                map.clear();
+                LatLng midLatLng = map.getCameraPosition().target;
+                if (marcador != null) marcador.setPosition(midLatLng);
+                map.addMarker(new MarkerOptions()
+                        .position(midLatLng));
+                try {
+                    if (point_move != null) {
+                        List<Address> addresses = geocoder.getFromLocation(midLatLng.latitude, midLatLng.longitude, 1);
+
+                        if (addresses.size() > 0) {
+                            address = addresses.get(0);
+                            lblDireccion.setText(address.getAddressLine(0));
+                        }
+                    }
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         });
 
@@ -348,6 +374,7 @@ public class ProcesarpedidoFragment extends Fragment implements OnMapReadyCallba
             Log.e("Exception: %s", e.getMessage());
         }
     }
+
 
     public interface OnFragmentInteractionListener {
         void onFragmentInteraction(Uri uri);
