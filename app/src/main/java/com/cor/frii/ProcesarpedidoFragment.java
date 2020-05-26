@@ -65,7 +65,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 
-public class ProcesarpedidoFragment extends Fragment implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener, LocationSource.OnLocationChangedListener {
+public class ProcesarpedidoFragment extends Fragment implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener {
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
 
@@ -194,20 +194,21 @@ public class ProcesarpedidoFragment extends Fragment implements OnMapReadyCallba
         getDeviceLocation();
         updateLocationUI();
 
-        map.setOnCameraChangeListener(new GoogleMap.OnCameraChangeListener() {
+        map.setOnCameraIdleListener(new GoogleMap.OnCameraIdleListener() {
             @Override
-            public void onCameraChange(CameraPosition cameraPosition) {
+            public void onCameraIdle() {
                 if (currentMarker != null) {
                     currentMarker.remove();
                 }
 
-                startLng = new LatLng(cameraPosition.target.latitude, cameraPosition.target.longitude);
-                String direccion = getStringAddress(cameraPosition.target.latitude, cameraPosition.target.longitude);
+                LatLng position = map.getCameraPosition().target;
+                startLng = new LatLng(position.latitude, position.longitude);
+                String direccion = getStringAddress(startLng.latitude, startLng.longitude);
                 lblDireccion.setText(direccion);
-
             }
         });
     }
+
 
     @Override
     public void onRequestPermissionsResult(int requestCode,
@@ -228,56 +229,6 @@ public class ProcesarpedidoFragment extends Fragment implements OnMapReadyCallba
         updateLocationUI();
     }
 
-    @Override
-    public void onLocationChanged(Location location) {
-        if (location == null) {
-            Toast.makeText(getContext(), "Location not found", Toast.LENGTH_LONG).show();
-        } else {
-            startLng = new LatLng(location.getLatitude(), location.getLongitude());
-            lblDireccion.setText(getStringAddress(startLng.latitude, startLng.longitude));
-        }
-
-        if (currentMarker == null) {
-            MarkerOptions options = new MarkerOptions();
-            options.position(startLng);
-            currentMarker = map.addMarker(options);
-            map.moveCamera(CameraUpdateFactory.newLatLngZoom(startLng, 15));
-        } else {
-            currentMarker.setPosition(startLng);
-        }
-
-        map.setOnCameraIdleListener(new GoogleMap.OnCameraIdleListener() {
-            @Override
-            public void onCameraIdle() {
-                LatLng center = map.getCameraPosition().target;
-                if (currentMarker != null) {
-                    currentMarker.remove();
-                    map.addMarker(new MarkerOptions().position(center).title("New posicition"));
-                    startLng = currentMarker.getPosition();
-                    System.out.println(startLng);
-                    String direccion = getStringAddress(startLng.latitude, startLng.longitude);
-                    lblDireccion.setText(direccion);
-                }
-            }
-        });
-
-        if (currentMarker != null) {
-            currentMarker.remove();
-        }
-
-        //Place current location marker
-        LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
-        MarkerOptions markerOptions = new MarkerOptions();
-        markerOptions.position(latLng);
-        markerOptions.title("Current Position");
-        markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE));
-        currentMarker = map.addMarker(markerOptions);
-
-        //move map camera
-        map.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-        map.animateCamera(CameraUpdateFactory.zoomTo(11));
-
-    }
 
     private void getDeviceLocation() {
         try {
@@ -362,24 +313,29 @@ public class ProcesarpedidoFragment extends Fragment implements OnMapReadyCallba
     }
 
     private String getStringAddress(Double lat, Double lng) {
-        String address = "";
-        String city;
-        Geocoder geocoder;
-        List<Address> addresses;
-        geocoder = new Geocoder(getContext(), Locale.getDefault());
+        String strAdd = "";
+        Geocoder geocoder = new Geocoder(getContext(), Locale.getDefault());
         try {
-            addresses = geocoder.getFromLocation(lat, lng, 1);
+            List<Address> addresses = geocoder.getFromLocation(lat, lng, 1);
             if (addresses != null) {
-                address = addresses.get(0).getAddressLine(0);
-                city = addresses.get(0).getLocality();
+                Address returnedAddress = addresses.get(0);
+                StringBuilder strReturnedAddress = new StringBuilder("");
+
+                for (int i = 0; i <= returnedAddress.getMaxAddressLineIndex(); i++) {
+                    strReturnedAddress.append(returnedAddress.getAddressLine(i)).append("\n");
+                }
+                strAdd = strReturnedAddress.toString();
+                Log.w(TAG, strReturnedAddress.toString());
+            } else {
+                Log.w(TAG, "No Address returned!");
             }
-
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
+            Log.w(TAG, "Canont get Address!");
         }
-
-        return address;
+        return strAdd;
     }
+
 
     public interface OnFragmentInteractionListener {
         void onFragmentInteraction(Uri uri);
@@ -400,8 +356,8 @@ public class ProcesarpedidoFragment extends Fragment implements OnMapReadyCallba
         JSONObject jsonObject = new JSONObject();
         RequestQueue queue = Volley.newRequestQueue(Objects.requireNonNull(getContext()));
         try {
-            jsonObject.put("latitud", String.valueOf(point_move.latitude));
-            jsonObject.put("longitud", String.valueOf(point_move.longitude));
+            jsonObject.put("latitud", String.valueOf(startLng.latitude));
+            jsonObject.put("longitud", String.valueOf(startLng.longitude));
             jsonObject.put("client_id", new Session(getContext()).getToken());
 
             JSONArray jsonArray = new JSONArray();
@@ -444,8 +400,8 @@ public class ProcesarpedidoFragment extends Fragment implements OnMapReadyCallba
 
                                 JSONObject datas = new JSONObject();
                                 datas.put("id", response.getJSONObject("data").getInt("order_id"));
-                                datas.put("latitude", point_move.latitude);
-                                datas.put("longitude", point_move.longitude);
+                                datas.put("latitude", startLng.latitude);
+                                datas.put("longitude", startLng.longitude);
                                 Log.d(TAG, "conect " + datas.toString());
                                 socket.emit("get orders", datas);
 

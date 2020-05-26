@@ -1,8 +1,12 @@
 package com.cor.frii;
 
+import android.annotation.SuppressLint;
+import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
@@ -11,6 +15,7 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
@@ -23,8 +28,17 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
+import com.android.volley.NetworkResponse;
+import com.android.volley.Request;
 import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.ServerError;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.HttpHeaderParser;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
 import com.cor.frii.persistence.DatabaseClient;
 import com.cor.frii.persistence.Session;
 import com.cor.frii.persistence.entity.Acount;
@@ -41,6 +55,8 @@ import org.json.JSONObject;
 
 import java.net.URISyntaxException;
 import java.util.*;
+
+import static androidx.core.content.ContextCompat.getSystemService;
 
 public class MisPedidosFragment extends Fragment {
     private static final String ARG_PARAM1 = "param1";
@@ -108,6 +124,7 @@ public class MisPedidosFragment extends Fragment {
         recyclerView.setLayoutManager(layoutManager);
 
         //--
+        llenarPedidos();
         swipeRefreshLayout = view.findViewById(R.id.swipeRefreshLayout);
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
@@ -147,6 +164,112 @@ public class MisPedidosFragment extends Fragment {
     public interface OnFragmentInteractionListener {
         void onFragmentInteraction(Uri uri);
     }
+
+    // Llenar información de pedidos
+    private void llenarPedidos() {
+        //--Usuario
+        int token = new Session(getContext()).getToken();
+        String url = this.baseURL + "/client/order/" + token;
+        final Acount acount = DatabaseClient.getInstance(getContext())
+                .getAppDatabase()
+                .getAcountDao()
+                .getUser(token);
+
+        JSONObject jsonObject = new JSONObject();
+
+        queue = Volley.newRequestQueue(getContext());
+        /*JsonObjectRequest request =
+                new JsonObjectRequest(Request.Method.GET, url, jsonObject, new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        try {
+                            int status = response.getInt("status");
+                            if (status == 200) {
+                                JSONArray jsonArray = response.getJSONArray("data");
+                                for (int i = 0; i < jsonArray.length(); i++) {
+                                    JSONObject obj = jsonArray.getJSONObject(i);
+                                    final Order order = new Order();
+                                    order.setId(obj.getJSONObject("orden").getInt("id"));
+                                    order.setDate(obj.getJSONObject("orden").getString("date"));
+                                    order.setStatus(obj.getJSONObject("orden").getString("status"));
+                                    order.setCalification((float) obj.getJSONObject("orden").getDouble("calification"));
+                                    order.setClientDirection(new LatLng(
+                                            obj.getJSONObject("orden").getDouble("latitude"),
+                                            obj.getJSONObject("orden").getDouble("longitude")
+                                    ));
+                                    if (obj.getJSONObject("company").length() > 0) {
+                                        order.setPhone(obj.getJSONObject("company").getString("phone"));
+                                        LatLng latLng = new LatLng(
+                                                obj.getJSONObject("company").getDouble("latitude"),
+                                                obj.getJSONObject("company").getDouble("longitude")
+                                        );
+                                        order.setCompanyDirection(latLng);
+                                    }
+                                    JSONArray details_data = obj.getJSONArray("order_detail");
+                                    List<String> details = new ArrayList<>();
+                                    for (int j = 0; j < details_data.length(); j++) {
+                                        JSONObject jsonObject1 = details_data.getJSONObject(j);
+                                        details.add(jsonObject1.getString("description"));
+                                    }
+                                    order.setDetalles(details);
+                                    data.add(order);
+                                }
+                                misPedidosAdapter = new MisPedidosAdapter(data);
+                                recyclerView.setAdapter(misPedidosAdapter);
+                                misPedidosAdapter.setOnClickListener(new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+                                        FragmentManager manager = Objects.requireNonNull(getActivity()).getSupportFragmentManager();
+                                        FragmentTransaction transaction = manager.beginTransaction();
+                                        String status = data.get(recyclerView.getChildAdapterPosition(v)).getStatus();
+                                        if (status.equals("confirm")) {
+                                            MapsPerdidos misPedidosFragment = new MapsPerdidos();
+                                            Bundle bundle = new Bundle();
+                                            LatLng d_company = data.get(recyclerView.getChildAdapterPosition(v)).getCompanyDirection();
+                                            LatLng d_client = data.get(recyclerView.getChildAdapterPosition(v)).getClientDirection();
+                                            bundle.putParcelable("DCOMPANY", d_company);
+                                            bundle.putParcelable("DCLIENT", d_client);
+                                            misPedidosFragment.setArguments(bundle);
+                                            transaction.add(R.id.navigationContainer, misPedidosFragment);
+                                            transaction.addToBackStack(null);
+                                            transaction.commit();
+                                        }
+                                    }
+                                });
+                                if (swipeRefreshLayout != null)
+                                    swipeRefreshLayout.setRefreshing(false);
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.d("Volley get", "error voley" + error.toString());
+                        NetworkResponse response = error.networkResponse;
+                        if (error instanceof ServerError && response != null) {
+                            try {
+                                String res = new String(response.data, HttpHeaderParser.parseCharset(response.headers, "utf-8"));
+                                System.out.println(res);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                }) {
+                    @Override
+                    public Map<String, String> getHeaders() {
+                        Map<String, String> headers = new HashMap<>();
+                        Log.d("Voley get", acount.getToken());
+                        headers.put("Authorization", "JWT " + acount.getToken());
+                        headers.put("Content-Type", "application/json");
+                        return headers;
+                    }
+                };
+        queue.add(request);*/
+    }
+
 
     private void initSocket() {
 
@@ -285,7 +408,7 @@ public class MisPedidosFragment extends Fragment {
                                     }
 
                                     android.app.Notification notification = new NotificationCompat.Builder(getContext(), CHANNEL_ID)
-                                            .setSmallIcon(R.drawable.ic_cart)
+                                            .setSmallIcon(R.drawable.image)
                                             .setContentTitle("Pedido Confirmado")
                                             .setContentText("Un proveedor ya tiene su pedido")
                                             .setPriority(NotificationCompat.PRIORITY_HIGH)
@@ -319,7 +442,7 @@ public class MisPedidosFragment extends Fragment {
                 JSONObject response = (JSONObject) args[0];
                 try {
                     if (response.getJSONObject("data").getInt("order_id") > 0) {
-                        getActivity().runOnUiThread(new Runnable() {
+                        Objects.requireNonNull(getActivity()).runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
                                 misPedidosAdapter.notifyDataSetChanged();
@@ -331,7 +454,7 @@ public class MisPedidosFragment extends Fragment {
                                     getActivity().getSupportFragmentManager().beginTransaction().replace(MisPedidosFragment.this.getId(), new MisPedidosFragment()).commit();
                                     String CHANNEL_ID = "channel1";
 
-                                    NotificationManager notificationManager = (NotificationManager) getContext().getSystemService(getContext().NOTIFICATION_SERVICE);
+                                    NotificationManager notificationManager = (NotificationManager) Objects.requireNonNull(getContext()).getSystemService(getContext().NOTIFICATION_SERVICE);
                                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 
 
@@ -344,7 +467,7 @@ public class MisPedidosFragment extends Fragment {
                                     }
 
                                     android.app.Notification notification = new NotificationCompat.Builder(getContext(), CHANNEL_ID)
-                                            .setSmallIcon(R.drawable.ic_cart)
+                                            .setSmallIcon(R.drawable.image)
                                             .setContentTitle("Pedido Entregado")
                                             .setContentText("El proveedor llego a su casa")
                                             .setPriority(NotificationCompat.PRIORITY_HIGH)
