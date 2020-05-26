@@ -9,8 +9,8 @@ import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 
-import android.os.Handler;
 import android.util.Log;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -57,25 +57,21 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.ExecutionException;
 
-public class ProcesarpedidoFragment extends Fragment implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener {
+public class ProcesarpedidoFragment extends Fragment implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener, LocationSource.OnLocationChangedListener {
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
 
     private String mParam1;
     private String mParam2;
 
-    private Button procesarPedido;
     private static final String TAG = "GAS";
     private static final int DEFAULT_ZOOM = 16;
     private Location mLastKnownLocation;
@@ -84,17 +80,16 @@ public class ProcesarpedidoFragment extends Fragment implements OnMapReadyCallba
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
     private FusedLocationProviderClient mFusedLocationProviderClient;
     private final LatLng mDefaultLocation = new LatLng(-33.8523341, 151.2106085);
-    private Marker marcador;
-    private Marker marcador_carro;
+    private Marker currentMarker;
+    private LatLng startLng;
     private Address address;
     private String baseURL = "http://34.71.251.155/api";
-    public String HOST_NODEJS = "http://34.71.251.155:9000";
+    private String HOST_NODEJS = "http://34.71.251.155:9000";
     private Thread thread = null;
 
     private Context context;
 
-    private ArrayList<LatLng> mMarkerPoints;
-    LatLng point_move;
+    private LatLng point_move;
     private Socket socket;
 
     private TextView lblDireccion;
@@ -132,16 +127,15 @@ public class ProcesarpedidoFragment extends Fragment implements OnMapReadyCallba
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_procesarpedido, container, false);
         lblDireccion = view.findViewById(R.id.lblDireccion);
+        ImageView markerIcon = view.findViewById(R.id.markerIcon);
 
-        procesarPedido = view.findViewById(R.id.ButtonConfirmarPedido);
+        Button procesarPedido = view.findViewById(R.id.ButtonConfirmarPedido);
 
-        mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(getActivity());
+        mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(Objects.requireNonNull(getActivity()));
         SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager()
                 .findFragmentById(R.id.google_map_pedidos);
         assert mapFragment != null;
         mapFragment.getMapAsync(this);
-
-        mMarkerPoints = new ArrayList<>();
 
         procesarPedido.setOnClickListener(new View.OnClickListener() {
 
@@ -200,101 +194,112 @@ public class ProcesarpedidoFragment extends Fragment implements OnMapReadyCallba
         getDeviceLocation();
         updateLocationUI();
 
-        Objects.requireNonNull(getActivity()).runOnUiThread(new Runnable() {
+        map.setOnCameraChangeListener(new GoogleMap.OnCameraChangeListener() {
             @Override
-            public void run() {
-                map.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
-                    @Override
-                    public void onMapClick(LatLng point) {
-                        map.clear();
+            public void onCameraChange(CameraPosition cameraPosition) {
+                if (currentMarker != null) {
+                    currentMarker.remove();
+                }
 
-                        Geocoder geocoder = new Geocoder(getContext(), Locale.getDefault());
+                startLng = new LatLng(cameraPosition.target.latitude, cameraPosition.target.longitude);
+                String direccion = getStringAddress(cameraPosition.target.latitude, cameraPosition.target.longitude);
+                lblDireccion.setText(direccion);
 
-                        try {
-                            List<Address> addresses = geocoder.getFromLocation(point.latitude, point.longitude, 1);
-
-                            if (addresses.size() > 0) {
-                                address = addresses.get(0);
-                                lblDireccion.setText(address.getAddressLine(0));
-                            }
-
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-
-                        point_move = point;
-                        map.addMarker(new MarkerOptions()
-                                .position(point));
-                    }
-                });
             }
         });
+    }
 
-        final Geocoder geocoder = new Geocoder(getContext(), Locale.getDefault());
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           @NonNull String permissions[],
+                                           @NonNull int[] grantResults) {
+        mLocationPermissionGranted = false;
+        switch (requestCode) {
+            case PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    mLocationPermissionGranted = true;
 
-        map.setOnCameraMoveListener(new GoogleMap.OnCameraMoveListener() {
+
+                }
+            }
+        }
+        updateLocationUI();
+    }
+
+    @Override
+    public void onLocationChanged(Location location) {
+        if (location == null) {
+            Toast.makeText(getContext(), "Location not found", Toast.LENGTH_LONG).show();
+        } else {
+            startLng = new LatLng(location.getLatitude(), location.getLongitude());
+            lblDireccion.setText(getStringAddress(startLng.latitude, startLng.longitude));
+        }
+
+        if (currentMarker == null) {
+            MarkerOptions options = new MarkerOptions();
+            options.position(startLng);
+            currentMarker = map.addMarker(options);
+            map.moveCamera(CameraUpdateFactory.newLatLngZoom(startLng, 15));
+        } else {
+            currentMarker.setPosition(startLng);
+        }
+
+        map.setOnCameraIdleListener(new GoogleMap.OnCameraIdleListener() {
             @Override
-            public void onCameraMove() {
-                map.clear();
-                LatLng midLatLng = map.getCameraPosition().target;
-                if (marcador != null) marcador.setPosition(midLatLng);
-                map.addMarker(new MarkerOptions()
-                        .position(midLatLng));
-                try {
-                    if (point_move != null) {
-                        List<Address> addresses = geocoder.getFromLocation(midLatLng.latitude, midLatLng.longitude, 1);
-
-                        if (addresses.size() > 0) {
-                            address = addresses.get(0);
-                            lblDireccion.setText(address.getAddressLine(0));
-                        }
-                    }
-
-                } catch (IOException e) {
-                    e.printStackTrace();
+            public void onCameraIdle() {
+                LatLng center = map.getCameraPosition().target;
+                if (currentMarker != null) {
+                    currentMarker.remove();
+                    map.addMarker(new MarkerOptions().position(center).title("New posicition"));
+                    startLng = currentMarker.getPosition();
+                    System.out.println(startLng);
+                    String direccion = getStringAddress(startLng.latitude, startLng.longitude);
+                    lblDireccion.setText(direccion);
                 }
             }
         });
 
+        if (currentMarker != null) {
+            currentMarker.remove();
+        }
+
+        //Place current location marker
+        LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+        MarkerOptions markerOptions = new MarkerOptions();
+        markerOptions.position(latLng);
+        markerOptions.title("Current Position");
+        markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE));
+        currentMarker = map.addMarker(markerOptions);
+
+        //move map camera
+        map.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+        map.animateCamera(CameraUpdateFactory.zoomTo(11));
 
     }
-
 
     private void getDeviceLocation() {
         try {
             if (mLocationPermissionGranted) {
                 Task<Location> locationResult = mFusedLocationProviderClient.getLastLocation();
-                locationResult.addOnCompleteListener(getActivity(), new OnCompleteListener<Location>() {
+                locationResult.addOnCompleteListener(Objects.requireNonNull(getActivity()), new OnCompleteListener<Location>() {
                     @Override
                     public void onComplete(@NonNull Task<Location> task) {
                         if (task.isSuccessful()) {
                             mLastKnownLocation = task.getResult();
                             if (mLastKnownLocation != null) {
-                                if (marcador != null) marcador.remove();
+                                if (currentMarker != null) currentMarker.remove();
 
                                 LatLng latLng = new LatLng(mLastKnownLocation.getLatitude(), mLastKnownLocation.getLongitude());
                                 map.animateCamera(CameraUpdateFactory.newLatLng(latLng));
                                 map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, DEFAULT_ZOOM));
-                                point_move = new LatLng(mLastKnownLocation.getLatitude(), mLastKnownLocation.getLongitude());
-                                map.addMarker(new MarkerOptions().position(point_move)
-                                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
-
-                                Geocoder geocoder = new Geocoder(getContext(), Locale.getDefault());
-
-                                try {
-                                    List<Address> addresses = geocoder.getFromLocation(mLastKnownLocation.getLatitude(), mLastKnownLocation.getLongitude(), 1);
-
-                                    if (addresses.size() > 0) {
-                                        address = addresses.get(0);
-                                        lblDireccion.setText(address.getAddressLine(0));
-                                    }
-
-                                } catch (IOException e) {
-                                    e.printStackTrace();
-                                }
+                                startLng = latLng;
+                                String direccion = getStringAddress(mLastKnownLocation.getLatitude(), mLastKnownLocation.getLongitude());
+                                lblDireccion.setText(direccion);
 
                             } else {
-                                new GpsUtils(getActivity()).turnGPSOn(new GpsUtils.onGpsListener() {
+                                new GpsUtils(Objects.requireNonNull(getActivity())).turnGPSOn(new GpsUtils.onGpsListener() {
                                     @Override
                                     public void gpsStatus(boolean isGPSEnable) {
                                         if (isGPSEnable) {
@@ -319,12 +324,12 @@ public class ProcesarpedidoFragment extends Fragment implements OnMapReadyCallba
                 getDeviceLocation();
             }
         } catch (SecurityException e) {
-            Log.e("Exception: %s", e.getMessage());
+            Log.e("Exception: %s", Objects.requireNonNull(e.getMessage()));
         }
     }
 
     private void getLocationPermission() {
-        if (ContextCompat.checkSelfPermission(getActivity().getApplicationContext(),
+        if (ContextCompat.checkSelfPermission(Objects.requireNonNull(getActivity()).getApplicationContext(),
                 android.Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
             mLocationPermissionGranted = true;
@@ -335,25 +340,6 @@ public class ProcesarpedidoFragment extends Fragment implements OnMapReadyCallba
         }
 
 
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode,
-                                           @NonNull String permissions[],
-                                           @NonNull int[] grantResults) {
-        mLocationPermissionGranted = false;
-        switch (requestCode) {
-            case PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION: {
-                // If request is cancelled, the result arrays are empty.
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    mLocationPermissionGranted = true;
-
-
-                }
-            }
-        }
-        updateLocationUI();
     }
 
     private void updateLocationUI() {
@@ -371,17 +357,33 @@ public class ProcesarpedidoFragment extends Fragment implements OnMapReadyCallba
                 getLocationPermission();
             }
         } catch (SecurityException e) {
-            Log.e("Exception: %s", e.getMessage());
+            Log.e("Exception: %s", Objects.requireNonNull(e.getMessage()));
         }
     }
 
+    private String getStringAddress(Double lat, Double lng) {
+        String address = "";
+        String city;
+        Geocoder geocoder;
+        List<Address> addresses;
+        geocoder = new Geocoder(getContext(), Locale.getDefault());
+        try {
+            addresses = geocoder.getFromLocation(lat, lng, 1);
+            address = addresses.get(0).getAddressLine(0);
+            city = addresses.get(0).getLocality();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return address;
+    }
 
     public interface OnFragmentInteractionListener {
         void onFragmentInteraction(Uri uri);
     }
 
     // Confirmar pedido
-    public void confirmarPedido() {
+    private void confirmarPedido() {
         //Obtener el token del cliente
         final Acount acount = DatabaseClient.getInstance(getContext())
                 .getAppDatabase()
@@ -462,11 +464,6 @@ public class ProcesarpedidoFragment extends Fragment implements OnMapReadyCallba
                         if (error instanceof ServerError && response != null) {
                             try {
                                 String res = new String(response.data, HttpHeaderParser.parseCharset(response.headers, "utf-8"));
-                                /*JSONObject obj = new JSONObject(res);
-                                Log.d("Voley post", obj.toString());
-                                String msj = obj.getString("message");
-                                Toast.makeText(getContext(), msj, Toast.LENGTH_SHORT).show();*/
-
                                 System.out.println(res);
 
                             } catch (Exception e) {
