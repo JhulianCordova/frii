@@ -28,6 +28,8 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.viewHold
     private Context context;
     private View.OnClickListener listener;
 
+    private TextView badge_count;
+
     public ProductAdapter(List<Product> products) {
         this.products = products;
     }
@@ -46,6 +48,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.viewHold
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.custom_products, parent, false);
         view.setOnClickListener(this);
         context = parent.getContext();
+
         return new viewHolder(view);
     }
 
@@ -77,6 +80,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.viewHold
             productCantidad = itemView.findViewById(R.id.ProductCantidad);
             productDescription = itemView.findViewById(R.id.ProductDescription);
 
+
         }
 
         void bind(final Product product) {
@@ -87,6 +91,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.viewHold
             Picasso.get().load(product.getUrl()).into(productImage);
 
             productButtonAdd.setOnClickListener(new View.OnClickListener() {
+
 
 
                 @Override
