@@ -35,7 +35,7 @@
             android:background="@drawable/badge_background"
             android:elevation="7dp"
             android:gravity="center"
-            android:visibility="invisible"
+            android:visibility="visible"
             android:textColor="@android:color/holo_red_dark"
             />
 

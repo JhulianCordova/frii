@@ -10,10 +10,29 @@ public class Order {
     private String date;
     private String status;
     private String phone;
+    private String companyName;
     private LatLng companyDirection;
     private LatLng clientDirection;
     private List<String> detalles;
     private float calification;
+    private long time;
+
+
+    public String getCompanyName() {
+        return companyName;
+    }
+
+    public void setCompanyName(String companyName) {
+        this.companyName = companyName;
+    }
+
+    public long getTime() {
+        return time;
+    }
+
+    public void setTime(long time) {
+        this.time = time;
+    }
 
     public float getCalification() {
         return calification;

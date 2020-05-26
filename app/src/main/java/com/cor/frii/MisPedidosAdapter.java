@@ -13,6 +13,7 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.CountDownTimer;
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -51,8 +52,13 @@ import org.json.JSONObject;
 import java.net.URISyntaxException;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import static android.content.Context.NOTIFICATION_SERVICE;
 
@@ -70,11 +76,10 @@ public class MisPedidosAdapter extends RecyclerView.Adapter<MisPedidosAdapter.vi
     private final static int NOTIFICATION_ID = 0;
     private final static String CHANNEL_ID = "NOTIFICACION";
 
-    private String buttonEstado = "cancelar";
-
     public MisPedidosAdapter(List<Order> data) {
         this.data = data;
     }
+
 
     @Override
     public void onClick(View v) {
@@ -92,12 +97,13 @@ public class MisPedidosAdapter extends RecyclerView.Adapter<MisPedidosAdapter.vi
         view.setOnClickListener(this);
         context = parent.getContext();
         viewGroup = parent;
+
         return new viewHolder(view);
     }
 
+
     @Override
     public void onBindViewHolder(@NonNull final viewHolder holder, final int position) {
-
         holder.titlePedido.setText(data.get(position).getDate());
         switch (data.get(position).getStatus()) {
             case "wait":
@@ -111,6 +117,7 @@ public class MisPedidosAdapter extends RecyclerView.Adapter<MisPedidosAdapter.vi
                 holder.estadoPedido.setText("Confirmado");
                 holder.cancelar.setEnabled(true);
                 holder.cancelar.setText("Cancelar");
+
                 break;
             case "delivered":
                 holder.estadoPedido.setText("Entregado");
@@ -151,6 +158,8 @@ public class MisPedidosAdapter extends RecyclerView.Adapter<MisPedidosAdapter.vi
                     context.startActivity(intent);
                 }
             });
+
+            holder.timerAuto.setText("Confirmado por: " + data.get(position).getCompanyName());
         } else {
             holder.llamar.setEnabled(false);
             holder.llamar.setBackgroundColor(Color.GRAY);
@@ -161,11 +170,18 @@ public class MisPedidosAdapter extends RecyclerView.Adapter<MisPedidosAdapter.vi
         if (data.get(position).getStatus().equals("cancel")) {
             holder.cancelar.setText("Repedir");
             holder.cancelar.setBackgroundColor(Color.rgb(40, 167, 69));
+            if (holder.timer != null) {
+                holder.timer.cancel();
+            }
         } else {
             if (data.get(position).getStatus().equals("wait")) {
-                /*holder.timer = new CountDownTimer(100000, 1000) {
-                    @SuppressLint("SetTextI18n")
-                    @Override
+                holder.timerflag = true;
+                long timer = 120000;
+                if (holder.timer != null) {
+                    holder.timer.cancel();
+                }
+
+                holder.timer = new CountDownTimer(timer, 1000) {
                     public void onTick(long millisUntilFinished) {
                         NumberFormat f = new DecimalFormat("00");
                         long hour = (millisUntilFinished / 3600000) % 24;
@@ -175,12 +191,12 @@ public class MisPedidosAdapter extends RecyclerView.Adapter<MisPedidosAdapter.vi
                         holder.timerAuto.setText(f.format(hour) + ":" + f.format(min) + ":" + f.format(sec));
                     }
 
-                    @Override
                     public void onFinish() {
-                        tiempoCancelar(data.get(position).getId());
-                        notificacionCancelado("Pedido cancelado", "El pedido fue cancelado, el tiempo expiro");
+                        tiempoCancelar(data.get(position).getId(), data.get(position).getStatus(), position);
+                        notificacionCancelado("Pedido cancelado", "El tiempo expiro");
+                        holder.timerAuto.setText("Expired!!");
                     }
-                }.start();*/
+                };
             }
 
             holder.cancelar.setOnClickListener(new View.OnClickListener() {
@@ -188,8 +204,10 @@ public class MisPedidosAdapter extends RecyclerView.Adapter<MisPedidosAdapter.vi
                 public void onClick(View v) {
                     System.out.println("entro...." + holder.cancelar.getText());
                     if (holder.cancelar.getText().equals("Cancelar")) {
-                        mensajeConfirmacion(data.get(position).getId());
+                        mensajeConfirmacion(data.get(position).getId(), data.get(position).getStatus(), position);
                         notifyDataSetChanged();
+                        notifyItemChanged(position);
+                        holder.timerflag = false;
                     } else if (holder.cancelar.getText().equals("Calificar")) {
                         AgendarPedido agendarPedido = new AgendarPedido(context, data.get(position).getId(),
                                 data.get(position).getCalification());
@@ -199,20 +217,35 @@ public class MisPedidosAdapter extends RecyclerView.Adapter<MisPedidosAdapter.vi
             });
         }
 
-        if (holder.cancelar.getText().equals("Repedir")) {
-            holder.cancelar.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    repedirOrden(data.get(position).getId());
+
+        holder.cancelar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                if (holder.cancelar.getText().equals("Cancelar")) {
+                    mensajeConfirmacion(data.get(position).getId(), data.get(position).getStatus(), position);
+                    notifyDataSetChanged();
+                    notifyItemChanged(position);
+                    holder.timerflag = false;
+                    System.out.println("entro...." + holder.cancelar.getText());
+                } else if (holder.cancelar.getText().equals("Calificar")) {
+                    AgendarPedido agendarPedido = new AgendarPedido(context, data.get(position).getId(),
+                            data.get(position).getCalification());
+                    agendarPedido.show();
+                } else if (holder.cancelar.getText().equals("Repedir")) {
+                    System.out.println("entro... repedir");
+                    repedirOrden(data.get(position).getId(), data.get(position).getClientDirection().latitude, data.get(position).getClientDirection().longitude);
                 }
-            });
+            }
+        });
+
+        if (holder.timerflag) {
+            holder.timer.start();
+        } else {
+            if (holder.timer != null) {
+                holder.timer.cancel();
+            }
         }
-
-        if (data.get(position).getStatus().equals("confirm")) {
-            notificacionCancelado("Pedido ha sido tomado", "El pedido que realizo ha sido tomado por un proveedor");
-        }
-
-
     }
 
     @Override
@@ -224,6 +257,7 @@ public class MisPedidosAdapter extends RecyclerView.Adapter<MisPedidosAdapter.vi
         TextView titlePedido, estadoPedido, detallePedido;
         Button llamar, mensaje, cancelar, btnRepedir;
         CountDownTimer timer;
+        boolean timerflag = false;
         TextView timerAuto;
 
         viewHolder(@NonNull View itemView) {
@@ -240,7 +274,7 @@ public class MisPedidosAdapter extends RecyclerView.Adapter<MisPedidosAdapter.vi
         }
     }
 
-    private void mensajeConfirmacion(final int idOrden) {
+    private void mensajeConfirmacion(final int idOrden, final String status, final int position) {
 
 
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
@@ -248,7 +282,7 @@ public class MisPedidosAdapter extends RecyclerView.Adapter<MisPedidosAdapter.vi
                 .setPositiveButton("Confirmar", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        tiempoCancelar(idOrden);
+                        tiempoCancelar(idOrden, status, position);
                     }
                 })
                 .setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
@@ -261,7 +295,7 @@ public class MisPedidosAdapter extends RecyclerView.Adapter<MisPedidosAdapter.vi
         builder.show();
     }
 
-    private void tiempoCancelar(int idOrden) {
+    private void tiempoCancelar(int idOrden, String status, final int position) {
         final String url = "http://34.71.251.155/api/order/client/cancel/";
         final JSONObject jsonObject = new JSONObject();
         try {
@@ -279,6 +313,8 @@ public class MisPedidosAdapter extends RecyclerView.Adapter<MisPedidosAdapter.vi
                             if (status == 200) {
                                 Toast.makeText(context, response.getString("message"), Toast.LENGTH_LONG).show();
                                 initSocket();
+                                Order order = data.get(position);
+                                order.setStatus("cancel");
                             }
                         } catch (JSONException e) {
                             e.printStackTrace();
@@ -303,7 +339,7 @@ public class MisPedidosAdapter extends RecyclerView.Adapter<MisPedidosAdapter.vi
         queue.add(jsonObjectRequest);
     }
 
-    private void repedirOrden(int idOrden) {
+    private void repedirOrden(final int idOrden, final double latitude, final double longitude) {
         final String url = "http://34.71.251.155/api/client/order/repedir/";
         final JSONObject jsonObject = new JSONObject();
         try {
@@ -321,6 +357,13 @@ public class MisPedidosAdapter extends RecyclerView.Adapter<MisPedidosAdapter.vi
                             if (status == 200) {
                                 Toast.makeText(context, response.getString("message"), Toast.LENGTH_LONG).show();
                                 initSocket();
+
+                                JSONObject datas = new JSONObject();
+                                datas.put("id", idOrden);
+                                datas.put("latitude", latitude);
+                                datas.put("longitude", longitude);
+                                Log.d(TAG, "conect " + datas.toString());
+                                socket.emit("get orders", datas);
                             }
                         } catch (JSONException e) {
                             e.printStackTrace();
@@ -472,6 +515,9 @@ public class MisPedidosAdapter extends RecyclerView.Adapter<MisPedidosAdapter.vi
         } catch (JSONException e) {
             e.printStackTrace();
         }
+
+
+
 
     }
 
