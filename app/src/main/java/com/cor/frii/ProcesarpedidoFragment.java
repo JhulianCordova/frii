@@ -369,8 +369,11 @@ public class ProcesarpedidoFragment extends Fragment implements OnMapReadyCallba
         geocoder = new Geocoder(getContext(), Locale.getDefault());
         try {
             addresses = geocoder.getFromLocation(lat, lng, 1);
-            address = addresses.get(0).getAddressLine(0);
-            city = addresses.get(0).getLocality();
+            if (addresses != null) {
+                address = addresses.get(0).getAddressLine(0);
+                city = addresses.get(0).getLocality();
+            }
+
         } catch (IOException e) {
             e.printStackTrace();
         }
