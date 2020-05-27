@@ -419,8 +419,8 @@ public class MisPedidosFragment extends Fragment {
                                             .setColor(Color.BLUE)
                                             .setAutoCancel(true).build();
                                     // notificationId is a unique int for each notification that you must define
-                                    //    NotificationManagerCompat notificationManager;
-                                    //     notificationManager =   NotificationManagerCompat.from(getContext());
+                                    // NotificationManagerCompat notificationManager;
+                                    // notificationManager =   NotificationManagerCompat.from(getContext());
                                     notificationManager.notify(1, notification);
                                 } catch (JSONException e) {
                                     e.printStackTrace();
