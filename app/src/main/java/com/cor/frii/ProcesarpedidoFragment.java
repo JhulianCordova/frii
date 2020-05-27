@@ -209,7 +209,6 @@ public class ProcesarpedidoFragment extends Fragment implements OnMapReadyCallba
         });
     }
 
-
     @Override
     public void onRequestPermissionsResult(int requestCode,
                                            @NonNull String permissions[],
@@ -228,7 +227,6 @@ public class ProcesarpedidoFragment extends Fragment implements OnMapReadyCallba
         }
         updateLocationUI();
     }
-
 
     private void getDeviceLocation() {
         try {

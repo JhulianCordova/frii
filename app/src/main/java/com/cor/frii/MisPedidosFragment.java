@@ -1,6 +1,7 @@
 package com.cor.frii;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -17,6 +18,7 @@ import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -64,7 +66,6 @@ public class MisPedidosFragment extends Fragment {
 
     private String mParam1;
     private String mParam2;
-
     private OnFragmentInteractionListener mListener;
     private SwipeRefreshLayout swipeRefreshLayout;
     private List<Order> orders;
@@ -100,6 +101,11 @@ public class MisPedidosFragment extends Fragment {
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
 
+        //Iniciamos el socket para traer los pedidos
+        initSocket();
+        emitStatusOrder();
+        socket.on("status order", onStatusOrder);
+
     }
 
     @Override
@@ -107,6 +113,28 @@ public class MisPedidosFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_mispedidos, container, false);
+        System.out.println("Entro... a Fragment Pedidos");
+
+        llenarPedidos();
+
+        recyclerView = view.findViewById(R.id.MisPedidosContainer);
+        swipeRefreshLayout = view.findViewById(R.id.swipeRefreshLayout);
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity());
+        recyclerView.setLayoutManager(layoutManager);
+
+        //--
+
+
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                MisPedidosFragment fragment = new MisPedidosFragment();
+                FragmentManager fragmentManager = Objects.requireNonNull(getActivity()).getSupportFragmentManager();
+                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+                fragmentTransaction.replace(R.id.navigationContainer, fragment);
+                fragmentTransaction.commit();
+            }
+        });
 
 
         return view;
@@ -116,26 +144,7 @@ public class MisPedidosFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        //Iniciamos el socket para traer los pedidos
-        initSocket();
-        socket.on("status order", onStatusOrder);
-        recyclerView = view.findViewById(R.id.MisPedidosContainer);
-        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity());
-        recyclerView.setLayoutManager(layoutManager);
-
-        //--
-        llenarPedidos();
-        swipeRefreshLayout = view.findViewById(R.id.swipeRefreshLayout);
-        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                MisPedidosFragment fragment = new MisPedidosFragment();
-                FragmentManager fragmentManager = Objects.requireNonNull(getActivity()).getSupportFragmentManager();
-                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                fragmentTransaction.add(R.id.navigationContainer, fragment);
-                fragmentTransaction.commit();
-            }
-        });
+        /*socket.on("status order", onStatusOrder);*/
     }
 
     public void onButtonPressed(Uri uri) {
@@ -144,9 +153,16 @@ public class MisPedidosFragment extends Fragment {
         }
     }
 
+    FragmentActivity MyActivity;
+
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
+
+
+        if (context instanceof Activity)
+            MyActivity = (FragmentActivity) context;
+
         if (context instanceof OnFragmentInteractionListener) {
             mListener = (OnFragmentInteractionListener) context;
         } else {
@@ -174,7 +190,6 @@ public class MisPedidosFragment extends Fragment {
                 .getAppDatabase()
                 .getAcountDao()
                 .getUser(token);
-
         JSONObject jsonObject = new JSONObject();
 
         queue = Volley.newRequestQueue(getContext());
@@ -212,21 +227,21 @@ public class MisPedidosFragment extends Fragment {
                                         details.add(jsonObject1.getString("description"));
                                     }
                                     order.setDetalles(details);
-                                    data.add(order);
+                                    orders.add(order);
                                 }
-                                misPedidosAdapter = new MisPedidosAdapter(data);
+                                misPedidosAdapter = new MisPedidosAdapter(orders);
                                 recyclerView.setAdapter(misPedidosAdapter);
                                 misPedidosAdapter.setOnClickListener(new View.OnClickListener() {
                                     @Override
                                     public void onClick(View v) {
                                         FragmentManager manager = Objects.requireNonNull(getActivity()).getSupportFragmentManager();
                                         FragmentTransaction transaction = manager.beginTransaction();
-                                        String status = data.get(recyclerView.getChildAdapterPosition(v)).getStatus();
+                                        String status = orders.get(recyclerView.getChildAdapterPosition(v)).getStatus();
                                         if (status.equals("confirm")) {
                                             MapsPerdidos misPedidosFragment = new MapsPerdidos();
                                             Bundle bundle = new Bundle();
-                                            LatLng d_company = data.get(recyclerView.getChildAdapterPosition(v)).getCompanyDirection();
-                                            LatLng d_client = data.get(recyclerView.getChildAdapterPosition(v)).getClientDirection();
+                                            LatLng d_company = orders.get(recyclerView.getChildAdapterPosition(v)).getCompanyDirection();
+                                            LatLng d_client = orders.get(recyclerView.getChildAdapterPosition(v)).getClientDirection();
                                             bundle.putParcelable("DCOMPANY", d_company);
                                             bundle.putParcelable("DCLIENT", d_client);
                                             misPedidosFragment.setArguments(bundle);
@@ -272,7 +287,6 @@ public class MisPedidosFragment extends Fragment {
 
 
     private void initSocket() {
-
         int id_user = new Session(getContext()).getToken();
         final JSONObject data = new JSONObject();
         Acount cuenta = DatabaseClient.getInstance(getContext())
@@ -282,7 +296,7 @@ public class MisPedidosFragment extends Fragment {
 
         final JSONObject json_connect = new JSONObject();
         IO.Options opts = new IO.Options();
-        opts.forceNew = true;
+        //  opts.forceNew = true;
         opts.reconnection = true;
         opts.query = "auth_token=thisgo77";
         try {
@@ -296,6 +310,8 @@ public class MisPedidosFragment extends Fragment {
         try {
             socket = IO.socket(HOST_NODEJS, opts);
             socket.connect();
+            if (socket.connected())
+                Toast.makeText(getContext(), "123456", Toast.LENGTH_SHORT).show();
             // SOCKET.io().reconnectionDelay(10000);
             Log.d(TAG, "Node connect ok");
             //conect();
@@ -360,39 +376,19 @@ public class MisPedidosFragment extends Fragment {
             }
         });
 
-        final int token = new Session(getContext()).getToken();
-        String url = this.baseURL + "/client/order/" + token;
-        final Acount acount = DatabaseClient.getInstance(getContext())
-                .getAppDatabase()
-                .getAcountDao()
-                .getUser(token);
-        final JSONObject datas = new JSONObject();
-        try {
-            datas.put("id", token);
-            datas.put("token", acount.getToken());
-            Log.d(TAG, "conect " + datas.toString());
-            socket.emit("status order", datas);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
         socket.on("confirm order client", new Emitter.Listener() {
             @Override
             public void call(Object... args) {
                 JSONObject response = (JSONObject) args[0];
                 try {
                     if (response.getJSONObject("data").getInt("order_id") > 0) {
-                        getActivity().runOnUiThread(new Runnable() {
+                        MyActivity.runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
                                 misPedidosAdapter.notifyDataSetChanged();
-                                final JSONObject datas = new JSONObject();
                                 try {
-                                    datas.put("id", token);
-                                    datas.put("token", acount.getToken());
-                                    Log.d(TAG, "conect " + datas.toString());
 
-                                    getActivity().getSupportFragmentManager().beginTransaction().replace(MisPedidosFragment.this.getId(), new MisPedidosFragment()).commit();
+                                    MyActivity.getSupportFragmentManager().beginTransaction().replace(R.id.swipeRefreshLayout, new MisPedidosFragment()).commit();
                                     String CHANNEL_ID = "channel1";
 
                                     NotificationManager notificationManager = (NotificationManager) getContext().getSystemService(getContext().NOTIFICATION_SERVICE);
@@ -422,7 +418,7 @@ public class MisPedidosFragment extends Fragment {
                                     // NotificationManagerCompat notificationManager;
                                     // notificationManager =   NotificationManagerCompat.from(getContext());
                                     notificationManager.notify(1, notification);
-                                } catch (JSONException e) {
+                                } catch (Exception e) {
                                     e.printStackTrace();
                                 }
                             }
@@ -442,19 +438,14 @@ public class MisPedidosFragment extends Fragment {
                 JSONObject response = (JSONObject) args[0];
                 try {
                     if (response.getJSONObject("data").getInt("order_id") > 0) {
-                        Objects.requireNonNull(getActivity()).runOnUiThread(new Runnable() {
+                        MyActivity.runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
                                 misPedidosAdapter.notifyDataSetChanged();
-                                final JSONObject datas = new JSONObject();
                                 try {
-                                    datas.put("id", token);
-                                    datas.put("token", acount.getToken());
-                                    Log.d(TAG, "conect " + datas.toString());
-                                    getActivity().getSupportFragmentManager().beginTransaction().replace(MisPedidosFragment.this.getId(), new MisPedidosFragment()).commit();
+                                    MyActivity.getSupportFragmentManager().beginTransaction().replace(R.id.swipeRefreshLayout, new MisPedidosFragment()).commit();
                                     String CHANNEL_ID = "channel1";
-
-                                    NotificationManager notificationManager = (NotificationManager) Objects.requireNonNull(getContext()).getSystemService(getContext().NOTIFICATION_SERVICE);
+                                    NotificationManager notificationManager = (NotificationManager) getContext().getSystemService(getContext().NOTIFICATION_SERVICE);
                                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 
 
@@ -481,7 +472,7 @@ public class MisPedidosFragment extends Fragment {
                                     //    NotificationManagerCompat notificationManager;
                                     //     notificationManager =   NotificationManagerCompat.from(getContext());
                                     notificationManager.notify(1, notification);
-                                } catch (JSONException e) {
+                                } catch (Exception e) {
                                     e.printStackTrace();
                                 }
                             }
@@ -495,6 +486,25 @@ public class MisPedidosFragment extends Fragment {
                 System.out.println(response.toString());
             }
         });
+    }
+
+    //Emit status order and list
+    private void emitStatusOrder() {
+        final int token = new Session(getContext()).getToken();
+        final Acount acount = DatabaseClient.getInstance(getContext())
+                .getAppDatabase()
+                .getAcountDao()
+                .getUser(token);
+        final JSONObject datas = new JSONObject();
+        try {
+            datas.put("id", token);
+            datas.put("token", acount.getToken());
+            Log.d(TAG, "Orders: " + datas.toString());
+            //--
+            socket.emit("status order", datas);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 
     private Emitter.Listener onStatusOrder = new Emitter.Listener() {
