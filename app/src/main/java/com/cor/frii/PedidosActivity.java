@@ -13,6 +13,7 @@ import androidx.fragment.app.FragmentTransaction;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 import android.widget.Toast;
 
@@ -34,6 +35,8 @@ public class PedidosActivity extends AppCompatActivity implements NavigationView
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pedidos);
 
+
+
         toolbar = findViewById(R.id.navigationToolbar);
         setSupportActionBar(toolbar);
 
@@ -51,15 +54,22 @@ public class PedidosActivity extends AppCompatActivity implements NavigationView
 
          */
 
-        FragmentManager manager = getSupportFragmentManager();
-        FragmentTransaction transaction = manager.beginTransaction();
-        transaction.add(R.id.navigationContainer, new MisPedidosFragment());
-        //transaction.addToBackStack(null);
-        transaction.commit();
+        if (savedInstanceState == null) {
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.navigationContainer, new MisPedidosFragment())
+                    .commit();
+        }
 
+        /*FragmentManager manager = getSupportFragmentManager();
+        FragmentTransaction transaction = manager.beginTransaction();
+        transaction.replace(R.id.navigationContainer, new MisPedidosFragment());
+        transaction.commit();
+*/
 
         BottomNavigationView bottomNavigationView = findViewById(R.id.BottomNavigation);
         bottomNavigationView.setOnNavigationItemSelectedListener(navListener);
+
 
 
     }
@@ -69,6 +79,7 @@ public class PedidosActivity extends AppCompatActivity implements NavigationView
         public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
             FragmentManager manager = getSupportFragmentManager();
             FragmentTransaction transaction = manager.beginTransaction();
+
             Intent intent;
             switch (menuItem.getItemId()) {
                 case R.id.HomeBottom:
@@ -76,7 +87,6 @@ public class PedidosActivity extends AppCompatActivity implements NavigationView
                     startActivity(intent);
                     break;
                 case R.id.MapaBottom:
-
                     Toast.makeText(getBaseContext(), "Por favor haga click en un pedido", Toast.LENGTH_SHORT).show();
                     break;
                 case R.id.PedidosBottom:
@@ -91,7 +101,6 @@ public class PedidosActivity extends AppCompatActivity implements NavigationView
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
-
 
         return false;
     }

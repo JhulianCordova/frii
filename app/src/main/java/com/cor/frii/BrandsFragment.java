@@ -79,6 +79,7 @@ public class BrandsFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_brands, container, false);
+        brandsList = new ArrayList<>();
         recyclerView = view.findViewById(R.id.BrandsContainer);
         recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 2));
 
@@ -117,7 +118,7 @@ public class BrandsFragment extends Fragment {
 
     // Llenar datos
     private void llenarDatos() {
-        brandsList = new ArrayList<>();
+
 
         final List<Brands> gas_categories = new ArrayList<>();
 
