@@ -142,9 +142,6 @@ public class ProcesarpedidoFragment extends Fragment implements OnMapReadyCallba
             @Override
             public void onClick(View v) {
                 confirmarPedido();
-                Intent intent = new Intent(getContext(), PedidosActivity.class);
-                startActivity(intent);
-                getActivity().finish();
             }
         });
 
@@ -407,6 +404,10 @@ public class ProcesarpedidoFragment extends Fragment implements OnMapReadyCallba
                                         .getAppDatabase()
                                         .getCartDao()
                                         .deleteAllCart();
+
+                                Intent intent = new Intent(getContext(), PedidosActivity.class);
+                                startActivity(intent);
+                                getActivity().finish();
                             }
                         } catch (JSONException e) {
                             e.printStackTrace();

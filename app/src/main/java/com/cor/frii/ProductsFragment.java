@@ -104,6 +104,7 @@ public class ProductsFragment extends Fragment {
         recyclerView = view.findViewById(R.id.ProductsContainer);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
+        /*
         add_badge=view.findViewById(R.id.ProductButtonAdd);
         add_badge.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -112,6 +113,8 @@ public class ProductsFragment extends Fragment {
                 //badge_count.setVisibility(true);
             }
         });
+
+         */
 
         llenarDatos();
 
