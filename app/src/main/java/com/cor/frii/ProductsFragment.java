@@ -12,6 +12,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.NetworkResponse;
@@ -58,6 +60,8 @@ public class ProductsFragment extends Fragment {
     private RecyclerView recyclerView;
     ArrayList<Product> products;
 
+    private Button add_badge;
+
     //--
     String urlBase = "http://34.71.251.155";
 
@@ -96,9 +100,18 @@ public class ProductsFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_products, container, false);
+        final View view = inflater.inflate(R.layout.fragment_products, container, false);
         recyclerView = view.findViewById(R.id.ProductsContainer);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+
+        add_badge=view.findViewById(R.id.ProductButtonAdd);
+        add_badge.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                TextView badge_count=view.findViewById(R.id.badge_count);
+                //badge_count.setVisibility(true);
+            }
+        });
 
         llenarDatos();
 
