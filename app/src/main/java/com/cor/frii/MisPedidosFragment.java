@@ -213,6 +213,7 @@ public class MisPedidosFragment extends Fragment {
                                     ));
                                     if (obj.getJSONObject("company").length() > 0) {
                                         order.setPhone(obj.getJSONObject("company").getString("phone"));
+                                        order.setCompanyName(obj.getJSONObject("company").getString("name"));
                                         LatLng latLng = new LatLng(
                                                 obj.getJSONObject("company").getDouble("latitude"),
                                                 obj.getJSONObject("company").getDouble("longitude")
@@ -310,9 +311,9 @@ public class MisPedidosFragment extends Fragment {
             socket = IO.socket(HOST_NODEJS, opts);
             socket.connect();
             if (socket.connected())
-                Toast.makeText(getContext(), "Socket Conectado", Toast.LENGTH_SHORT).show();
-            // SOCKET.io().reconnectionDelay(10000);
-            Log.d(TAG, "Node connect ok");
+                //   Toast.makeText(getContext(), "Socket Conectado", Toast.LENGTH_SHORT).show();
+                // SOCKET.io().reconnectionDelay(10000);
+                Log.d(TAG, "Node connect ok");
             //conect();
         } catch (URISyntaxException e) {
             Log.d(TAG, "Node connect error");
@@ -523,6 +524,39 @@ public class MisPedidosFragment extends Fragment {
                 }
 
                 System.out.println(response.toString());
+            }
+        });
+
+        socket.on("order cancelar client", new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                JSONObject response = (JSONObject) args[0];
+
+                //REPONSE -> (RESPONSE.MESSAGE) TOAST
+
+                ActivityMispedidosFragment.MyActivity.runOnUiThread(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        orders.clear();
+                        llenarPedidos();
+                    }
+                });
+            }
+        });
+
+        socket.on("reorder client", new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                JSONObject response = (JSONObject) args[0];
+
+                ActivityMispedidosFragment.MyActivity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        orders.clear();
+                        llenarPedidos();
+                    }
+                });
             }
         });
     }

@@ -206,10 +206,13 @@ public class MisPedidosAdapter extends RecyclerView.Adapter<MisPedidosAdapter.vi
                 public void onClick(View v) {
                     System.out.println("entro...." + holder.cancelar.getText());
                     if (holder.cancelar.getText().equals("Cancelar")) {
-                        mensajeConfirmacion(data.get(position).getId(), data.get(position).getStatus(), position);
 
+                        /*mensajeConfirmacion(data.get(position).getId(), data.get(position).getStatus(), position);
                         notifyDataSetChanged();
-                        notifyItemChanged(position);
+                        notifyItemChanged(position);*/
+
+                        initSocket();
+                        emitirCancelar(data.get(position).getId());
 
                         holder.timerflag = false;
                     } else if (holder.cancelar.getText().equals("Calificar")) {
@@ -239,10 +242,18 @@ public class MisPedidosAdapter extends RecyclerView.Adapter<MisPedidosAdapter.vi
                             data.get(position).getCalification());
                     agendarPedido.show();
                 } else if (holder.cancelar.getText().equals("Repedir")) {
-                    repedirOrden(
+                    /*repedirOrden(
                             data.get(position).getId(),
                             data.get(position).getClientDirection().latitude,
-                            data.get(position).getClientDirection().longitude);
+                            data.get(position).getClientDirection().longitude
+                    );
+                    //FUNCION( DATA.GET(POSITION).GETID )*/
+                    initSocket();
+                    emitirReorder(
+                            data.get(position).getId(),
+                            data.get(position).getClientDirection().latitude,
+                            data.get(position).getClientDirection().longitude
+                    );
 
                     notifyDataSetChanged();
                     notifyItemChanged(position);
@@ -293,7 +304,9 @@ public class MisPedidosAdapter extends RecyclerView.Adapter<MisPedidosAdapter.vi
                 .setPositiveButton("Confirmar", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        tiempoCancelar(idOrden, status, position);
+                        /*tiempoCancelar(idOrden, status, position);*/
+                        initSocket();
+                        emitirCancelar(idOrden);
                     }
                 })
                 .setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
@@ -532,4 +545,39 @@ public class MisPedidosAdapter extends RecyclerView.Adapter<MisPedidosAdapter.vi
 
     }
 
+    //FUNCION(IDORDEN)
+    private void emitirCancelar(int idorden) {
+        JSONObject datas = new JSONObject();
+        int id_user = new Session(context).getToken();
+        try {
+            datas.put("id", idorden);
+            datas.put("id_user", id_user);
+            socket.emit("order cancel client", datas);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void emitirReorder(int idorden, double latitude, double longitude) {
+        JSONObject datas = new JSONObject();
+        int id_user = new Session(context).getToken();
+        try {
+            datas.put("id", idorden);
+            datas.put("id_user", id_user);
+            socket.emit("reorder client", datas);
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        JSONObject orden = new JSONObject();
+        try {
+            orden.put("id", idorden);
+            orden.put("latitude", latitude);
+            orden.put("longitude", longitude);
+            socket.emit("get orders", orden);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
 }
