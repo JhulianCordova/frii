@@ -104,17 +104,19 @@ public class ProductsFragment extends Fragment {
         recyclerView = view.findViewById(R.id.ProductsContainer);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        /*
-        add_badge=view.findViewById(R.id.ProductButtonAdd);
+
+        /*add_badge=view.findViewById(R.id.ProductButtonAdd);
         add_badge.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 TextView badge_count=view.findViewById(R.id.badge_count);
-                //badge_count.setVisibility(true);
+                badge_count.setVisibility(view.VISIBLE);
             }
         });
 
          */
+
+
 
         llenarDatos();
 

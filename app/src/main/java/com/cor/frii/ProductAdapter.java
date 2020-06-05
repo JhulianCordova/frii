@@ -1,6 +1,7 @@
 package com.cor.frii;
 
 import android.content.Context;
+import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -49,7 +50,13 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.viewHold
         view.setOnClickListener(this);
         context = parent.getContext();
 
-        return new viewHolder(view);
+
+
+        View view1=LayoutInflater.from(parent.getContext()).inflate(R.layout.navigation_app_bar_main,parent,false);
+        badge_count=view1.findViewById(R.id.badge_count);
+        badge_count.setVisibility(View.INVISIBLE);
+
+        return new viewHolder(view,badge_count,view1);
     }
 
     @Override
@@ -67,18 +74,21 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.viewHold
     }
 
     class viewHolder extends RecyclerView.ViewHolder {
-        TextView productTilte, productDescription;
+        TextView productTilte, productDescription,add_badge;
         ImageView productImage;
         Button productButtonAdd;
         EditText productCantidad;
+        View view;
 
-        viewHolder(@NonNull View itemView) {
+        viewHolder(@NonNull View itemView,TextView add_badge1, View view1) {
             super(itemView);
             productTilte = itemView.findViewById(R.id.ProductTitle);
             productImage = itemView.findViewById(R.id.ProductImage);
             productButtonAdd = itemView.findViewById(R.id.ProductButtonAdd);
             productCantidad = itemView.findViewById(R.id.ProductCantidad);
             productDescription = itemView.findViewById(R.id.ProductDescription);
+            add_badge=add_badge1;
+            view=view1;
 
 
         }
@@ -88,10 +98,10 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.viewHold
             productTilte.setText(product.getName());
             productDescription.setText(product.getDescription());
 
+
             Picasso.get().load(product.getUrl()).into(productImage);
 
             productButtonAdd.setOnClickListener(new View.OnClickListener() {
-
 
 
                 @Override
@@ -100,6 +110,10 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.viewHold
                     ECart eCart = new ECart();
                     eCart.setName(product.getName());
                     eCart.setPrice(product.getPrice());
+
+                    //productDescription.setVisibility(View.INVISIBLE);
+
+                    //add_badge.setVisibility(View.VISIBLE);
 
                     if (productCantidad.getText().length() > 0) {
                         eCart.setCantidad(Integer.parseInt(productCantidad.getText().toString()));
@@ -117,5 +131,9 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.viewHold
             });
 
         }
+
+
     }
+
+
 }

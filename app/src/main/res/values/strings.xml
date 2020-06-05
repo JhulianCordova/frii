@@ -8,7 +8,8 @@
     <string name="close">close</string>
 
     <!-- navigation  name-->
-    <string name="app_name_title">FRII</string>
+    <string name="app_name_title">MAYORISTA</string>
+    <string name="welcome">BIENVENIDO</string>
 
 
     <!-- login -->

@@ -24,7 +24,7 @@
             android:layout_gravity="center"
             android:layout_marginStart="10dp"
             android:layout_weight="1"
-            app:srcCompat="@drawable/avatar" />
+            app:srcCompat="@drawable/mayorista" />
 
 
         <LinearLayout
@@ -50,7 +50,7 @@
                 android:id="@+id/lblEmailUsuario"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="TextView"
+                android:text="@string/welcome"
                 android:textColor="@color/white" />
         </LinearLayout>
     </LinearLayout>
