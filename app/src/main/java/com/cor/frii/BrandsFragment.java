@@ -118,13 +118,10 @@ public class BrandsFragment extends Fragment {
 
     // Llenar datos
     private void llenarDatos() {
-
-
         final List<Brands> gas_categories = new ArrayList<>();
-
-
         Bundle bundle = this.getArguments();
         String url = "";
+
         if (bundle != null) {
             url = this.urlBase + "/api/markes/" + bundle.getInt("idCategory");
             if (bundle.getInt("idCategory") == 2) {
@@ -158,14 +155,10 @@ public class BrandsFragment extends Fragment {
                             transaction.addToBackStack(null);
                             transaction.commit();
                         } else {
-                            /*Bundle b = new Bundle();
-                            b.putInt("IdMarke", gas_categories.get(recyclerView.getChildAdapterPosition(v)).getId());
-                            ProductsFragment productsFragment = new ProductsFragment();
-                            productsFragment.setArguments(b);
-                            transaction.replace(R.id.mainContainer, productsFragment);
+                            GasCisternaFragment gasCisternaFragment = new GasCisternaFragment();
+                            transaction.replace(R.id.mainContainer, gasCisternaFragment);
                             transaction.addToBackStack(null);
-                            transaction.commit();*/
-
+                            transaction.commit();
                         }
 
                     }
@@ -223,7 +216,10 @@ public class BrandsFragment extends Fragment {
                                         transaction.commit();
 
                                     } else if (brandsTitle.equals("camion")) {
-                                        Toast.makeText(getContext(), "En implementacion", Toast.LENGTH_LONG).show();
+                                        GasCisternaFragment gasCisternaFragment = new GasCisternaFragment();
+                                        transaction.replace(R.id.mainContainer, gasCisternaFragment);
+                                        transaction.addToBackStack(null);
+                                        transaction.commit();
                                     } else {
                                         Bundle b = new Bundle();
                                         b.putInt("IdMarke", brandsList.get(recyclerView.getChildAdapterPosition(v)).getId());

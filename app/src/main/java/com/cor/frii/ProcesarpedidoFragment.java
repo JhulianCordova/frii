@@ -10,8 +10,7 @@ import android.net.Uri;
 import android.os.Bundle;
 
 import android.util.Log;
-import android.widget.ImageView;
-import android.widget.TextView;
+import android.widget.*;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
@@ -21,8 +20,6 @@ import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.Toast;
 
 import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
@@ -92,6 +89,8 @@ public class ProcesarpedidoFragment extends Fragment implements OnMapReadyCallba
     private LatLng point_move;
     private Socket socket;
 
+    private RadioGroup groupMetodo, groupMetodoEfectivo;
+    private RadioButton voucher;
     private TextView lblDireccion;
 
     private OnFragmentInteractionListener mListener;
@@ -99,7 +98,6 @@ public class ProcesarpedidoFragment extends Fragment implements OnMapReadyCallba
     public ProcesarpedidoFragment() {
         // Required empty public constructor
     }
-
 
     public static ProcesarpedidoFragment newInstance(String param1, String param2) {
         ProcesarpedidoFragment fragment = new ProcesarpedidoFragment();
@@ -125,17 +123,47 @@ public class ProcesarpedidoFragment extends Fragment implements OnMapReadyCallba
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_procesarpedido, container, false);
+        final View view = inflater.inflate(R.layout.fragment_procesarpedido, container, false);
+
         lblDireccion = view.findViewById(R.id.lblDireccion);
         ImageView markerIcon = view.findViewById(R.id.markerIcon);
-
+        groupMetodo = view.findViewById(R.id.groupMetodo);
+        groupMetodoEfectivo = view.findViewById(R.id.groupMetodoEfectivo);
+        voucher = view.findViewById(R.id.RadioButtonBoleta);
         Button procesarPedido = view.findViewById(R.id.ButtonConfirmarPedido);
+
+        groupMetodo.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+                switch (checkedId) {
+                    case R.id.rbEfectivo:
+                        groupMetodoEfectivo.setVisibility(View.VISIBLE);
+                        voucher = view.findViewById(R.id.RadioButtonBoleta);
+                        break;
+                    case R.id.rbTarjeta:
+                        groupMetodoEfectivo.setVisibility(View.GONE);
+                        voucher = view.findViewById(R.id.rbTarjeta);
+                }
+            }
+        });
+
+        groupMetodoEfectivo.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+                if (checkedId == R.id.RadioButtonFactura) {
+                    voucher = view.findViewById(R.id.RadioButtonFactura);
+                } else {
+                    voucher = view.findViewById(R.id.RadioButtonBoleta);
+                }
+            }
+        });
 
         mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(Objects.requireNonNull(getActivity()));
         SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager()
                 .findFragmentById(R.id.google_map_pedidos);
         assert mapFragment != null;
         mapFragment.getMapAsync(this);
+
 
         procesarPedido.setOnClickListener(new View.OnClickListener() {
 
@@ -144,7 +172,6 @@ public class ProcesarpedidoFragment extends Fragment implements OnMapReadyCallba
                 confirmarPedido();
             }
         });
-
         return view;
     }
 
@@ -347,10 +374,22 @@ public class ProcesarpedidoFragment extends Fragment implements OnMapReadyCallba
         if (lblDireccion.getText().toString().length() == 0 && lblDireccion.getText().toString().equals("")) {
             return;
         }
+        String comprobante;
+        switch (voucher.getText().toString()) {
+            case "Factura":
+                comprobante = "factura";
+                break;
+            case "Pagar con targeta":
+                comprobante = "tarjeta";
+                break;
+            default:
+                comprobante = "boleta";
+        }
 
         JSONObject jsonObject = new JSONObject();
         RequestQueue queue = Volley.newRequestQueue(Objects.requireNonNull(getContext()));
         try {
+            jsonObject.put("voucher", comprobante);
             jsonObject.put("latitud", String.valueOf(startLng.latitude));
             jsonObject.put("longitud", String.valueOf(startLng.longitude));
             jsonObject.put("client_id", new Session(getContext()).getToken());
@@ -377,10 +416,7 @@ public class ProcesarpedidoFragment extends Fragment implements OnMapReadyCallba
         }
 
         String url = this.baseURL + "/client/order/";
-
-
         System.out.println(jsonObject.toString());
-
         JsonObjectRequest jsonObjectRequest =
                 new JsonObjectRequest(Request.Method.POST, url, jsonObject, new Response.Listener<JSONObject>() {
                     @Override
