@@ -122,12 +122,12 @@ public class MisPedidosAdapter extends RecyclerView.Adapter<MisPedidosAdapter.vi
             case "delivered":
                 holder.estadoPedido.setText("Entregado");
                 holder.cancelar.setText("Calificar");
-                holder.cancelar.setBackgroundColor(Color.rgb(23, 162, 184));
+                holder.cancelar.setBackgroundResource(R.drawable.custom_button_calificar);
                 break;
             default:
                 holder.estadoPedido.setText("Cancelado");
                 holder.cancelar.setText("Repedir");
-                holder.cancelar.setBackgroundColor(Color.rgb(40, 167, 69));
+                holder.cancelar.setBackgroundResource(R.drawable.custom_button_repedir);
                 holder.mensaje.setVisibility(View.GONE);
                 holder.llamar.setVisibility(View.GONE);
 
@@ -162,14 +162,14 @@ public class MisPedidosAdapter extends RecyclerView.Adapter<MisPedidosAdapter.vi
             holder.timerAuto.setText("Confirmado por: " + data.get(position).getCompanyName());
         } else {
             holder.llamar.setEnabled(false);
-            holder.llamar.setBackgroundColor(Color.GRAY);
+            holder.llamar.setBackgroundResource(R.drawable.custom_button_gray);
             holder.mensaje.setEnabled(false);
-            holder.mensaje.setBackgroundColor(Color.GRAY);
+            holder.mensaje.setBackgroundResource(R.drawable.custom_button_gray);
         }
 
         if (data.get(position).getStatus().equals("cancel")) {
             holder.cancelar.setText("Repedir");
-            holder.cancelar.setBackgroundColor(Color.rgb(40, 167, 69));
+            holder.cancelar.setBackgroundResource(R.drawable.custom_button_repedir);
             if (holder.timer != null) {
                 holder.timer.cancel();
             }

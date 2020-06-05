@@ -117,7 +117,7 @@ public class CartdetailFragment extends Fragment implements CartDetailAdapter.Ev
         assert eCarts != null;
         if (eCarts.size() == 0) {
             procesarPedido.setEnabled(false);
-            procesarPedido.setBackgroundColor(Color.GRAY);
+            procesarPedido.setBackgroundResource(R.drawable.custom_button_gray);
         } else {
             procesarPedido.setEnabled(true);
         }
@@ -167,8 +167,9 @@ public class CartdetailFragment extends Fragment implements CartDetailAdapter.Ev
     @Override
     public void calcularTotal(float total) {
         if (total == 0) {
-            procesarPedido.setEnabled(false);
+
             procesarPedido.setBackgroundResource(R.drawable.custom_button_gray);
+            procesarPedido.setEnabled(false);
         }
 
         lblTotal.setText(String.valueOf(total));
