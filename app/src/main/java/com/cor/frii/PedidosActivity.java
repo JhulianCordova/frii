@@ -17,8 +17,12 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import com.cor.frii.Login.LoginActivity;
+import com.cor.frii.persistence.Session;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
+
+import java.util.Objects;
 
 public class PedidosActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener,
         MisPedidosFragment.OnFragmentInteractionListener,
@@ -35,6 +39,16 @@ public class PedidosActivity extends AppCompatActivity implements NavigationView
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pedidos);
 
+        //Validar informacion del usuario
+        Session session = new Session(getApplicationContext());
+        final int token = session.getToken();
+        if (token == 0 || token < 0) {
+            Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
+            startActivity(intent);
+            finish();
+            System.out.println("LAS CREDENCIALES SON INVALIDAS");
+        }
+        //--
 
 
         toolbar = findViewById(R.id.navigationToolbar);

@@ -44,6 +44,17 @@ public class PerfilActivity extends AppCompatActivity  implements NavigationView
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_perfil);
 
+        //Validar informacion del usuario
+        Session session = new Session(getApplicationContext());
+        final int token = session.getToken();
+        if (token == 0 || token < 0) {
+            Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
+            startActivity(intent);
+            finish();
+            System.out.println("LAS CREDENCIALES SON INVALIDAS");
+        }
+        //--
+
         toolbar = findViewById(R.id.navigationToolbar);
         setSupportActionBar(toolbar);
         drawerLayout = findViewById(R.id.navigationDrawerPerfil);
