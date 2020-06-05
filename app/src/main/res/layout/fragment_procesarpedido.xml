@@ -117,10 +117,12 @@
                 android:layout_marginEnd="10dp">
 
                 <RadioGroup
+                    android:id="@+id/groupMetodo"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content">
 
                     <RadioButton
+                        android:id="@+id/rbTarjeta"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:drawableLeft="@drawable/ic_credit_card_outline"
@@ -134,12 +136,14 @@
                         android:theme="@style/RadioButton" />
 
                     <RadioButton
+                        android:id="@+id/rbEfectivo"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:drawableLeft="@drawable/ic_cash_100"
                         android:drawablePadding="10dp"
                         android:layoutDirection="rtl"
                         android:padding="5dp"
+                        android:checked="true"
                         android:text="@string/pay_money"
                         android:textAlignment="textStart"
                         android:textStyle="bold"
@@ -150,6 +154,7 @@
             </RelativeLayout>
 
             <RadioGroup
+                android:id="@+id/groupMetodoEfectivo"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"

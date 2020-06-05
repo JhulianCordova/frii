@@ -26,8 +26,8 @@
     <string name="send_forgotted_password">Enviar</string>
 
     <string name="warning">Se recomienda realizar pedidos indendientes por  cada producto.</string>
-    
-    
+
+
     <!-- procesar pedido cart activity-->
     <string name="pay_credit_card">Pagar con targeta</string>
     <string name="pay_money">Pagar en efectivo</string>

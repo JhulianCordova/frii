@@ -41,6 +41,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.HttpHeaderParser;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.cor.frii.Login.LoginActivity;
 import com.cor.frii.persistence.DatabaseClient;
 import com.cor.frii.persistence.Session;
 import com.cor.frii.persistence.entity.Acount;
@@ -100,6 +101,17 @@ public class MisPedidosFragment extends Fragment {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
+
+        //Validar informacion del usuario
+        Session session = new Session(getContext());
+        final int token = session.getToken();
+        if (token == 0 || token < 0) {
+            Intent intent = new Intent(getContext(), LoginActivity.class);
+            startActivity(intent);
+            Objects.requireNonNull(getActivity()).finish();
+            System.out.println("LAS CREDENCIALES SON INVALIDAS");
+        }
+        //--
 
     }
 

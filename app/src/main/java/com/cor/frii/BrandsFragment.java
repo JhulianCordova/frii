@@ -1,6 +1,7 @@
 package com.cor.frii;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 
@@ -23,6 +24,8 @@ import com.android.volley.ServerError;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.HttpHeaderParser;
 import com.android.volley.toolbox.JsonArrayRequest;
+import com.cor.frii.Login.LoginActivity;
+import com.cor.frii.persistence.Session;
 import com.cor.frii.pojo.Brands;
 import com.cor.frii.utils.VolleySingleton;
 
@@ -34,6 +37,7 @@ import org.json.JSONObject;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 
 public class BrandsFragment extends Fragment {
@@ -72,6 +76,18 @@ public class BrandsFragment extends Fragment {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
+
+        //Validar informacion del usuario
+        Session session = new Session(getContext());
+        final int token = session.getToken();
+        if (token == 0 || token < 0) {
+            Intent intent = new Intent(getContext(), LoginActivity.class);
+            startActivity(intent);
+            Objects.requireNonNull(getActivity()).finish();
+            System.out.println("LAS CREDENCIALES SON INVALIDAS");
+        }
+        //--
+
     }
 
     @Override
@@ -118,13 +134,10 @@ public class BrandsFragment extends Fragment {
 
     // Llenar datos
     private void llenarDatos() {
-
-
         final List<Brands> gas_categories = new ArrayList<>();
-
-
         Bundle bundle = this.getArguments();
         String url = "";
+
         if (bundle != null) {
             url = this.urlBase + "/api/markes/" + bundle.getInt("idCategory");
             if (bundle.getInt("idCategory") == 2) {
@@ -158,14 +171,10 @@ public class BrandsFragment extends Fragment {
                             transaction.addToBackStack(null);
                             transaction.commit();
                         } else {
-                            /*Bundle b = new Bundle();
-                            b.putInt("IdMarke", gas_categories.get(recyclerView.getChildAdapterPosition(v)).getId());
-                            ProductsFragment productsFragment = new ProductsFragment();
-                            productsFragment.setArguments(b);
-                            transaction.replace(R.id.mainContainer, productsFragment);
+                            GasCisternaFragment gasCisternaFragment = new GasCisternaFragment();
+                            transaction.replace(R.id.mainContainer, gasCisternaFragment);
                             transaction.addToBackStack(null);
-                            transaction.commit();*/
-
+                            transaction.commit();
                         }
 
                     }
@@ -223,7 +232,10 @@ public class BrandsFragment extends Fragment {
                                         transaction.commit();
 
                                     } else if (brandsTitle.equals("camion")) {
-                                        Toast.makeText(getContext(), "En implementacion", Toast.LENGTH_LONG).show();
+                                        GasCisternaFragment gasCisternaFragment = new GasCisternaFragment();
+                                        transaction.replace(R.id.mainContainer, gasCisternaFragment);
+                                        transaction.addToBackStack(null);
+                                        transaction.commit();
                                     } else {
                                         Bundle b = new Bundle();
                                         b.putInt("IdMarke", brandsList.get(recyclerView.getChildAdapterPosition(v)).getId());

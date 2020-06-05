@@ -19,10 +19,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.cor.frii.Login.LoginActivity;
+import com.cor.frii.persistence.DatabaseClient;
 import com.cor.frii.persistence.Session;
+import com.cor.frii.persistence.entity.Acount;
 import com.google.android.material.navigation.NavigationView;
 
-public class PerfilActivity extends AppCompatActivity  implements NavigationView.OnNavigationItemSelectedListener,
+public class PerfilActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener,
         SettingFragment.OnFragmentInteractionListener,
         MainFragment.OnFragmentInteractionListener,
         CategoriesFragment.OnFragmentInteractionListener,
@@ -30,7 +32,7 @@ public class PerfilActivity extends AppCompatActivity  implements NavigationView
         ProductsFragment.OnFragmentInteractionListener,
         GasFragment.OnFragmentInteractionListener,
         MisPedidosFragment.OnFragmentInteractionListener,
-        AccountFragment.OnFragmentInteractionListener{
+        AccountFragment.OnFragmentInteractionListener {
 
 
     DrawerLayout drawerLayout;
@@ -38,11 +40,23 @@ public class PerfilActivity extends AppCompatActivity  implements NavigationView
     Toolbar toolbar;
     NavigationView navigationView;
     TextView CerrarSecion;
+    TextView lblUsername, lblEmail;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_perfil);
+
+        //Validar informacion del usuario
+        Session session = new Session(getApplicationContext());
+        final int token = session.getToken();
+        if (token == 0 || token < 0) {
+            Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
+            startActivity(intent);
+            finish();
+            System.out.println("LAS CREDENCIALES SON INVALIDAS");
+        }
+        //--
 
         toolbar = findViewById(R.id.navigationToolbar);
         setSupportActionBar(toolbar);
@@ -57,37 +71,28 @@ public class PerfilActivity extends AppCompatActivity  implements NavigationView
         actionBarDrawerToggle.setDrawerIndicatorEnabled(true);
         actionBarDrawerToggle.syncState();
 
-        Bundle datos=this.getIntent().getExtras();
-        String name=datos.getString("name");
-        int Id=datos.getInt("id");
+        Bundle datos = this.getIntent().getExtras();
+        String name = datos.getString("name");
+        int Id = datos.getInt("id");
 
-        if (Id==R.id.Perfil){
-            FragmentManager manager=getSupportFragmentManager();
-            FragmentTransaction transaction=manager.beginTransaction();
-            transaction.add(R.id.navigationContainer,new SettingFragment());
+        if (Id == R.id.Perfil) {
+            FragmentManager manager = getSupportFragmentManager();
+            FragmentTransaction transaction = manager.beginTransaction();
+            transaction.add(R.id.navigationContainer, new SettingFragment());
             //transaction.addToBackStack(null);
             transaction.commit();
 
         }
-        if (Id==R.id.account){
-            FragmentManager manager=getSupportFragmentManager();
-            FragmentTransaction transaction=manager.beginTransaction();
-            transaction.replace(R.id.navigationContainer,new AccountFragment());
+        if (Id == R.id.account) {
+            FragmentManager manager = getSupportFragmentManager();
+            FragmentTransaction transaction = manager.beginTransaction();
+            transaction.replace(R.id.navigationContainer, new AccountFragment());
             //transaction.addToBackStack(null);
             transaction.commit();
         }
 
-        /*
-        int na=R.id.Perfil;
-        //int id=na.getItemId();
-
-        System.out.println("===================="+Id);
-        System.out.println("===================="+na  +"======");
-
-         */
-
-        CerrarSecion=findViewById(R.id.CerrarSesion);
-        CerrarSecion.setOnClickListener(new View.OnClickListener(){
+        CerrarSecion = findViewById(R.id.CerrarSesion);
+        CerrarSecion.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View v) {
@@ -110,21 +115,21 @@ public class PerfilActivity extends AppCompatActivity  implements NavigationView
         FragmentTransaction transaction = manager.beginTransaction();
         Intent intent;
         if (menuItem.getItemId() == R.id.home) {
-             intent=new Intent(getBaseContext(),MainActivity.class);
+            intent = new Intent(getBaseContext(), MainActivity.class);
             startActivity(intent);
         }
         if (menuItem.getItemId() == R.id.account) {
-             intent=new Intent(getBaseContext(),PerfilActivity.class);
-            intent.putExtra("id",R.id.account);
+            intent = new Intent(getBaseContext(), PerfilActivity.class);
+            intent.putExtra("id", R.id.account);
             startActivity(intent);
             Toast.makeText(this, "Account", Toast.LENGTH_SHORT).show();
         }
         if (menuItem.getItemId() == R.id.Perfil) {
 
-             intent=new Intent(getBaseContext(),PerfilActivity.class);
-            String title=menuItem.getTitle().toString();
-            intent.putExtra("name",title);
-            intent.putExtra("id",R.id.Perfil);
+            intent = new Intent(getBaseContext(), PerfilActivity.class);
+            String title = menuItem.getTitle().toString();
+            intent.putExtra("name", title);
+            intent.putExtra("id", R.id.Perfil);
             startActivity(intent);
 
             /*
@@ -135,11 +140,52 @@ public class PerfilActivity extends AppCompatActivity  implements NavigationView
 
              */
         }
-        if (menuItem.getItemId()==R.id.MisPedidos){
-            intent=new Intent(this, PedidosActivity.class);
+        if (menuItem.getItemId() == R.id.MisPedidos) {
+            intent = new Intent(this, PedidosActivity.class);
             startActivity(intent);
         }
         return false;
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        llenarInfoUsuario();
+    }
+
+    private void llenarInfoUsuario() {
+        Session session = new Session(getApplicationContext());
+        final int token = session.getToken();
+
+        if (token != 0) {
+            Acount acount = DatabaseClient.getInstance(getApplicationContext())
+                    .getAppDatabase()
+                    .getAcountDao()
+                    .getUser(token);
+
+            if (acount != null) {
+                View view = navigationView.getHeaderView(0);
+                lblUsername = view.findViewById(R.id.lblNombreUsuario);
+                lblEmail = view.findViewById(R.id.lblEmailUsuario);
+
+                lblUsername.setText(acount.getNombre());
+                lblEmail.setText(acount.getEmail());
+            } else {
+                Toast.makeText(getApplicationContext(), "Error de  loggeado", Toast.LENGTH_LONG).show();
+                Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
+                startActivity(intent);
+                finish();
+            }
+
+
+        } else {
+            Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
+            startActivity(intent);
+            finish();
+            System.out.println("LAS CREDENCIALES SON INVALIDAS");
+        }
+
+
     }
 
     @Override

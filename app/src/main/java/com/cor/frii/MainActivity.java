@@ -120,22 +120,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 finish();
             }
         });
-
-
-        Session session = new Session(getApplicationContext());
-        System.out.println("VALOR DE TOKEN " + session.getToken());
-
-        List<Acount> acounts = DatabaseClient.getInstance(getApplicationContext())
-                .getAppDatabase()
-                .getAcountDao()
-                .getUsers();
-
-        for (Acount a : acounts) {
-            System.out.println(a.getId());
-            System.out.println(a.getNombre());
-            System.out.println(a.getEmail());
-            System.out.println("------------------>");
-        }
     }
 
     @Override
@@ -171,42 +155,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             intent.putExtra("name", title);
             intent.putExtra("id", R.id.Perfil);
             startActivity(intent);
-
-            /*
-            transaction.replace(R.id.navigationContainer, new SettingFragment());
-            transaction.addToBackStack(null);
-            transaction.commit();
-            Toast.makeText(this, "Perfil", Toast.LENGTH_SHORT).show();
-
-             */
         }
         if (menuItem.getItemId() == R.id.MisPedidos) {
 
             Intent intent = new Intent(getBaseContext(), PedidosActivity.class);
             startActivity(intent);
-            /*
-            transaction.replace(R.id.navigationContainer, new MisPedidosFragment());
-            transaction.addToBackStack(null);
-            transaction.commit();
-            Toast.makeText(this, "Mis Pedidos", Toast.LENGTH_SHORT).show();
-
-             */
-
         }
-        /*
-        if (menuItem.getItemId() == R.id.CerrarSesion) {
-
-            Session session = new Session(getApplicationContext());
-            session.destroySession();
-
-            Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
-            startActivity(intent);
-            finish();
-
-        }
-        
-         */
-
 
         return false;
     }
@@ -225,17 +179,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         fragmentTransaction = fragmentManager.beginTransaction();
         fragmentTransaction.add(R.id.navigationContainer, new MainFragment());
         fragmentTransaction.commit();
-
-
-        /*
-        // inicializando los fragment de categories y brands en el app
-        FragmentTransaction transaction=getSupportFragmentManager().beginTransaction();
-        transaction.add(R.id.CategoriesSection,new CategoriesFragment()).commit();
-
-        FragmentTransaction tras=getSupportFragmentManager().beginTransaction();
-        tras.add(R.id.mainContainer,new BrandsFragment()).commit();
-
-         */
     }
 
 
@@ -244,7 +187,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         final int token = session.getToken();
 
         if (token != 0) {
-
             Acount acount = DatabaseClient.getInstance(getApplicationContext())
                     .getAppDatabase()
                     .getAcountDao()

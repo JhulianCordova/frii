@@ -1,6 +1,7 @@
 package com.cor.frii;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
@@ -17,10 +18,13 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.cor.frii.Login.LoginActivity;
 import com.cor.frii.persistence.DatabaseClient;
+import com.cor.frii.persistence.Session;
 import com.cor.frii.persistence.entity.ECart;
 
 import java.util.List;
+import java.util.Objects;
 
 
 /**
@@ -79,6 +83,17 @@ public class CartdetailFragment extends Fragment implements CartDetailAdapter.Ev
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
+
+        //Validar informacion del usuario
+        Session session = new Session(getContext());
+        final int token = session.getToken();
+        if (token == 0 || token < 0) {
+            Intent intent = new Intent(getContext(), LoginActivity.class);
+            startActivity(intent);
+            Objects.requireNonNull(getActivity()).finish();
+            System.out.println("LAS CREDENCIALES SON INVALIDAS");
+        }
+        //--
     }
 
     @Override
@@ -153,7 +168,7 @@ public class CartdetailFragment extends Fragment implements CartDetailAdapter.Ev
     public void calcularTotal(float total) {
         if (total == 0) {
             procesarPedido.setEnabled(false);
-            procesarPedido.setBackgroundColor(Color.GRAY);
+            procesarPedido.setBackgroundResource(R.drawable.custom_button_gray);
         }
 
         lblTotal.setText(String.valueOf(total));

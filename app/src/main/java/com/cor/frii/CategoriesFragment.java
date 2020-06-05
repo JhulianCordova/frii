@@ -1,6 +1,7 @@
 package com.cor.frii;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 
@@ -25,6 +26,8 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.HttpHeaderParser;
 
 import com.android.volley.toolbox.JsonArrayRequest;
+import com.cor.frii.Login.LoginActivity;
+import com.cor.frii.persistence.Session;
 import com.cor.frii.pojo.Categories;
 import com.cor.frii.utils.VolleySingleton;
 
@@ -34,6 +37,7 @@ import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Objects;
 
 
 /**
@@ -91,6 +95,18 @@ public class CategoriesFragment extends Fragment {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
+
+        //Validar informacion del usuario
+        Session session = new Session(getContext());
+        final int token = session.getToken();
+        if (token == 0 || token < 0) {
+            Intent intent = new Intent(getContext(), LoginActivity.class);
+            startActivity(intent);
+            Objects.requireNonNull(getActivity()).finish();
+            System.out.println("LAS CREDENCIALES SON INVALIDAS");
+        }
+        //--
+
     }
 
     @Override

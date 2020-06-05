@@ -14,11 +14,12 @@ import androidx.fragment.app.Fragment;
 import com.cor.frii.R;
 import com.google.android.material.textfield.TextInputLayout;
 
+import java.util.Objects;
+
 public class ForgottenPasswordFragment extends Fragment implements View.OnClickListener {
 
 
-    private static TextView Email, atras,enviar;
-
+    private static TextView Email, atras, enviar;
 
 
     @Override
@@ -27,11 +28,16 @@ public class ForgottenPasswordFragment extends Fragment implements View.OnClickL
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.forgottenpassword_layout, container, false);
 
-        atras=view.findViewById(R.id.BackLogin);
-        Email=view.findViewById(R.id.EmailLogin);
-        enviar=view.findViewById(R.id.EnviarForgottenPassword);
+        atras = view.findViewById(R.id.BackLogin);
+        Email = view.findViewById(R.id.EmailLogin);
+        enviar = view.findViewById(R.id.EnviarForgottenPassword);
 
-
+        atras.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Objects.requireNonNull(getActivity()).onBackPressed();
+            }
+        });
 
         /*
         ForgottenPassword.setOnClickListener(new View.OnClickListener(){
@@ -57,9 +63,6 @@ public class ForgottenPasswordFragment extends Fragment implements View.OnClickL
 
         return view;
     }
-
-
-
 
 
     @Override

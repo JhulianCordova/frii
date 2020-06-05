@@ -1,5 +1,6 @@
 package com.cor.frii.Login;
 
+import android.accounts.Account;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.LiveData;
@@ -82,7 +83,7 @@ public class LoginActivity extends AppCompatActivity {
         forgottedPassword.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(getApplicationContext(), ForgottenPasswordActivity.class);
+                Intent intent = new Intent(getApplication(), ForgottenPasswordActivity.class);
                 startActivity(intent);
             }
         });
@@ -213,74 +214,97 @@ public class LoginActivity extends AppCompatActivity {
 
     public void insertarUsuario(final String token, final int id, final String pass) {
         RequestQueue requestQueue = Volley.newRequestQueue(getApplicationContext());
-        JSONObject object = new JSONObject();
-        String url = baseUrl + "/api/clients/" + id;
-        JsonObjectRequest jsonObjectRequest =
-                new JsonObjectRequest(Request.Method.GET, url, object, new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        System.out.println(response);
-                        Acount cuenta = new Acount();
-                        try {
-                            int i = response.getJSONObject("client").getInt("client_id");
-                            cuenta.setId(response.getJSONObject("client").getInt("client_id"));
-                            cuenta.setNumDocumento(response.getJSONObject("client").getString("num_document"));
-                            cuenta.setNombre(response.getJSONObject("client").getString("name"));
-                            cuenta.setPhoneOne(response.getJSONObject("client").getString("phone1"));
-                            cuenta.setPhoneTwo(response.getJSONObject("client").getString("phone2"));
-                            cuenta.setDireccion(response.getJSONObject("client").getString("address"));
-                            cuenta.setEmail(response.getString("user"));
-                            cuenta.setPassword(pass);
-                            cuenta.setToken(token);
 
-                            DatabaseClient.getInstance(getApplicationContext())
-                                    .getAppDatabase()
-                                    .getAcountDao()
-                                    .addUser(cuenta);
+        Acount a = DatabaseClient.getInstance(getApplicationContext())
+                .getAppDatabase()
+                .getAcountDao()
+                .getUser(id);
 
-
-                            Session session = new Session(getApplicationContext());
-                            session.setToken(i);
-                            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-                            startActivity(intent);
-
-
-                            saveTokenBackend(i, token);
-
-                            finish();
-
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }, new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Log.d("Volley post", "error voley" + error.toString());
-                        NetworkResponse response = error.networkResponse;
-                        if (error instanceof ServerError && response != null) {
+        if (a == null) {
+            JSONObject object = new JSONObject();
+            String url = baseUrl + "/api/clients/" + id;
+            JsonObjectRequest jsonObjectRequest =
+                    new JsonObjectRequest(Request.Method.GET, url, object, new Response.Listener<JSONObject>() {
+                        @Override
+                        public void onResponse(JSONObject response) {
+                            System.out.println(response);
+                            Acount cuenta = new Acount();
                             try {
-                                String res = new String(response.data,
-                                        HttpHeaderParser.parseCharset(response.headers, "utf-8"));
-                                JSONObject obj = new JSONObject(res);
-                                System.out.println(res);
-                            } catch (UnsupportedEncodingException | JSONException e1) {
-                                e1.printStackTrace();
+                                int i = response.getJSONObject("client").getInt("client_id");
+                                cuenta.setId(response.getJSONObject("client").getInt("client_id"));
+                                cuenta.setNumDocumento(response.getJSONObject("client").getString("num_document"));
+                                cuenta.setNombre(response.getJSONObject("client").getString("name"));
+                                cuenta.setPhoneOne(response.getJSONObject("client").getString("phone1"));
+                                cuenta.setPhoneTwo(response.getJSONObject("client").getString("phone2"));
+                                cuenta.setDireccion(response.getJSONObject("client").getString("address"));
+                                cuenta.setEmail(response.getString("user"));
+                                cuenta.setPassword(pass);
+                                cuenta.setToken(token);
+
+                                DatabaseClient.getInstance(getApplicationContext())
+                                        .getAppDatabase()
+                                        .getAcountDao()
+                                        .addUser(cuenta);
+
+
+                                Session session = new Session(getApplicationContext());
+                                session.setToken(i);
+                                Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                                startActivity(intent);
+
+
+                                saveTokenBackend(i, token);
+
+                                finish();
+
+                            } catch (JSONException e) {
+                                e.printStackTrace();
                             }
                         }
-                    }
-                }) {
-                    @Override
-                    public Map<String, String> getHeaders() {
-                        Map<String, String> headers = new HashMap<>();
-                        Log.d("Voley get", token);
-                        headers.put("Authorization", "JWT " + token);
-                        headers.put("Content-Type", "application/json");
-                        return headers;
-                    }
-                };
+                    }, new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            Log.d("Volley post", "error voley" + error.toString());
+                            NetworkResponse response = error.networkResponse;
+                            if (error instanceof ServerError && response != null) {
+                                try {
+                                    String res = new String(response.data,
+                                            HttpHeaderParser.parseCharset(response.headers, "utf-8"));
+                                    JSONObject obj = new JSONObject(res);
+                                    System.out.println(res);
+                                } catch (UnsupportedEncodingException | JSONException e1) {
+                                    e1.printStackTrace();
+                                }
+                            }
+                        }
+                    }) {
+                        @Override
+                        public Map<String, String> getHeaders() {
+                            Map<String, String> headers = new HashMap<>();
+                            Log.d("Voley get", token);
+                            headers.put("Authorization", "JWT " + token);
+                            headers.put("Content-Type", "application/json");
+                            return headers;
+                        }
+                    };
 
-        requestQueue.add(jsonObjectRequest);
+            requestQueue.add(jsonObjectRequest);
+        } else {
+            a.setToken(token);
+            a.setPassword(pass);
+            DatabaseClient.getInstance(getApplicationContext())
+                    .getAppDatabase()
+                    .getAcountDao()
+                    .updateUser(a);
+
+            Session session = new Session(getApplicationContext());
+            session.setToken(a.getId());
+            saveTokenBackend(a.getId(), token);
+
+            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+            startActivity(intent);
+            finish();
+        }
     }
 
 
