@@ -24,6 +24,8 @@ import com.cor.frii.Login.LoginActivity;
 import com.cor.frii.persistence.DatabaseClient;
 import com.cor.frii.persistence.Session;
 import com.cor.frii.persistence.entity.Acount;
+
+import com.cor.frii.utils.badge_count;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 
@@ -62,6 +64,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     //--
     TextView lblUsername, lblEmail, CerrarSecion, ProbandoID;
     int id = 3;
+
+    private TextView badge_count;
 
     //e
     @Override
@@ -120,6 +124,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 finish();
             }
         });
+
+        badge_count=findViewById(R.id.badge_count);
+
+
+    }
+
+    public void badge_visible(){
+        //TextView badge_count=findViewById(R.id.badge_count);
+        badge_count.setVisibility(View.VISIBLE);
     }
 
     @Override

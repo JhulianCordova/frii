@@ -1,6 +1,8 @@
 package com.cor.frii;
 
 import android.content.Context;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,6 +20,7 @@ import com.cor.frii.persistence.DatabaseClient;
 import com.cor.frii.persistence.entity.ECart;
 import com.cor.frii.pojo.Product;
 import com.cor.frii.utils.LoadImage;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
@@ -30,6 +33,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.viewHold
     private View.OnClickListener listener;
 
     private TextView badge_count;
+    private View view_badge;
 
     public ProductAdapter(List<Product> products) {
         this.products = products;
@@ -52,11 +56,17 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.viewHold
 
 
 
-        View view1=LayoutInflater.from(parent.getContext()).inflate(R.layout.navigation_app_bar_main,parent,false);
-        badge_count=view1.findViewById(R.id.badge_count);
+         view_badge=LayoutInflater.from(parent.getContext()).inflate(R.layout.navigation_app_bar_main,parent,false);
+        badge_count=view_badge.findViewById(R.id.badge_count);
         badge_count.setVisibility(View.INVISIBLE);
+        badge_count.setBackgroundColor(Color.YELLOW);
 
-        return new viewHolder(view,badge_count,view1);
+        FloatingActionButton fla=view_badge.findViewById(R.id.fad_cart_order);
+        fla.setBackgroundTintList(ColorStateList.valueOf(Color.YELLOW));
+
+
+
+        return new viewHolder(view);
     }
 
     @Override
@@ -73,6 +83,12 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.viewHold
         this.listener = listener;
     }
 
+
+    public void badge_visible(){
+        badge_count=view_badge.findViewById(R.id.badge_count);
+        badge_count.setVisibility(view_badge.VISIBLE);
+    }
+
     class viewHolder extends RecyclerView.ViewHolder {
         TextView productTilte, productDescription,add_badge;
         ImageView productImage;
@@ -80,15 +96,14 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.viewHold
         EditText productCantidad;
         View view;
 
-        viewHolder(@NonNull View itemView,TextView add_badge1, View view1) {
+        viewHolder(@NonNull View itemView) {
             super(itemView);
             productTilte = itemView.findViewById(R.id.ProductTitle);
             productImage = itemView.findViewById(R.id.ProductImage);
             productButtonAdd = itemView.findViewById(R.id.ProductButtonAdd);
             productCantidad = itemView.findViewById(R.id.ProductCantidad);
             productDescription = itemView.findViewById(R.id.ProductDescription);
-            add_badge=add_badge1;
-            view=view1;
+
 
 
         }
@@ -111,9 +126,11 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.viewHold
                     eCart.setName(product.getName());
                     eCart.setPrice(product.getPrice());
 
+
+
                     //productDescription.setVisibility(View.INVISIBLE);
 
-                    //add_badge.setVisibility(View.VISIBLE);
+                    //badge_visible();
 
                     if (productCantidad.getText().length() > 0) {
                         eCart.setCantidad(Integer.parseInt(productCantidad.getText().toString()));

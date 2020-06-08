@@ -19,6 +19,7 @@
 
     <!-- new account -->
     <string name="Nombre">Nombre o Razo Social</string>
+    <string name="terminos_condiciones"><u>terminos y condiciones</u></string>
 
     <!--  Forgotted password-->
     <string name="email_forgottedpassword">Ingrese el correo con el que creo la cuenta</string>

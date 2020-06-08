@@ -2,9 +2,11 @@ package com.cor.frii;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 
+import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
@@ -16,6 +18,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.NetworkResponse;
@@ -62,6 +67,8 @@ public class CategoriesFragment extends Fragment {
     private CategoriesAdapter categoriesAdapter;
     private RecyclerView recyclerView;
     ArrayList<Categories> categories;
+
+    private View last_view=null;
 
     //--
     String urlBase = "http://34.71.251.155";
@@ -184,6 +191,8 @@ public class CategoriesFragment extends Fragment {
                                     Bundle bundle = new Bundle();
                                     bundle.putInt("idCategory", categories.get(recyclerView.getChildAdapterPosition(v)).getId());
 
+                                    highlight(v);
+
                                     FragmentManager manager = getActivity().getSupportFragmentManager();
                                     FragmentTransaction transaction = manager.beginTransaction();
                                     brandsFragment = new BrandsFragment();
@@ -219,6 +228,32 @@ public class CategoriesFragment extends Fragment {
                     }
                 });
         VolleySingleton.getInstance(getContext()).addToRequestQueue(arrayRequest);
+    }
+
+    public void highlight(View v){
+        if (last_view==null){
+            last_view=v;
+            //v.setBackgroundResource(R.drawable.custom_button_highlight);
+            CardView linear=v.findViewById(R.id.CategoriesCardView);
+            linear.setBackgroundResource(R.drawable.custom_button_highlight);
+            TextView title=v.findViewById(R.id.CategoriesName);
+            title.setTextColor(getResources().getColor(R.color.frii_Background));
+        }
+        else{
+            CardView linear=last_view.findViewById(R.id.CategoriesCardView);
+            linear.setBackgroundResource(R.drawable.custom_button_highlight_white);
+            //last_view.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+            TextView last_text=last_view.findViewById(R.id.CategoriesName);
+            last_text.setTextColor(Color.BLACK);
+            last_view=v;
+            //last_view.setBackgroundResource(R.drawable.custom_button_highlight);
+            CardView lina=last_view.findViewById(R.id.CategoriesCardView);
+            lina.setBackgroundResource(R.drawable.custom_button_highlight);
+            TextView title=last_view.findViewById(R.id.CategoriesName);
+            title.setTextColor(getResources().getColor(R.color.frii_Background));
+        }
+
+
     }
 
 

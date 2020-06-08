@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.NetworkResponse;
@@ -36,6 +37,8 @@ public class NewAccountActivity extends AppCompatActivity {
     private TextInputEditText txtName, txtNumDocumento, txtCorreo, txtTelefono, txtDireccion,
             txtPass, txtPassRepeat;
     private Button crearCuenta;
+    private TextView terminos_condiciones;
+
 
     //--
     public String baseUrl = "http://34.71.251.155";
@@ -54,6 +57,16 @@ public class NewAccountActivity extends AppCompatActivity {
         txtPassRepeat = findViewById(R.id.txtPasswordRepeat);
 
         crearCuenta = findViewById(R.id.CrearCuenta);
+
+        terminos_condiciones=findViewById(R.id.terminos_condiciones);
+        terminos_condiciones.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent=new Intent(getApplicationContext(),TerminosCondicionesActivity.class);
+                startActivity(intent);
+            }
+        });
+
 
 
         List<Acount> acounts = DatabaseClient.getInstance(getApplicationContext())
